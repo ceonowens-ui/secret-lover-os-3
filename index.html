@@ -386,6 +386,7 @@ function prevTrack(){
 audio.addEventListener('play',()=>{playing=true;updatePlayBtn();updateListState();});
 audio.addEventListener('pause',()=>{playing=false;updatePlayBtn();updateListState();});
 audio.addEventListener('ended',()=>nextTrack());
+audio.addEventListener('error',()=>{const c=audio.error?audio.error.code:0;const m={1:'已中斷',2:'網路或授權錯誤',3:'解碼錯誤',4:'來源不支援或驗證失敗'};showToast('播放失敗：'+(m[c]||'未知錯誤'));playing=false;updatePlayBtn();});
 audio.addEventListener('timeupdate',()=>{
   if(seeking||!audio.duration)return;
   const p=(audio.currentTime/audio.duration)*100;
