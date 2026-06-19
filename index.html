@@ -183,15 +183,15 @@ body{font-family:var(--serif);color:var(--title);min-height:100dvh}
       <div class="purchase-head">
         <div class="disp">Unlock the Album</div>
         <h2>解鎖完整 21 首專輯</h2>
-        <p>免費試聽前 2 首，解鎖後可線上聽 + 下載收藏</p>
+        <p>免費試聽前 2 首，解鎖後可線上收聽全本；典藏版加贈 WAV 下載</p>
       </div>
       <div class="plans">
         <div class="plan-card" data-plan="299" onclick="selectPlan('299')">
           <div class="plan-name">數位專輯</div>
           <div class="plan-price">NT$299</div>
           <div class="plan-feats">
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首 MP3</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可下載離線聽</div>
+            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首,線上收聽</div>
+            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數,隨時重播</div>
             <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可加入手機主畫面</div>
           </div>
         </div>
@@ -201,7 +201,7 @@ body{font-family:var(--serif);color:var(--title);min-height:100dvh}
           <div class="plan-price">NT$599</div>
           <div class="plan-feats">
             <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>上面全部內容</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質</div>
+            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質,可下載收藏</div>
             <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>數位歌詞本 / Liner Notes</div>
           </div>
         </div>
@@ -257,27 +257,27 @@ const CONFIG = {
 
 /* ====== 曲目資料 ====== */
 const TRACKS=[
- {n:1,title:"我們之間的祕密",file:"01.mp3",free:true},
- {n:2,title:"真的喜歡是藏不住的",file:"02.mp3",free:true},
- {n:3,title:"假裝教你戀愛",file:"os3/03.mp3",free:false},
- {n:4,title:"越界以後",file:"os3/04.mp3",free:false},
- {n:5,title:"Sometimes, I See You",file:"os3/05.mp3",free:false},
- {n:6,title:"藍色的暗戀",file:"os3/06.mp3",free:false},
- {n:7,title:"晴天裡擁抱你",file:"os3/07.mp3",free:false},
- {n:8,title:"心跳先說了祕密",file:"os3/08.mp3",free:false},
- {n:9,title:"喜歡你的回音",file:"os3/09.mp3",free:false},
- {n:10,title:"電影院沒有第三個人",file:"os3/10.mp3",free:false},
- {n:11,title:"如果你也害怕",file:"os3/11.mp3",free:false},
- {n:12,title:"把喜歡藏進音樂盒",file:"os3/12.mp3",free:false},
- {n:13,title:"戀愛練習題",file:"os3/13.mp3",free:false},
- {n:14,title:"幼稚鬼決鬥",file:"os3/14.mp3",free:false},
- {n:15,title:"喜歡你這件小事",file:"os3/15.mp3",free:false},
- {n:16,title:"靠近你的安全距離",file:"os3/16.mp3",free:false},
- {n:17,title:"晴天裡，我終於懂了",file:"os3/17.mp3",free:false},
- {n:18,title:"不能被發現的心意",file:"os3/18.mp3",free:false},
- {n:19,title:"拓晞爭吵，你為什麼不懂",file:"os3/19.mp3",free:false},
- {n:20,title:"等待阿拓",file:"os3/20.mp3",free:false},
- {n:21,title:"最終的告白，我喜歡的一直是你",file:"os3/21.mp3",free:false},
+ {n:1,title:"我們之間的祕密",file:"01.mp3",free:true,wav:"os3/wav/01.wav"},
+ {n:2,title:"真的喜歡是藏不住的",file:"02.mp3",free:true,wav:"os3/wav/02.wav"},
+ {n:3,title:"假裝教你戀愛",file:"os3/03.mp3",free:false,wav:"os3/wav/03.wav"},
+ {n:4,title:"越界以後",file:"os3/04.mp3",free:false,wav:"os3/wav/04.wav"},
+ {n:5,title:"Sometimes, I See You",file:"os3/05.mp3",free:false,wav:"os3/wav/05.wav"},
+ {n:6,title:"藍色的暗戀",file:"os3/06.mp3",free:false,wav:"os3/wav/06.wav"},
+ {n:7,title:"晴天裡擁抱你",file:"os3/07.mp3",free:false,wav:"os3/wav/07.wav"},
+ {n:8,title:"心跳先說了祕密",file:"os3/08.mp3",free:false,wav:"os3/wav/08.wav"},
+ {n:9,title:"喜歡你的回音",file:"os3/09.mp3",free:false,wav:"os3/wav/09.wav"},
+ {n:10,title:"電影院沒有第三個人",file:"os3/10.mp3",free:false,wav:"os3/wav/10.wav"},
+ {n:11,title:"如果你也害怕",file:"os3/11.mp3",free:false,wav:"os3/wav/11.wav"},
+ {n:12,title:"把喜歡藏進音樂盒",file:"os3/12.mp3",free:false,wav:"os3/wav/12.wav"},
+ {n:13,title:"戀愛練習題",file:"os3/13.mp3",free:false,wav:"os3/wav/13.wav"},
+ {n:14,title:"幼稚鬼決鬥",file:"os3/14.mp3",free:false,wav:"os3/wav/14.wav"},
+ {n:15,title:"喜歡你這件小事",file:"os3/15.mp3",free:false,wav:"os3/wav/15.wav"},
+ {n:16,title:"靠近你的安全距離",file:"os3/16.mp3",free:false,wav:"os3/wav/16.wav"},
+ {n:17,title:"晴天裡，我終於懂了",file:"os3/17.mp3",free:false,wav:"os3/wav/17.wav"},
+ {n:18,title:"不能被發現的心意",file:"os3/18.mp3",free:false,wav:"os3/wav/18.wav"},
+ {n:19,title:"拓晞爭吵，你為什麼不懂",file:"os3/19.mp3",free:false,wav:"os3/wav/19.wav"},
+ {n:20,title:"等待阿拓",file:"os3/20.mp3",free:false,wav:"os3/wav/20.wav"},
+ {n:21,title:"最終的告白，我喜歡的一直是你",file:"os3/21.mp3",free:false,wav:"os3/wav/21.wav"},
 ];
 
 const $=id=>document.getElementById(id);
@@ -295,7 +295,11 @@ const fmt=s=>(!s||!isFinite(s))?'0:00':`${Math.floor(s/60)}:${String(Math.floor(
 
 function lockIconSVG(){return `<div class="lock-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>`;}
 function playIconSmallSVG(){return `<div class="play-icon-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`;}
-function dlIconSVG(file){return `<a class="dl-icon" href="songs/${encodeURIComponent(file)}" download onclick="event.stopPropagation()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>`;}
+function dlIconSVG(t){
+  const u=getUnlockData();
+  const href=CONFIG.WORKER_API_BASE+'/download?file='+encodeURIComponent(t.wav)+'&email='+encodeURIComponent(u.email||'')+'&code='+encodeURIComponent(u.code||'');
+  return `<a class="dl-icon" href="${href}" title="下載 WAV 原始音質" onclick="event.stopPropagation()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>`;
+}
 
 /* ====== 角色情緒文案（解鎖後才顯示） ====== */
 const TRACK_SUBS={
@@ -333,7 +337,8 @@ function buildList(animateUnlock){
   const unlocked=isUnlocked();
   $('track-list').innerHTML=TRACKS.map((t,i)=>{
     const locked=trackLocked(t);
-    const icon = locked ? lockIconSVG() : (unlocked ? dlIconSVG(t.file) : playIconSmallSVG());
+    const canDownload = unlocked && getUnlockData().product==='599';
+    const icon = locked ? lockIconSVG() : (canDownload ? dlIconSVG(t) : playIconSmallSVG());
     const name = locked ? 'Secret Track' : t.title;
     const sub = '';
     const anim = (animateUnlock && !t.free) ? ' reveal-anim' : '';
