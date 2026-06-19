@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>秘密關係 OST｜幸運轉盤</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Baloo+2:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --frame:#efe9f3;
+  --bg:#faf7fb;--title:#5f5872;--text2:#a79cb8;--text3:#b6adc6;
+  --locked:#c8bfd6;--locked2:#b6adc6;--pink:#f29bc2;--blue:#afc7f6;--accent:#f29bc2;
+  --grad:linear-gradient(135deg,#f29bc2 0%,#c9b0ec 52%,#afc7f6 100%);--playing-bg:#fbeaf3;
+  --border:#efe7f4;--border2:#f0e8f4;--card:#ffffff;
+  --serif:"Quicksand","Huninn",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --display:"Baloo 2","Huninn","Quicksand",sans-serif;
+}
+html,body{background:var(--frame)}
+body{font-family:var(--serif);color:var(--title);min-height:100dvh}
+.app-frame{display:flex;justify-content:center;min-height:100dvh}
+.app{width:100%;max-width:430px;min-height:100dvh;background:linear-gradient(180deg,#faf7fb 0%,#f7f1fa 46%,#fff9f4 100%);position:relative;overflow-x:hidden;box-shadow:0 0 60px rgba(150,120,150,.08);padding:0 0 56px}
+
+.topbar{padding:28px 22px 14px;text-align:center}
+.topbar .eyebrow{font-size:12px;letter-spacing:.12em;color:var(--text2);font-weight:600}
+.topbar h1{font-family:var(--display);font-size:23px;margin-top:6px;color:var(--title)}
+.topbar p{font-size:13px;color:var(--text2);margin-top:8px;line-height:1.6}
+
+.badge-row{display:flex;justify-content:center;margin-top:14px}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:999px;padding:7px 16px;font-size:12.5px;color:var(--text2);font-weight:600;box-shadow:0 4px 14px rgba(150,120,150,.08);display:flex;align-items:center;gap:6px}
+.badge b{color:var(--pink);font-family:var(--display)}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--pink)}
+
+.wheel-wrap{display:flex;flex-direction:column;align-items:center;margin:26px 0 8px;position:relative}
+.pointer{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:18px solid var(--title);position:relative;z-index:3;margin-bottom:-4px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.12))}
+.wheel-frame{width:264px;height:264px;border-radius:50%;background:var(--card);padding:10px;box-shadow:0 14px 34px rgba(150,120,150,.18),inset 0 0 0 1px var(--border)}
+.wheel{width:100%;height:100%;border-radius:50%;position:relative;overflow:hidden;transition:transform 3.4s cubic-bezier(.13,.78,.1,1);background:
+  conic-gradient(
+    #f9c8de 0deg 45deg, #d9c6f0 45deg 90deg,
+    #f9c8de 90deg 135deg, #c3d6f7 135deg 180deg,
+    #f9c8de 180deg 225deg, #d9c6f0 225deg 270deg,
+    #f9c8de 270deg 315deg, #c3d6f7 315deg 360deg
+  );
+  box-shadow:inset 0 0 0 6px #fff, inset 0 0 22px rgba(150,120,150,.12);
+}
+.wheel .seg{position:absolute;top:50%;left:50%;width:118px;text-align:center;font-size:18px;transform-origin:0 0;font-family:var(--display)}
+.wheel-center{position:absolute;top:50%;left:50%;width:54px;height:54px;margin:-27px;border-radius:50%;background:var(--grad);box-shadow:0 4px 10px rgba(150,120,150,.25);display:flex;align-items:center;justify-content:center;font-size:20px}
+
+.draw-card{margin:22px 18px 0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px 18px;box-shadow:0 10px 28px rgba(150,120,150,.10)}
+.draw-card label{display:block;font-size:12.5px;color:var(--text2);font-weight:600;margin-bottom:8px}
+.draw-card input{width:100%;border:1px solid var(--border2);background:var(--bg);border-radius:12px;padding:13px 14px;font-size:14.5px;color:var(--title);font-family:var(--serif);outline:none}
+.draw-card input:focus{border-color:var(--pink)}
+.err-msg{font-size:12px;color:#e08bb0;margin-top:8px;min-height:14px}
+
+.spin-btn{width:100%;margin-top:14px;border:none;border-radius:14px;padding:15px;font-size:15.5px;font-weight:700;font-family:var(--display);color:#fff;background:var(--grad);box-shadow:0 10px 22px rgba(242,155,194,.35);cursor:pointer;letter-spacing:.03em}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.spin-btn:active:not(:disabled){transform:translateY(1px)}
+
+.soldout-banner{margin:22px 18px 0;background:var(--card);border:1px dashed var(--locked2);border-radius:20px;padding:22px 18px;text-align:center;color:var(--text2);font-size:13.5px;line-height:1.7}
+
+.result-overlay{position:fixed;inset:0;background:rgba(95,88,114,.38);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+.result-overlay.show{display:flex}
+.result-card{width:100%;max-width:340px;background:var(--card);border-radius:22px;padding:30px 26px;text-align:center;box-shadow:0 24px 60px rgba(80,60,90,.28)}
+.result-card .emoji{font-size:40px}
+.result-card h2{font-family:var(--display);font-size:19px;margin-top:10px;color:var(--title)}
+.result-card p{font-size:13px;color:var(--text2);margin-top:8px;line-height:1.6}
+.code-box{margin-top:16px;background:var(--bg);border:1px solid var(--border2);border-radius:12px;padding:14px;font-family:var(--display);font-size:19px;letter-spacing:.06em;color:var(--pink);font-weight:700}
+.result-card .close-btn{margin-top:18px;width:100%;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;font-family:var(--serif);color:var(--title);background:var(--bg);border:1px solid var(--border2);cursor:pointer}
+
+.foot-note{text-align:center;font-size:11.5px;color:var(--text3);margin-top:20px;padding:0 30px;line-height:1.7}
+.back-link{display:block;text-align:center;margin-top:18px;font-size:12.5px;color:var(--text2);text-decoration:none;font-weight:600}
+.back-link span{color:var(--pink)}
+
+@keyframes pop{0%{transform:scale(.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.result-card{animation:pop .28s ease}
+</style>
+</head>
+<body>
+<div class="app-frame">
+<div class="app">
+
+  <div class="topbar">
+    <div class="eyebrow">SECRET RELATIONSHIP OST</div>
+    <h1>幸運轉盤 🎡</h1>
+    <p>前 30 位粉絲，轉一次免費獲得<br>數位專輯（NT$299 方案）兌換碼</p>
+  </div>
+
+  <div class="badge-row">
+    <div class="badge"><span class="dot"></span>已送出 <b id="claimedNum">--</b> / 30 組</div>
+  </div>
+
+  <div class="wheel-wrap">
+    <div class="pointer"></div>
+    <div class="wheel-frame">
+      <div class="wheel" id="wheel">
+        <div class="wheel-center">🎁</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="draw-card" id="drawCard">
+    <label for="emailInput">輸入你的 Email，準備抽獎</label>
+    <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+    <div class="err-msg" id="errMsg"></div>
+    <button class="spin-btn" id="spinBtn">轉一下 🎉</button>
+  </div>
+
+  <div class="soldout-banner" id="soldoutBanner" style="display:none">
+    🎊 30 組免費兌換碼已經被粉絲們領完了！<br>謝謝大家的支持，密切注意下次活動～
+  </div>
+
+  <p class="foot-note">每組 Email 只能抽一次。中獎後兌換碼會立刻顯示，也會寄一份到你的信箱備查。</p>
+  <a class="back-link" href="./index.html">回到 <span>秘密關係 OST</span> 播放器</a>
+
+</div>
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="emoji" id="resultEmoji">🎉</div>
+    <h2 id="resultTitle">恭喜中獎！</h2>
+    <p id="resultDesc">這是你的 299 方案兌換碼，去播放器的「解鎖」分頁輸入 Email + 兌換碼即可開通。</p>
+    <div class="code-box" id="resultCode">SLOV-XXXX-XXXX</div>
+    <button class="close-btn" id="closeResult">好，我知道了</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://secret-lover-ost-api.anthonywen0693.workers.dev";
+const LS_KEY = "slo-freedraw-v1";
+
+const wheel = document.getElementById('wheel');
+const spinBtn = document.getElementById('spinBtn');
+const emailInput = document.getElementById('emailInput');
+const errMsg = document.getElementById('errMsg');
+const claimedNum = document.getElementById('claimedNum');
+const drawCard = document.getElementById('drawCard');
+const soldoutBanner = document.getElementById('soldoutBanner');
+const resultOverlay = document.getElementById('resultOverlay');
+const resultEmoji = document.getElementById('resultEmoji');
+const resultTitle = document.getElementById('resultTitle');
+const resultDesc = document.getElementById('resultDesc');
+const resultCode = document.getElementById('resultCode');
+const closeResult = document.getElementById('closeResult');
+
+let spinning = false;
+let currentRotation = 0;
+
+function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v||""); }
+
+function getSaved(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||"null"); }catch(e){ return null; }
+}
+function setSaved(data){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(data)); }catch(e){}
+}
+
+function showResult({emoji, title, desc, code}){
+  resultEmoji.textContent = emoji;
+  resultTitle.textContent = title;
+  resultDesc.textContent = desc;
+  resultCode.textContent = code || "";
+  resultCode.style.display = code ? "block" : "none";
+  resultOverlay.classList.add('show');
+}
+closeResult.addEventListener('click', ()=> resultOverlay.classList.remove('show'));
+
+function setSoldOut(){
+  drawCard.style.display = "none";
+  soldoutBanner.style.display = "block";
+  spinBtn.disabled = true;
+}
+
+async function refreshStatus(){
+  try{
+    const res = await fetch(API_BASE + "/free-draw-status");
+    const data = await res.json();
+    if(data && data.ok){
+      claimedNum.textContent = data.claimed;
+      if(data.remaining <= 0) setSoldOut();
+    }
+  }catch(e){ /* 安靜失敗，不影響轉盤操作 */ }
+}
+
+function spinWheelVisual(){
+  return new Promise(resolve=>{
+    const fullSpins = 5; // 轉滿 5 圈製造懸念
+    const randomOffset = Math.floor(Math.random()*360);
+    currentRotation += fullSpins*360 + randomOffset;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    const onEnd = ()=>{ wheel.removeEventListener('transitionend', onEnd); resolve(); };
+    wheel.addEventListener('transitionend', onEnd);
+  });
+}
+
+async function handleSpin(){
+  if(spinning) return;
+  const email = emailInput.value.trim().toLowerCase();
+  errMsg.textContent = "";
+
+  if(!isValidEmail(email)){
+    errMsg.textContent = "請輸入正確的 Email 格式";
+    return;
+  }
+
+  const saved = getSaved();
+  if(saved && saved.email === email && saved.code){
+    showResult({
+      emoji:"💌",
+      title:"你已經抽過囉",
+      desc:"這組 Email 之前已經領過兌換碼了，直接用下面這組去解鎖播放器吧：",
+      code: saved.code
+    });
+    return;
+  }
+
+  spinning = true;
+  spinBtn.disabled = true;
+  spinBtn.textContent = "轉動中…";
+
+  await spinWheelVisual();
+
+  try{
+    const res = await fetch(API_BASE + "/claim-free", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+
+    if(data.soldOut){
+      showResult({ emoji:"🎊", title:"剛好送完了", desc: data.message || "30 組免費兌換碼已經送完，謝謝支持！", code:"" });
+      setSoldOut();
+    } else if(data.ok){
+      setSaved({ email, code: data.code });
+      if(data.alreadyClaimed){
+        showResult({
+          emoji:"💌", title:"你已經抽過囉",
+          desc:"這組 Email 之前已經領過兌換碼了，直接用下面這組去解鎖播放器吧：",
+          code: data.code
+        });
+      }else{
+        showResult({
+          emoji:"🎉", title:"恭喜中獎！",
+          desc:"這是你的 299 方案兌換碼，去播放器的「解鎖」分頁輸入 Email + 兌換碼即可開通。我們也寄了一份到你的信箱。",
+          code: data.code
+        });
+      }
+      if(typeof data.remaining === "number"){
+        claimedNum.textContent = 30 - data.remaining;
+        if(data.remaining <= 0) setSoldOut();
+      }else{
+        refreshStatus();
+      }
+    } else {
+      errMsg.textContent = data.message || "發生錯誤，請稍後再試一次";
+    }
+  }catch(e){
+    errMsg.textContent = "連線失敗，請檢查網路後再試一次";
+  }
+
+  spinning = false;
+  spinBtn.disabled = false;
+  spinBtn.textContent = "轉一下 🎉";
+}
+
+spinBtn.addEventListener('click', handleSpin);
+refreshStatus();
+</script>
+</body>
+</html>
