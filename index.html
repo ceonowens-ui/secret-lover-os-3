@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>秘密關係 OST</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Huninn&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Baloo+2:wght@600;700&family=Huninn&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -45,6 +45,9 @@ body{font-family:var(--serif);color:var(--title);min-height:100dvh}
 .cover-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%;display:block}
 .deco{position:absolute;z-index:2;pointer-events:none}
 .deco.heart{top:18px;right:18px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.82);backdrop-filter:blur(4px);color:#f29bc2;box-shadow:0 5px 14px rgba(214,160,205,.4)}
+.heart-field{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
+.heart-particle{position:absolute;transform:translate(-50%,-50%);will-change:transform,opacity;animation:heartFloat var(--dur,2.8s) ease-out forwards}
+@keyframes heartFloat{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(var(--r,0deg))}18%{opacity:.95}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--r,0deg))}}
 @keyframes floaty{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-9px) rotate(6deg)}}
 
 .album-meta{text-align:center;padding:20px 24px 2px}
@@ -131,9 +134,43 @@ body{font-family:var(--serif);color:var(--title);min-height:100dvh}
 .unlock-link{text-align:center;font-size:12px;color:var(--text3);margin-top:20px;cursor:pointer}
 .unlock-link b{color:var(--pink);font-weight:500}
 
+/* mood wall */
+.mood-head{padding:54px 28px 6px;text-align:center}
+.mood-head .disp{font-family:var(--display);font-size:25px;font-weight:600;letter-spacing:2px;color:var(--title)}
+.mood-head .sub-zh{font-size:12.5px;color:var(--text2);margin-top:12px;letter-spacing:1px;line-height:1.7}
+.mood-head .sub-en{font-family:var(--display);font-size:10px;font-weight:600;letter-spacing:3px;color:#c2b9d0;margin-top:7px;text-transform:uppercase}
+.mood-count{text-align:center;font-size:11.5px;color:#b3a6c8;letter-spacing:.5px;padding:20px 28px 4px}
+.mood-count b{color:var(--pink);font-weight:600;font-family:var(--display)}
+.glass-card{margin:8px 20px 0;background:rgba(255,255,255,.66);backdrop-filter:blur(10px);border:1px solid rgba(242,200,228,.6);border-radius:22px;padding:20px 18px;box-shadow:0 12px 30px rgba(214,160,205,.18)}
+.mood-input{width:100%;padding:13px 15px;border-radius:16px;border:1.5px solid var(--border);background:rgba(255,255,255,.8);font-size:13.5px;color:var(--title);outline:none;font-family:var(--serif)}
+.mood-input:focus{border-color:var(--pink)}
+.mood-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.mood-tag{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:rgba(255,255,255,.7);color:#a79cb8;font-size:12px;font-family:var(--serif);cursor:pointer;transition:all .25s ease;-webkit-tap-highlight-color:transparent}
+.mood-tag:hover{border-color:rgba(242,155,194,.5)}
+.mood-tag.sel{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 5px 14px rgba(236,144,179,.32)}
+.mood-ta-wrap{position:relative;margin-top:14px}
+.mood-ta{width:100%;min-height:74px;resize:none;padding:13px 15px;border-radius:16px;border:1.5px solid var(--border);background:rgba(255,255,255,.8);font-size:13.5px;line-height:1.6;color:var(--title);outline:none;font-family:var(--serif)}
+.mood-ta:focus{border-color:var(--pink)}
+.mood-count-char{text-align:right;font-family:var(--display);font-size:11px;color:#c2b9d0;margin-top:6px;letter-spacing:.5px}
+.mood-err{color:var(--pink);font-size:11.5px;text-align:center;min-height:16px;margin-top:8px;opacity:0;transition:opacity .2s}
+.mood-err.show{opacity:1}
+.mood-submit{display:block;width:100%;margin-top:6px;padding:14px;border-radius:24px;background:var(--grad);color:#fff;border:none;font-family:var(--serif);font-size:14px;letter-spacing:2px;cursor:pointer;box-shadow:0 10px 24px rgba(236,144,179,.32);transition:transform .15s ease,filter .2s ease}
+.mood-submit:active{transform:scale(.97);filter:brightness(1.06)}
+.mood-submit.done{filter:brightness(1.05)}
+.mood-list{padding:22px 20px 0}
+.mood-note{background:rgba(255,255,255,.62);backdrop-filter:blur(8px);border:1px solid rgba(242,200,228,.55);border-radius:18px;padding:15px 17px;margin-bottom:12px;box-shadow:0 8px 20px rgba(214,160,205,.14);transition:transform .25s ease,box-shadow .25s ease}
+.mood-note:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(214,160,205,.22)}
+.mood-note.new{animation:noteIn .55s ease both}
+@keyframes noteIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.mood-note-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.mood-note-name{font-family:var(--display);font-size:13px;font-weight:600;color:#7a6e92}
+.mood-note-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--pink);background:rgba(242,155,194,.12);padding:3px 10px;border-radius:14px;letter-spacing:.5px;white-space:nowrap;flex-shrink:0}
+.mood-note-text{font-size:13.5px;line-height:1.7;color:#5f5872;letter-spacing:.3px}
+.mood-note-time{font-family:var(--display);font-size:10.5px;color:#c2b9d0;margin-top:9px;letter-spacing:.5px}
+
 /* tab bar */
 .tab-bar{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:430px;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.tab-btn{flex:1;padding:13px 0 11px;background:none;border:none;color:#a79cb8;font-family:var(--serif);font-weight:500;font-size:10.5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;letter-spacing:2px;-webkit-tap-highlight-color:transparent}
+.tab-btn{flex:1;padding:13px 0 11px;background:none;border:none;color:#a79cb8;font-family:var(--serif);font-weight:500;font-size:10.5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;letter-spacing:1px;-webkit-tap-highlight-color:transparent}
 .tab-btn:focus,.tab-btn:focus-visible{outline:none}
 .tab-btn.active{color:var(--pink)}
 .tab-btn svg{width:20px;height:20px}
@@ -144,105 +181,128 @@ body{font-family:var(--serif);color:var(--title);min-height:100dvh}
 </head>
 <body>
 <div class="app-frame">
-  <div class="app">
+<div class="app">
 
-    <div class="page active" id="page-player">
-      <div class="topbar">
-        <div class="eyebrow"><span class="ttl">《<span class="s-accent">S</span>ecret Lover》</span><span class="sub">Original Soundtrack</span></div>
-        <button class="menu-btn" onclick="switchTab('purchase')" aria-label="方案">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-      </div>
-      <div class="cover-stage">
-        <div class="cover-wrap"><img src="image/cover.png" alt="靠近你的安全距離"></div>
-        <div class="deco heart"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z" opacity=".9"/></svg></div>
-      </div>
-      <div class="album-meta">
-        <div class="t2">秘密關係 配樂 原聲帶</div>
-        <div class="t3">21 Tracks · Original Soundtrack</div>
-      </div>
-      <div class="prog-section">
-        <div class="prog-wrap" id="prog-wrap">
-          <div class="prog-fill" id="prog-fill"></div>
-          <div class="prog-start"></div>
-          <div class="prog-thumb" id="prog-thumb"><span class="lover-dot tuo" id="play-dot">拓</span></div>
-        </div>
-        <div class="time-row"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
-      </div>
-      <div class="controls">
-        <button class="ctrl-btn" onclick="prevTrack()"><svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-        <button class="play-btn" onclick="togglePlay()"><svg width="27" height="27" viewBox="0 0 24 24" fill="white"><path id="play-path" d="M8 5v14l11-7z"/></svg></button>
-        <button class="ctrl-btn" onclick="nextTrack()"><svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
-      </div>
-      <div class="section-label">TRACK LIST · 曲目列表</div>
-      <div class="track-list" id="track-list"></div>
-      <div class="unlock-cta" id="unlock-cta"></div>
-    </div>
-
-    <div class="page" id="page-purchase">
-      <div class="purchase-head">
-        <div class="disp">Unlock the Album</div>
-        <h2>解鎖完整 21 首專輯</h2>
-        <p>免費試聽前 2 首，解鎖後可線上收聽全本；典藏版加贈 WAV 下載</p>
-      </div>
-      <div class="plans">
-        <div class="plan-card" data-plan="299" onclick="selectPlan('299')">
-          <div class="plan-name">數位專輯</div>
-          <div class="plan-price">NT$299</div>
-          <div class="plan-feats">
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首,線上收聽</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數,隨時重播</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可加入手機主畫面</div>
-          </div>
-        </div>
-        <div class="plan-card featured" data-plan="599" onclick="selectPlan('599')">
-          <div class="badge">收藏推薦</div>
-          <div class="plan-name">典藏版 + WAV</div>
-          <div class="plan-price">NT$599</div>
-          <div class="plan-feats">
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>上面全部內容</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質,可下載收藏</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>數位歌詞本 / Liner Notes</div>
-          </div>
-        </div>
-      </div>
-      <div class="checkout-wrap">
-        <button class="btn-grad" id="checkout-btn" onclick="goCheckout()">前往結帳</button>
-        <button class="btn-grad secondary" style="margin-top:11px" onclick="switchTab('unlock')">已經購買？輸入兌換碼</button>
-      </div>
-    </div>
-
-    <div class="page" id="page-unlock">
-      <div class="unlock-head">
-        <div class="unlock-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
-        <div class="disp">Enter Your Code</div>
-        <h2>輸入你的兌換碼</h2>
-        <p>購買後會寄到信箱，請用購買時的 email 解鎖</p>
-      </div>
-      <div class="form-wrap">
-        <label>EMAIL</label>
-        <input type="email" id="in-email" placeholder="you@example.com" autocomplete="email">
-        <label>兌換碼 · CODE</label>
-        <input type="text" id="in-code" placeholder="SR-XXXX-XXXX" autocomplete="off">
-        <button class="btn-grad" onclick="redeem()">解鎖</button>
-        <div class="unlock-link" onclick="switchTab('purchase')">還沒購買？<b>看方案 →</b></div>
-      </div>
-    </div>
-
-    <nav class="tab-bar">
-      <button class="tab-btn active" id="tab-player" onclick="switchTab('player')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>聽歌
+  <div class="page active" id="page-player">
+    <div class="topbar">
+      <div class="eyebrow"><span class="ttl">《<span class="s-accent">S</span>ecret Lover》</span><span class="sub">Original Soundtrack</span></div>
+      <button class="menu-btn" onclick="switchTab('purchase')" aria-label="方案">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
       </button>
-      <button class="tab-btn" id="tab-purchase" onclick="switchTab('purchase')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1"/></svg>完整版
-      </button>
-      <button class="tab-btn" id="tab-unlock" onclick="switchTab('unlock')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>我的
-      </button>
-    </nav>
-
-    <div class="toast" id="toast"></div>
+    </div>
+    <div class="cover-stage">
+      <div class="cover-wrap"><img src="image/cover.png" alt="靠近你的安全距離"></div>
+      <div class="heart-field" id="heart-field"></div>
+      <div class="deco heart"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z" opacity=".9"/></svg></div>
+    </div>
+    <div class="album-meta">
+      <div class="t2">秘密關係 配樂 原聲帶</div>
+      <div class="t3">21 Tracks · Original Soundtrack</div>
+    </div>
+    <div class="prog-section">
+      <div class="prog-wrap" id="prog-wrap">
+        <div class="prog-fill" id="prog-fill"></div>
+        <div class="prog-start"></div>
+        <div class="prog-thumb" id="prog-thumb"><span class="lover-dot tuo" id="play-dot">拓</span></div>
+      </div>
+      <div class="time-row"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" onclick="prevTrack()"><svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+      <button class="play-btn" onclick="togglePlay()"><svg width="27" height="27" viewBox="0 0 24 24" fill="white"><path id="play-path" d="M8 5v14l11-7z"/></svg></button>
+      <button class="ctrl-btn" onclick="nextTrack()"><svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+    </div>
+    <div class="section-label">TRACK LIST · 曲目列表</div>
+    <div class="track-list" id="track-list"></div>
+    <div class="unlock-cta" id="unlock-cta"></div>
   </div>
+
+  <div class="page" id="page-purchase">
+    <div class="purchase-head">
+      <div class="disp">Unlock the Album</div>
+      <h2>解鎖完整 21 首專輯</h2>
+      <p>免費試聽前 2 首，解鎖後可線上聽 + 下載收藏</p>
+    </div>
+    <div class="plans">
+      <div class="plan-card" data-plan="299" onclick="selectPlan('299')">
+        <div class="plan-name">數位專輯</div>
+        <div class="plan-price">NT$299</div>
+        <div class="plan-feats">
+          <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首，線上收聽</div>
+          <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數，隨時重播</div>
+          <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可加入手機主畫面</div>
+        </div>
+      </div>
+      <div class="plan-card featured" data-plan="599" onclick="selectPlan('599')">
+        <div class="badge">收藏推薦</div>
+        <div class="plan-name">典藏版 + WAV</div>
+        <div class="plan-price">NT$599</div>
+        <div class="plan-feats">
+          <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>上面全部內容</div>
+          <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質，可下載收藏</div>
+        </div>
+      </div>
+    </div>
+    <div class="checkout-wrap">
+      <button class="btn-grad" id="checkout-btn" onclick="goCheckout()">前往結帳</button>
+      <button class="btn-grad secondary" style="margin-top:11px" onclick="switchTab('unlock')">已經購買？輸入兌換碼</button>
+    </div>
+  </div>
+
+  <div class="page" id="page-unlock">
+    <div class="unlock-head">
+      <div class="unlock-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
+      <div class="disp">Enter Your Code</div>
+      <h2>輸入你的兌換碼</h2>
+      <p>購買後會寄到信箱，請用購買時的 email 解鎖</p>
+    </div>
+    <div class="form-wrap">
+      <label>EMAIL</label>
+      <input type="email" id="in-email" placeholder="you@example.com" autocomplete="email">
+      <label>兌換碼 · CODE</label>
+      <input type="text" id="in-code" placeholder="SR-XXXX-XXXX" autocomplete="off">
+      <button class="btn-grad" onclick="redeem()">解鎖</button>
+      <div class="unlock-link" onclick="switchTab('purchase')">還沒購買？<b>看方案 →</b></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-mood">
+    <div class="mood-head">
+      <div class="disp">FAN MOOD WALL</div>
+      <div class="sub-zh">把沒說出口的心情，留在這首歌裡。</div>
+      <div class="sub-en">Leave your hidden feeling here</div>
+    </div>
+    <div class="mood-count">今晚有 <b id="mood-num">0</b> 個人，把秘密留在這裡。</div>
+    <div class="glass-card">
+      <input class="mood-input" id="mood-name" type="text" placeholder="你的暱稱" maxlength="16" autocomplete="off">
+      <div class="mood-tags" id="mood-tags"></div>
+      <div class="mood-ta-wrap">
+        <textarea class="mood-ta" id="mood-text" maxlength="80" placeholder="現在聽這首歌，你想留下什麼心情？"></textarea>
+        <div class="mood-count-char"><span id="mood-chars">0</span> / 80</div>
+      </div>
+      <div class="mood-err" id="mood-err">先寫下一點心情吧。</div>
+      <button class="mood-submit" id="mood-submit" onclick="submitMood()">留下心情</button>
+    </div>
+    <div class="mood-list" id="mood-list"></div>
+  </div>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" id="tab-player" onclick="switchTab('player')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>聽歌
+    </button>
+    <button class="tab-btn" id="tab-purchase" onclick="switchTab('purchase')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1"/></svg>完整版
+    </button>
+    <button class="tab-btn" id="tab-unlock" onclick="switchTab('unlock')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>我的
+    </button>
+    <button class="tab-btn" id="tab-mood" onclick="switchTab('mood')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M12 14.5s-2-1.2-2-2.6a1.3 1.3 0 0 1 2-1.1 1.3 1.3 0 0 1 2 1.1c0 1.4-2 2.6-2 2.6z" fill="currentColor" stroke="none"/></svg>心情牆
+    </button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
 </div>
 
 <audio id="audio" preload="none"></audio>
@@ -388,8 +448,8 @@ function prevTrack(){
   if(trackLocked(TRACKS[i])){return;}
   playIdx(i);
 }
-audio.addEventListener('play',()=>{playing=true;updatePlayBtn();updateListState();});
-audio.addEventListener('pause',()=>{playing=false;updatePlayBtn();updateListState();});
+audio.addEventListener('play',()=>{playing=true;updatePlayBtn();updateListState();startHearts();});
+audio.addEventListener('pause',()=>{playing=false;updatePlayBtn();updateListState();stopHearts();});
 audio.addEventListener('ended',()=>nextTrack());
 audio.addEventListener('error',()=>{const c=audio.error?audio.error.code:0;const m={1:'已中斷',2:'網路或授權錯誤',3:'解碼錯誤',4:'來源不支援或驗證失敗'};showToast('播放失敗：'+(m[c]||'未知錯誤'));playing=false;updatePlayBtn();});
 audio.addEventListener('timeupdate',()=>{
@@ -416,10 +476,11 @@ function updatePlayBtn(){
 
 /* ====== 分頁切換 ====== */
 function switchTab(t){
-  ['player','purchase','unlock'].forEach(p=>{
+  ['player','purchase','unlock','mood'].forEach(p=>{
     $('page-'+p).classList.toggle('active',p===t);
     $('tab-'+p).classList.toggle('active',p===t);
   });
+  window.scrollTo(0,0);
 }
 
 /* ====== 購買方案 ====== */
@@ -475,11 +536,97 @@ function showToast(m){
   clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2200);
 }
 
+/* ====== 心情牆 Mood Wall ====== */
+const MOOD_KEY='secretLoverMoodWallComments';
+const MOODS=['想他','心動','捨不得','偷偷嘖到','夜車聽歌','哭了','好甜','回不去了'];
+const defaultComments=[
+  {id:1,name:"匿名聽眾",mood:"夜車聽歌",text:"坐在車上聽到這首，突然覺得他們好像真的存在。",time:"剛剛"},
+  {id:2,name:"小秘密",mood:"偷偷嘖到",text:"明明只是 OST，為什麼我腦中都是他們靠近的畫面。",time:"3 分鐘前"},
+  {id:3,name:"不想睡",mood:"想他",text:"那句旋律一出來，就像回到他們沒說出口的那一晚。",time:"8 分鐘前"},
+  {id:4,name:"今天也暈船",mood:"心動",text:"真的喜歡是藏不住的，連歌都藏不住。",time:"12 分鐘前"},
+  {id:5,name:"第21首等我",mood:"捨不得",text:"希望完整 21 首快點解鎖，想把他們的故事聽完。",time:"18 分鐘前"},
+];
+let moodComments=[],selectedMood='';
+function loadMoods(){
+  const saved=localStorage.getItem(MOOD_KEY);
+  if(saved){try{moodComments=JSON.parse(saved);}catch(e){moodComments=defaultComments.slice();}}
+  else{moodComments=defaultComments.slice();}
+}
+function saveMoods(){localStorage.setItem(MOOD_KEY,JSON.stringify(moodComments));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function buildMoodTags(){
+  $('mood-tags').innerHTML=MOODS.map(m=>`<button type="button" class="mood-tag" data-mood="${m}">${m}</button>`).join('');
+  [...$('mood-tags').children].forEach(el=>el.addEventListener('click',()=>{
+    const m=el.dataset.mood;
+    selectedMood = (selectedMood===m) ? '' : m;
+    [...$('mood-tags').children].forEach(b=>b.classList.toggle('sel',b.dataset.mood===selectedMood));
+  }));
+}
+function renderMoods(newId){
+  $('mood-num').textContent=moodComments.length;
+  $('mood-list').innerHTML=moodComments.map(c=>`
+    <div class="mood-note${c.id===newId?' new':''}">
+      <div class="mood-note-top">
+        <span class="mood-note-name">${esc(c.name)}</span>
+        <span class="mood-note-tag">♡ ${esc(c.mood)}</span>
+      </div>
+      <div class="mood-note-text">${esc(c.text)}</div>
+      <div class="mood-note-time">${esc(c.time)}</div>
+    </div>`).join('');
+}
+function submitMood(){
+  const text=$('mood-text').value.trim();
+  const err=$('mood-err');
+  if(!text){err.textContent='先寫下一點心情吧。';err.classList.add('show');return;}
+  err.classList.remove('show');
+  const c={id:Date.now(),name:$('mood-name').value.trim()||'匿名聽眾',mood:selectedMood||'聽歌中',text:text.slice(0,80),time:'剛剛',createdAt:new Date().toISOString()};
+  moodComments.unshift(c);
+  saveMoods();
+  renderMoods(c.id);
+  $('mood-name').value='';$('mood-text').value='';$('mood-chars').textContent='0';
+  selectedMood='';[...$('mood-tags').children].forEach(b=>b.classList.remove('sel'));
+  const btn=$('mood-submit');btn.textContent='已收藏這個瞬間 ♡';btn.classList.add('done');
+  setTimeout(()=>{btn.textContent='留下心情';btn.classList.remove('done');},1000);
+}
+
+/* ====== 播放時散落的愛心 ====== */
+let heartTimer=null;
+const HEART_COLORS=['#f29bc2','#f7b8d2','#c9b0ec','#cdbcf2','#afc7f6'];
+function spawnHeart(){
+  const field=$('heart-field'); if(!field) return;
+  const h=document.createElement('div'); h.className='heart-particle';
+  const ang=Math.random()*Math.PI*2;
+  const startR=40+Math.random()*8;            // 從封面邊緣附近出發
+  const cx=50+Math.cos(ang)*startR;
+  const cy=50+Math.sin(ang)*startR;
+  const dist=42+Math.random()*64;             // 向外飄出距離
+  const size=12+Math.random()*15;
+  const col=HEART_COLORS[Math.floor(Math.random()*HEART_COLORS.length)];
+  h.style.left=cx+'%'; h.style.top=cy+'%';
+  h.style.setProperty('--dx',(Math.cos(ang)*dist).toFixed(1)+'px');
+  h.style.setProperty('--dy',(Math.sin(ang)*dist-18).toFixed(1)+'px');
+  h.style.setProperty('--r',(Math.random()*50-25).toFixed(0)+'deg');
+  h.style.setProperty('--dur',(2.2+Math.random()*1.4).toFixed(2)+'s');
+  h.innerHTML=`<svg width="${size.toFixed(0)}" height="${size.toFixed(0)}" viewBox="0 0 24 24" fill="${col}"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>`;
+  field.appendChild(h);
+  setTimeout(()=>h.remove(),3700);
+}
+function startHearts(){
+  if(heartTimer) return;
+  spawnHeart();
+  heartTimer=setInterval(()=>{ spawnHeart(); if(Math.random()<.5) spawnHeart(); },360);
+}
+function stopHearts(){ clearInterval(heartTimer); heartTimer=null; }
+
 /* ====== 初始化 ====== */
 selectPlan('299');
 buildList();
 updatePlayhead();
 updateCTA();
+loadMoods();
+buildMoodTags();
+renderMoods();
+$('mood-text').addEventListener('input',e=>{$('mood-chars').textContent=e.target.value.length;if(e.target.value.trim())$('mood-err').classList.remove('show');});
 </script>
 </body>
 </html>
