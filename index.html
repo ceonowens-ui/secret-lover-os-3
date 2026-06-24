@@ -35,6 +35,7 @@ body{font-family:'Noto Serif TC',serif;color:#fff;min-height:100dvh}
 @keyframes glowFade{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}28%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.25)}}
 @keyframes dotPulse{0%,100%{opacity:.3;transform:translate(-50%,-50%) scale(.8)}50%{opacity:.78;transform:translate(-50%,-50%) scale(1.25)}}
 @keyframes bounce{0%{transform:scale(1)}30%{transform:scale(1.2)}55%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes secretReveal{0%{filter:blur(8px);opacity:0}60%{opacity:1}100%{filter:blur(0);opacity:1}}
 
 /* ---- player ---- */
 .cover-box{position:relative;width:100%;height:64vh;min-height:520px;max-height:620px;overflow:hidden}
@@ -76,6 +77,9 @@ body{font-family:'Noto Serif TC',serif;color:#fff;min-height:100dvh}
 .track-name{flex:1;min-width:0;font-family:'Noto Serif TC',serif;font-size:14px;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .track-item.playing .track-name{color:#fff}
 .track-item.locked .track-name{color:#7a7388;font-style:italic;letter-spacing:1px}
+.secret-blur{filter:blur(5px);opacity:.45;transition:filter .4s,opacity .4s;user-select:none}
+.track-item.locked:hover .secret-blur{filter:blur(3px);opacity:.65}
+.reveal-secret{animation:secretReveal .7s cubic-bezier(.3,1,.5,1) both;filter:blur(0)!important;opacity:1!important}
 .lock-icon,.play-icon-sm,.dl-icon{flex-shrink:0;display:flex}
 .lock-icon{color:#6f6680}
 .play-icon-sm{color:#f3a0c4}
@@ -405,11 +409,10 @@ function trackRowsHTML(animateUnlock){
     const locked=trackLocked(t);
     const canDownload = unlocked && getUnlockData().product==='599';
     const icon = locked ? lockIconSVG() : (canDownload ? dlIconSVG(t) : playIconSmallSVG());
-    const name = locked ? 'Secret Track' : t.title;
     const anim = (animateUnlock && !t.free) ? ' reveal-anim' : '';
     return `<div class="track-item${locked?' locked':''}${i===cur?' playing':''}${anim}" data-i="${i}">
       <span class="track-num">${String(t.n).padStart(2,'0')}</span>
-      <div class="track-name">${name}</div>
+      <div class="track-name${locked?' secret-blur':''}">${t.title}</div>
       ${icon}
     </div>`;
   }).join('');
@@ -424,7 +427,13 @@ function buildList(animateUnlock){
 }
 function onTrackClick(i){
   const t=TRACKS[i];
-  if(trackLocked(t)){showToast('需解鎖完整專輯才能播放');closeSheet();switchTab('purchase');return;}
+  if(trackLocked(t)){
+    const nt=$('now-title');nt.textContent=t.title;nt.className='now-title reveal-secret';
+    closeSheet();
+    clearTimeout(onTrackClick._rt);
+    onTrackClick._rt=setTimeout(()=>{renderNow();showToast('解鎖完整版即可無限播放 ♡');switchTab('purchase');},1100);
+    return;
+  }
   closeSheet();
   playIdx(i);
 }
@@ -491,7 +500,7 @@ function renderNow(){
   const t=TRACKS[cur];
   const locked=trackLocked(t);
   const odd=(t.n%2===1);
-  $('now-title').textContent = locked ? 'Secret Track' : t.title;
+  const nt=$('now-title');nt.textContent=t.title;nt.className='now-title'+(locked?' secret-blur':'');
   $('now-sub').textContent = 'track '+String(t.n).padStart(2,'0')+(SUBS[t.n]?(' · '+SUBS[t.n]):'');
   $('prog-dot-label').textContent = odd?'拓':'晞';
   $('prog-thumb').style.background = odd?'linear-gradient(135deg,#cdbcf2,#b59cf0)':'linear-gradient(135deg,#f7b8d2,#f3a0c4)';
