@@ -18,6 +18,8 @@ body{font-family:'Noto Serif TC',serif;color:#fff;min-height:100dvh}
 
 .page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;background:#0d0a12}
 .page.active{display:block}
+#page-purchase,#page-unlock{background:radial-gradient(120% 60% at 50% 0%,#1c1426,#0d0a12 70%)}
+#page-mood{background:radial-gradient(120% 55% at 50% 0%,#1c1426,#0d0a12 70%)}
 
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 @keyframes reveal{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:none}}
@@ -35,15 +37,15 @@ body{font-family:'Noto Serif TC',serif;color:#fff;min-height:100dvh}
 @keyframes bounce{0%{transform:scale(1)}30%{transform:scale(1.2)}55%{transform:scale(.95)}100%{transform:scale(1)}}
 
 /* ---- player ---- */
-.cover-box{position:relative;width:100%;height:42vh;min-height:300px;max-height:360px;overflow:hidden}
-.cover-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%;transform-origin:center 45%}
+.cover-box{position:relative;width:100%;height:64vh;min-height:520px;max-height:620px;overflow:hidden}
+.cover-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform-origin:center 45%}
 .cover-box img.breathe{animation:breathe 7s ease-in-out infinite}
-.cover-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,18,.65) 0%,rgba(13,10,18,.1) 16%,rgba(13,10,18,0) 38%,rgba(13,10,18,.55) 68%,rgba(13,10,18,.98) 90%)}
-.cover-title{position:absolute;top:0;left:0;right:0;padding:28px 24px 0;text-align:center;z-index:2}
-.cover-title .ttl{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:30px;color:#fff;letter-spacing:.5px;line-height:1;text-shadow:0 2px 16px rgba(0,0,0,.5)}
-.cover-title .sub{font-family:'Bodoni Moda',serif;font-weight:500;font-size:11px;letter-spacing:5px;color:rgba(255,255,255,.92);text-transform:uppercase;margin-top:8px;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+.cover-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,18,.55) 0%,rgba(13,10,18,.05) 22%,rgba(13,10,18,0) 44%,rgba(13,10,18,.6) 74%,rgba(13,10,18,.98) 100%)}
+.cover-title{position:absolute;top:0;left:0;right:0;padding:42px 24px 0;text-align:center;z-index:2}
+.cover-title .sub{font-family:'Bodoni Moda',serif;font-weight:500;font-size:11px;letter-spacing:6px;color:rgba(255,255,255,.82);text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+.cover-title .ttl{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:38px;color:#fff;letter-spacing:.5px;line-height:1;margin-top:8px;text-shadow:0 3px 20px rgba(0,0,0,.55)}
 
-.now-card{position:relative;margin-top:-44px;background:linear-gradient(180deg,#16101c,#0d0a12 60%);border-top:1px solid rgba(255,255,255,.12);border-radius:30px 30px 0 0;padding:16px 26px 0;z-index:3}
+.now-card{position:relative;margin:-132px 14px 0;background:rgba(22,16,28,.55);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:22px 22px 6px;z-index:3;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .now-top{display:flex;justify-content:space-between;align-items:flex-start}
 .now-label{font-family:'Bodoni Moda',serif;font-size:9px;letter-spacing:4px;color:#f29bc2;text-transform:uppercase}
 .now-title{font-family:'Noto Serif TC',serif;font-size:27px;font-weight:600;color:#fff;margin-top:8px;letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -61,7 +63,7 @@ body{font-family:'Noto Serif TC',serif;color:#fff;min-height:100dvh}
 .controls{display:flex;align-items:center;justify-content:center;gap:30px;margin-top:14px}
 .ctrl-btn{background:none;border:none;cursor:pointer;padding:6px;color:rgba(255,255,255,.85)}
 .play-btn{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.85);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(120,90,160,.45),inset 0 1px 10px rgba(243,160,196,.55),inset 0 0 0 1px rgba(255,255,255,.55)}
-.next-scene{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.10);margin-top:18px;padding:14px 2px 6px;cursor:pointer}
+.next-scene{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.10);margin-top:18px;padding:14px 2px 8px;cursor:pointer}
 .next-scene span{font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase}
 
 .list-wrap{background:#0d0a12;padding:4px 16px calc(120px + env(safe-area-inset-bottom))}
@@ -181,8 +183,8 @@ body{font-family:'Noto Serif TC',serif;color:#fff;min-height:100dvh}
       <img id="cover-img" src="image/cover.png" alt="靠近你的安全距離">
       <div class="cover-shade"></div>
       <div class="cover-title">
-        <div class="ttl">Secret Lover</div>
         <div class="sub">Original Soundtrack</div>
+        <div class="ttl">Secret Lover</div>
       </div>
     </div>
     <div class="now-card">
