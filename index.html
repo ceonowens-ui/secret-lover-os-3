@@ -36,61 +36,70 @@ body{font-family:'Noto Serif TC','PingFang TC',sans-serif;color:#fff}
 
   <!-- ========== PLAYER ========== -->
   <div id="screen-player" style="position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0d0a12">
-    <!-- full-bleed hero — 四角圓潤浮島 -->
-    <div style="position:relative;width:calc(100% - 16px);height:calc(100dvh - 16px);min-height:580px;overflow:hidden;border-radius:28px;margin:8px auto 0">
-      <img src="image/cover.png" alt="" id="cover-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%;transform-origin:center 45%;animation:breathe 7s ease-in-out infinite;animation-play-state:paused">
-      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,18,.42) 0%,rgba(13,10,18,0) 22%,rgba(13,10,18,0) 58%,rgba(13,10,18,.14) 80%,rgba(13,10,18,.4) 100%)"></div>
-      <!-- header -->
-      <div style="position:absolute;top:0;left:0;right:0;padding:42px 24px 0;text-align:center;z-index:2">
-        <div style="font-family:'Bodoni Moda',serif;font-weight:500;font-size:11px;letter-spacing:6px;color:rgba(255,255,255,.82);text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.45)">Original Soundtrack</div>
-        <div style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:38px;color:#fff;letter-spacing:.5px;line-height:1;margin-top:8px;text-shadow:0 3px 20px rgba(0,0,0,.55)">Secret Lover</div>
+
+    <!-- First viewport: flex column — cover card + NP card -->
+    <div style="height:100dvh;min-height:520px;display:flex;flex-direction:column">
+
+      <!-- Cover floating card -->
+      <div style="position:relative;flex:1;min-height:240px;overflow:hidden;margin:calc(16px + env(safe-area-inset-top,0px)) 12px 0;border-radius:28px;box-shadow:0 22px 50px rgba(0,0,0,.58),0 5px 16px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.06)">
+        <img src="image/cover.png" alt="" id="cover-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform-origin:center 45%;animation:breathe 7s ease-in-out infinite;animation-play-state:paused">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,18,.6) 0%,rgba(13,10,18,.33) 7%,rgba(13,10,18,0) 15%,rgba(13,10,18,0) 78%,rgba(13,10,18,.30) 91%,rgba(13,10,18,.51) 100%)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;padding:14px 24px 0;text-align:center;z-index:2">
+          <div style="font-family:'Bodoni Moda',serif;font-weight:500;font-size:9px;letter-spacing:4.5px;color:rgba(255,255,255,.85);text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5)">Original Soundtrack</div>
+          <div style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:28px;color:#fff;letter-spacing:.5px;line-height:1;margin-top:5px;text-shadow:0 3px 20px rgba(0,0,0,.6)">Secret Lover</div>
+        </div>
+        <!-- heart burst overlay inside cover -->
+        <div id="heart-burst-overlay" style="position:absolute;inset:0;z-index:80;pointer-events:none;overflow:hidden;display:none"></div>
+        <!-- unlock burst -->
+        <div id="unlock-burst-overlay" style="display:none;position:absolute;inset:0;z-index:90;pointer-events:none">
+          <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 45%,rgba(243,160,196,.55),rgba(243,160,196,.3) 45%,transparent 72%);animation:burstGlow 1.8s ease-out forwards"></div>
+          <div id="unlock-particles" style="position:absolute;inset:0;z-index:91;pointer-events:none"></div>
+        </div>
       </div>
-      <!-- Now Playing glass card -->
-      <div style="position:absolute;left:14px;right:14px;bottom:98px;background:rgba(22,16,28,.55);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14);border-radius:28px;padding:20px 22px 16px;z-index:3;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+
+      <!-- Now Playing glass card — overlaps cover by 52px -->
+      <div style="position:relative;margin:-52px 18px calc(86px + env(safe-area-inset-bottom,0px));background:rgba(22,16,28,.55);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:12px 18px 4px;z-index:3;box-shadow:0 24px 60px rgba(0,0,0,.5)">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div style="flex:1;min-width:0">
-            <div style="font-family:'Bodoni Moda',serif;font-size:9px;letter-spacing:4px;color:#f29bc2;text-transform:uppercase">Now Playing · <span id="now-num">01</span></div>
-            <div id="now-title" style="font-family:'Noto Serif TC',serif;font-size:25px;font-weight:600;color:#fff;margin-top:8px;letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">我們之間的祕密</div>
+            <div style="font-family:'Bodoni Moda',serif;font-size:9px;letter-spacing:4px;color:#f29bc2;text-transform:uppercase">Now Playing</div>
+            <div id="now-title" style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:600;color:#fff;margin-top:3px;letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">我們之間的祕密</div>
+            <div id="now-sub" style="font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:rgba(255,255,255,.7);margin-top:4px">track 01 · 拓把距離靠近的那一秒</div>
           </div>
           <button id="heart-btn" onclick="captureHeart(event)" style="border-radius:50%;background:rgba(243,160,196,.12);border:1px solid rgba(243,160,196,.45);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:12px;flex:none;width:44px;height:44px">
             <svg id="heart-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f3a0c4" stroke-width="2" stroke-linejoin="round" style="animation:heartbeat 2.6s ease-in-out infinite"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>
           </button>
         </div>
-        <!-- progress bar -->
-        <div id="prog-el" onpointerdown="onProgDown(event)" style="position:relative;height:4px;border-radius:4px;background:rgba(255,255,255,.18);cursor:pointer;margin-top:16px">
+        <!-- progress -->
+        <div id="prog-el" onpointerdown="onProgDown(event)" style="position:relative;height:4px;border-radius:4px;background:rgba(255,255,255,.18);cursor:pointer;margin-top:9px">
           <div id="prog-fill" style="position:absolute;left:0;top:0;height:100%;border-radius:4px;background:linear-gradient(90deg,#f7b8d2,#f3a0c4 60%,#f29bc2);width:0%"></div>
           <div id="prog-glow" style="position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;width:32px;height:32px;border-radius:50%;background:rgba(243,160,196,.9);filter:blur(7px);opacity:.34;pointer-events:none"></div>
-          <div id="prog-dot" style="position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#f7b8d2,#f3a0c4);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:12px;font-weight:600;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 12px rgba(243,160,196,.9);z-index:1">晞</div>
+          <div id="prog-dot" style="position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#cdbcf2,#b59cf0);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:12px;font-weight:600;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 12px rgba(176,156,228,.9);z-index:1">拓</div>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'Bodoni Moda',serif;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.55)"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
-        <!-- playback controls -->
-        <div style="display:flex;align-items:center;justify-content:center;gap:30px;margin-top:10px">
+        <div style="display:flex;justify-content:space-between;margin-top:9px;font-family:'Bodoni Moda',serif;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.55)"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
+        <!-- controls -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:28px;margin-top:2px">
           <button onclick="prevTrack()" style="background:none;border:none;cursor:pointer;padding:6px"><svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-          <button onclick="togglePlay()" style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(120,90,160,.45),inset 0 1px 10px rgba(243,160,196,.55),inset 0 0 0 1px rgba(255,255,255,.55)">
+          <button onclick="togglePlay()" style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(120,90,160,.45),inset 0 1px 10px rgba(243,160,196,.55),inset 0 0 0 1px rgba(255,255,255,.55)">
             <svg width="23" height="23" viewBox="0 0 24 24" fill="#2c1f3a"><path id="play-path" d="M8 5v14l11-7z"/></svg>
           </button>
           <button onclick="nextTrack()" style="background:none;border:none;cursor:pointer;padding:6px"><svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
         </div>
-      </div>
-      <!-- next track hint -->
-      <div id="next-hint" onclick="openSheet()" style="position:absolute;left:0;right:0;bottom:76px;z-index:4;text-align:center;cursor:pointer;font-family:'Noto Serif TC',serif;font-size:12px;letter-spacing:1px;color:rgba(255,255,255,.72);text-shadow:0 1px 6px rgba(0,0,0,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 44px">下一首 <span id="next-title">真的喜歡是藏不住的</span> ⌄</div>
-      <!-- heart burst overlay -->
-      <div id="heart-burst-overlay" style="position:absolute;inset:0;z-index:80;pointer-events:none;overflow:hidden;display:none"></div>
-      <!-- unlock burst -->
-      <div id="unlock-burst-overlay" style="display:none;position:absolute;inset:0;z-index:90;pointer-events:none">
-        <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 45%,rgba(243,160,196,.55),rgba(243,160,196,.3) 45%,transparent 72%);animation:burstGlow 1.8s ease-out forwards"></div>
-        <div style="position:absolute;left:50%;top:42%;z-index:91;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;border:2px solid rgba(243,160,196,.7);animation:ring 1.4s ease-out forwards;pointer-events:none"></div>
-        <div id="unlock-particles" style="position:absolute;inset:0;z-index:91;pointer-events:none"></div>
+        <!-- next scene strip -->
+        <div onclick="openSheet()" style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.10);margin-top:6px;padding:6px 2px 2px;cursor:pointer">
+          <span style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase">Next Scene · 共 21 首</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
       </div>
     </div>
-    <!-- track list below fold -->
-    <div style="background:#0d0a12;padding:26px 16px 88px">
-      <div style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.5);text-transform:uppercase;padding:0 12px 10px">Tracks · 21 首</div>
+
+    <!-- Track list below fold -->
+    <div style="background:#0d0a12;margin-top:calc(-70px - env(safe-area-inset-bottom,0px));padding:18px 16px calc(120px + env(safe-area-inset-bottom,0px))">
+      <div style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.5);text-transform:uppercase;padding:0 12px 8px">Tracks · 21 首</div>
       <div id="track-list"></div>
     </div>
   </div>
 
-  <!-- ========== SHEET (track drawer) ========== -->
+  <!-- ========== SHEET ========== -->
   <div id="sheet-overlay" onclick="closeSheet()" style="display:none;position:absolute;inset:0;z-index:60;background:rgba(8,6,12,.55);animation:fadeIn .25s ease"></div>
   <div id="sheet" style="display:none;position:absolute;left:0;right:0;bottom:0;z-index:61;height:84%;background:linear-gradient(180deg,#16111d,#0d0a12);border-radius:26px 26px 0 0;border-top:1px solid rgba(255,255,255,.12);flex-direction:column;animation:slideUp .32s cubic-bezier(.22,.9,.3,1)">
     <div style="padding:18px 24px 8px;display:flex;align-items:center;justify-content:space-between;flex:none">
@@ -234,9 +243,9 @@ function closeSheet(){$('sheet-overlay').style.display='none';$('sheet').style.d
 function lockSVG(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f6680" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';}
 function playSVG(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="#f3a0c4"><path d="M8 5v14l11-7z"/></svg>';}
 function dlSVG(f){return '<a href="songs/'+encodeURIComponent(f)+'" download onclick="event.stopPropagation()" style="color:inherit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>';}
-function buildTrackList(anim){const u=isUnlocked();$('track-list').innerHTML=TRACKS.map((tk,i)=>{const lk=trackLocked(tk),ip=(i===cur),nc=ip?'#f29bc2':(lk?'#5f5870':'#9a93a8'),tc=ip?'#fff':(lk?'#7a7388':'rgba(255,255,255,.82)'),ts=lk?'font-style:italic;letter-spacing:1px':'',rb=ip?'background:rgba(243,160,196,.10);':'',ra=(anim&&!tk.free)?'animation:reveal .5s ease '+((i-2)*0.05).toFixed(2)+'s both;':'',ic=lk?lockSVG():(u?dlSVG(tk.file):playSVG());return '<div onclick="onTrackClick('+i+')" style="display:flex;align-items:center;gap:13px;padding:10px 12px;border-radius:14px;cursor:pointer;'+rb+ra+'"><span style="font-family:\'Bodoni Moda\',serif;font-size:13px;width:24px;text-align:center;color:'+nc+'">'+String(tk.n).padStart(2,'0')+'</span><div style="flex:1;min-width:0;font-family:\'Noto Serif TC\',serif;font-size:17px;color:'+tc+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'+ts+'">'+(lk?'Secret Track':tk.title)+'</div>'+ic+'</div>';}).join('');}
+function buildTrackList(anim){const u=isUnlocked();$('track-list').innerHTML=TRACKS.map((tk,i)=>{const lk=trackLocked(tk),ip=(i===cur),nc=ip?'#f29bc2':(lk?'#5f5870':'#9a93a8'),tc=ip?'#fff':(lk?'#7a7388':'rgba(255,255,255,.82)'),ts=lk?'font-style:italic;letter-spacing:1px':'',rb=ip?'background:rgba(243,160,196,.10);':'',ra=(anim&&!tk.free)?'animation:reveal .5s ease '+((i-2)*0.05).toFixed(2)+'s both;':'',ic=lk?lockSVG():(u?dlSVG(tk.file):playSVG());return '<div onclick="onTrackClick('+i+')" style="display:flex;align-items:center;gap:13px;padding:10px 12px;border-radius:14px;cursor:pointer;'+rb+ra+'"><span style="font-family:\'Bodoni Moda\',serif;font-size:13px;width:24px;text-align:center;color:'+nc+'">'+String(tk.n).padStart(2,'0')+'</span><div style="flex:1;min-width:0;font-family:\'Noto Serif TC\',serif;font-size:14px;color:'+tc+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'+ts+'">'+(lk?'Secret Track':tk.title)+'</div>'+ic+'</div>';}).join('');}
 function buildSheet(){const u=isUnlocked();$('sheet-list').innerHTML=TRACKS.map((tk,i)=>{const lk=trackLocked(tk),ip=(i===cur),nc=ip?'#f29bc2':(lk?'#5f5870':'rgba(255,255,255,.5)'),tc=ip?'#fff':(lk?'#7a7388':'rgba(255,255,255,.7)'),ts=lk?'font-style:italic;letter-spacing:1px':'',rb=ip?'background:rgba(243,160,196,.10);':'',ic=lk?lockSVG():(u?dlSVG(tk.file):playSVG());return '<div onclick="onTrackClick('+i+');closeSheet();" style="display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;cursor:pointer;'+rb+'"><span style="font-family:\'Bodoni Moda\',serif;font-size:13px;width:24px;text-align:center;color:'+nc+'">'+String(tk.n).padStart(2,'0')+'</span><div style="flex:1;min-width:0;font-family:\'Noto Serif TC\',serif;font-size:17px;color:'+tc+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'+ts+'">'+(lk?'Secret Track':tk.title)+'</div>'+ic+'</div>';}).join('');}
-function updateNP(){const t=TRACKS[cur],lk=trackLocked(t),odd=(t.n%2===1);$('now-title').textContent=lk?'Secret Track':t.title;$('now-num').textContent=String(t.n).padStart(2,'0');const nx=TRACKS[(cur+1)%TRACKS.length];$('next-title').textContent=trackLocked(nx)?'Secret Track':nx.title;const dBg=odd?'linear-gradient(135deg,#cdbcf2,#b59cf0)':'linear-gradient(135deg,#f7b8d2,#f3a0c4)',dG=odd?'rgba(176,156,228,.9)':'rgba(243,160,196,.9)',pF=odd?'linear-gradient(90deg,#c9b0ec,#b59cf0 60%,#cdbcf2)':'linear-gradient(90deg,#f7b8d2,#f3a0c4 60%,#f29bc2)';$('prog-dot').textContent=odd?'拓':'晞';$('prog-dot').style.background=dBg;$('prog-dot').style.boxShadow='0 2px 10px rgba(0,0,0,.4),0 0 12px '+dG;$('prog-fill').style.background=pF;$('prog-glow').style.background=dG;}
+function updateNP(){const t=TRACKS[cur],lk=trackLocked(t),odd=(t.n%2===1);$('now-title').textContent=lk?'Secret Track':t.title;$('now-sub').textContent='track '+String(t.n).padStart(2,'0')+(SUBS[t.n]?' · '+SUBS[t.n]:'');const dBg=odd?'linear-gradient(135deg,#cdbcf2,#b59cf0)':'linear-gradient(135deg,#f7b8d2,#f3a0c4)',dG=odd?'rgba(176,156,228,.9)':'rgba(243,160,196,.9)',pF=odd?'linear-gradient(90deg,#c9b0ec,#b59cf0 60%,#cdbcf2)':'linear-gradient(90deg,#f7b8d2,#f3a0c4 60%,#f29bc2)';$('prog-dot').textContent=odd?'拓':'晞';$('prog-dot').style.background=dBg;$('prog-dot').style.boxShadow='0 2px 10px rgba(0,0,0,.4),0 0 12px '+dG;$('prog-fill').style.background=pF;$('prog-glow').style.background=dG;}
 function srcFor(t){if(t.free)return 'songs/'+encodeURIComponent(t.file);const u=getUnlockData();return CONFIG.WORKER_API_BASE+'/track?file='+encodeURIComponent(t.file)+'&email='+encodeURIComponent(u.email||'')+'&code='+encodeURIComponent(u.code||'');}
 function playIdx(i){cur=i;const t=TRACKS[i];audio.src=srcFor(t);audio.play().catch(()=>{});updateNP();buildTrackList();}
 function onTrackClick(i){const t=TRACKS[i];if(trackLocked(t)){showToast('需解鎖完整專輯才能播放');go('purchase');return;}playIdx(i);}
