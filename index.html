@@ -2,625 +2,236 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d0a12">
 <title>秘密關係 OST</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Huninn&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --frame:#efe9f3;
-  --bg:#faf7fb;--title:#5f5872;--text2:#a79cb8;--text3:#b6adc6;
-  --locked:#c8bfd6;--locked2:#b6adc6;--pink:#f29bc2;--blue:#afc7f6;--accent:#f29bc2;
-  --grad:linear-gradient(135deg,#f29bc2 0%,#c9b0ec 52%,#afc7f6 100%);--playing-bg:#fbeaf3;
-  --border:#efe7f4;--border2:#f0e8f4;--card:#ffffff;
-  --serif:"Quicksand","Huninn",-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
-  --display:"Baloo 2","Huninn","Quicksand",sans-serif;
-}
-html,body{background:var(--frame)}
-body{font-family:var(--serif);color:var(--title);min-height:100dvh}
-.app-frame{display:flex;justify-content:center;min-height:100dvh}
-.app{width:100%;max-width:430px;min-height:100dvh;background:linear-gradient(180deg,#faf7fb 0%,#f7f1fa 46%,#fff9f4 100%);position:relative;overflow-x:hidden;box-shadow:0 0 60px rgba(150,120,150,.08)}
-
-.page{display:none;padding:0 0 100px}
-.page.active{display:block}
-
-/* header */
-.topbar{position:relative;display:flex;align-items:center;justify-content:center;padding:40px 24px 4px}
-.topbar .eyebrow{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
-.topbar .eyebrow .ttl{font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:1.5px;color:#8a7fa0;white-space:nowrap}
-.topbar .eyebrow .s-accent{background:linear-gradient(135deg,#f29bc2,#c9b0ec 55%,#afc7f6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
-.topbar .eyebrow .sub{font-family:var(--display);font-size:10px;font-weight:600;letter-spacing:4px;color:#b6adc6;text-transform:uppercase;white-space:nowrap}
-.menu-btn{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;color:#a79cb8;padding:9px;cursor:pointer;border-radius:50%;transition:background-color .2s}
-.menu-btn:hover{background:rgba(242,155,194,.12)}
-.menu-btn svg{display:block}
-
-/* cover */
-.cover-stage{position:relative;width:min(304px,75vw);margin:30px auto 12px}
-.cover-stage::before{content:'';position:absolute;inset:-20% -16% -12%;background:radial-gradient(56% 56% at 50% 40%,rgba(242,155,194,.34),rgba(175,199,246,.26) 56%,transparent 78%);filter:blur(34px);z-index:0}
-.cover-wrap{position:relative;z-index:1;width:100%;aspect-ratio:1/1;border-radius:44px;overflow:hidden;background:#fff;border:6px solid #fff;box-shadow:0 26px 56px rgba(214,160,205,.34),0 10px 22px rgba(175,160,225,.20)}
-.cover-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 38%;display:block}
-.deco{position:absolute;z-index:2;pointer-events:none}
-.deco.heart{top:18px;right:18px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.82);backdrop-filter:blur(4px);color:#f29bc2;box-shadow:0 5px 14px rgba(214,160,205,.4)}
-.heart-field{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:visible}
-.heart-particle{position:absolute;transform:translate(-50%,-50%);will-change:transform,opacity;animation:heartFloat var(--dur,2.8s) ease-out forwards}
-@keyframes heartFloat{0%{opacity:0;transform:translate(-50%,-50%) scale(.3) rotate(var(--r,0deg))}18%{opacity:.95}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--r,0deg))}}
-@keyframes floaty{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-9px) rotate(6deg)}}
-
-.album-meta{text-align:center;padding:20px 24px 2px}
-.album-meta .t-en{font-family:var(--display);font-size:21px;font-weight:600;letter-spacing:.5px;color:#5f5872}
-.album-meta .t2{font-size:12.5px;color:#a79cb8;margin-top:14px;letter-spacing:3px}
-.album-meta .t3{font-family:var(--display);font-size:11px;color:#c2b9d0;margin-top:6px;letter-spacing:2px}
-
-/* progress + controls */
-.prog-section{padding:30px 36px 4px}
-.prog-wrap{position:relative;height:5px;border-radius:5px;background:#f6e6f0;cursor:pointer}
-.prog-wrap::before{content:'';position:absolute;left:0;right:0;top:-16px;bottom:-16px}
-.prog-fill{position:absolute;left:0;top:0;height:100%;border-radius:5px;background:var(--grad);width:0%}
-.prog-start{position:absolute;left:0;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:#ecd9ea;box-shadow:0 0 0 3px #fff;z-index:1}
-.prog-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;z-index:2}
-.lover-dot{position:relative;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;font-family:var(--display);font-size:13px;font-weight:600;color:#fff;border:2.5px solid #fff;overflow:hidden}
-.lover-dot::after{content:'';position:absolute;top:3px;left:5px;width:42%;height:34%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.85),transparent 70%);pointer-events:none}
-.lover-dot.tuo{background:linear-gradient(135deg,#cdbcf2,#ddccf6);box-shadow:0 3px 10px rgba(176,156,228,.6),0 0 0 4px rgba(201,184,240,.18)}
-.lover-dot.jun{background:linear-gradient(135deg,#f7b8d2,#f3a0c4);box-shadow:0 3px 10px rgba(242,155,194,.6),0 0 0 4px rgba(242,155,194,.18)}
-.time-row{display:flex;justify-content:space-between;margin-top:14px;font-family:var(--display);font-size:12px;letter-spacing:1px;color:#b6adc6}
-
-.controls{display:flex;align-items:center;justify-content:center;gap:38px;padding:18px 0 26px}
-.ctrl-btn{background:none;border:none;color:#a79cb8;cursor:pointer;padding:8px}
-.ctrl-btn svg{display:block}
-.play-btn{position:relative;width:66px;height:66px;border-radius:50%;background:var(--grad);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 12px 28px rgba(214,160,205,.46),inset 0 2px 6px rgba(255,255,255,.5)}
-.play-btn::after{content:'';position:absolute;top:9px;left:14px;width:30%;height:24%;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.75),transparent 70%);pointer-events:none}
-
-/* track list */
-.section-label{padding:20px 28px 14px;font-family:var(--display);font-size:11px;font-weight:600;letter-spacing:5px;color:#b6adc6}
-.track-list{padding:0 18px}
-.track-item{display:flex;align-items:center;gap:14px;padding:15px 16px;border-radius:18px;margin-bottom:2px;cursor:pointer;border-bottom:1px solid #f1ecf5;transition:background-color .25s}
-.track-item:last-child{border-bottom:none}
-.track-item:hover{background:rgba(242,155,194,.06)}
-.track-item.playing{background:var(--playing-bg);border-bottom-color:transparent}
-.track-num{width:26px;text-align:center;font-family:var(--display);font-size:13px;letter-spacing:.5px;color:#b6adc6;flex-shrink:0}
-.track-item.playing .track-num{color:var(--pink)}
-.track-info{flex:1;min-width:0}
-.track-name{font-size:14px;color:var(--title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.track-item.playing .track-name{color:#5f5872;font-weight:500}
-.track-item.locked{background:rgba(176,160,210,.06)}
-.track-item.locked .track-name{color:#a89eba;font-style:italic;letter-spacing:1px}
-.track-sub{font-family:var(--serif);font-size:11px;font-style:italic;color:#a99fbb;margin-top:4px;letter-spacing:.5px}
-@keyframes revealName{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-@keyframes revealBg{from{background:rgba(176,160,210,.18)}to{background:transparent}}
-@keyframes revealIcon{0%{opacity:0;transform:scale(.5) rotate(-12deg)}60%{transform:scale(1.15) rotate(4deg)}100%{opacity:1;transform:none}}
-.track-item.reveal-anim{animation:revealBg .9s ease}
-.track-item.reveal-anim .track-name,.track-item.reveal-anim .track-sub{animation:revealName .7s ease both}
-.track-item.reveal-anim .play-icon-sm,.track-item.reveal-anim .dl-icon{animation:revealIcon .7s ease both}
-.lock-icon{color:var(--locked);flex-shrink:0;display:flex}
-.play-icon-sm{color:var(--pink);flex-shrink:0;display:flex}
-.dl-icon{color:var(--pink);flex-shrink:0;display:flex}
-
-/* CTA */
-.unlock-cta{margin:26px 18px 0}
-.btn-grad{display:block;width:100%;text-align:center;padding:15px;border-radius:16px;background:var(--grad);color:#fff;border:none;font-family:var(--serif);font-size:14px;letter-spacing:2px;cursor:pointer;box-shadow:0 10px 24px rgba(236,144,179,.32)}
-.btn-grad.secondary{background:#fff;color:var(--pink);border:1.5px solid var(--pink);box-shadow:none}
-
-/* purchase page */
-.purchase-head{padding:62px 28px 8px;text-align:center}
-.purchase-head .disp{font-family:var(--display);font-size:26px;font-weight:600;letter-spacing:.5px;color:var(--title)}
-.purchase-head h2{font-size:17px;font-weight:500;letter-spacing:2px;color:var(--title);margin-top:8px}
-.purchase-head p{font-size:12px;color:var(--text3);margin-top:12px;line-height:1.75}
-.plans{padding:26px 22px;display:flex;flex-direction:column;gap:20px}
-.plan-card{border-radius:22px;background:var(--card);border:1.5px solid var(--border2);padding:26px 22px;position:relative;cursor:pointer;box-shadow:0 14px 34px rgba(180,150,180,.15);transition:border-color .25s,box-shadow .25s}
-.plan-card.selected{border-color:var(--pink);box-shadow:0 0 0 4px rgba(236,144,179,.16)}
-.plan-card.featured{border-color:var(--pink);border-width:2px}
-.badge{position:absolute;top:-11px;right:18px;background:var(--grad);color:#fff;font-size:10px;padding:5px 12px;border-radius:20px;letter-spacing:2px}
-.plan-name{font-size:15px;color:var(--title);letter-spacing:1px}
-.plan-price{font-family:var(--display);font-size:30px;color:var(--title);margin-top:4px;font-weight:700}
-.plan-feats{margin-top:18px;display:flex;flex-direction:column;gap:11px}
-.plan-feats div{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text2)}
-.plan-feats svg{flex-shrink:0;margin-top:1px;color:var(--pink)}
-.checkout-wrap{padding:10px 24px 0}
-
-/* unlock page */
-.unlock-head{padding:72px 28px 12px;text-align:center}
-.unlock-icon{width:66px;height:66px;border-radius:50%;background:var(--playing-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:var(--pink)}
-.unlock-head .disp{font-family:var(--display);font-size:24px;font-weight:600;color:var(--title)}
-.unlock-head h2{font-size:16px;font-weight:500;color:var(--title);letter-spacing:1px;margin-top:6px}
-.unlock-head p{font-size:12px;color:var(--text3);margin-top:10px;line-height:1.7;padding:0 14px}
-.form-wrap{padding:24px 28px}
-.form-wrap label{font-family:var(--display);font-size:11px;font-weight:600;color:var(--text3);letter-spacing:3px}
-.form-wrap input{width:100%;margin:9px 0 20px;padding:15px;border-radius:16px;border:1.5px solid var(--border);background:#fff;font-size:14px;color:var(--title);outline:none;font-family:var(--serif)}
-.form-wrap input:focus{border-color:var(--pink)}
-.unlock-link{text-align:center;font-size:12px;color:var(--text3);margin-top:20px;cursor:pointer}
-.unlock-link b{color:var(--pink);font-weight:500}
-
-/* mood wall */
-.mood-head{padding:54px 28px 6px;text-align:center}
-.mood-head .disp{font-family:var(--display);font-size:25px;font-weight:600;letter-spacing:2px;color:var(--title)}
-.mood-head .sub-zh{font-size:12.5px;color:var(--text2);margin-top:12px;letter-spacing:1px;line-height:1.7}
-.mood-head .sub-en{font-family:var(--display);font-size:10px;font-weight:600;letter-spacing:3px;color:#c2b9d0;margin-top:7px;text-transform:uppercase}
-.mood-count{text-align:center;font-size:11.5px;color:#b3a6c8;letter-spacing:.5px;padding:20px 28px 4px}
-.mood-count b{color:var(--pink);font-weight:600;font-family:var(--display)}
-.glass-card{margin:8px 20px 0;background:rgba(255,255,255,.66);backdrop-filter:blur(10px);border:1px solid rgba(242,200,228,.6);border-radius:22px;padding:20px 18px;box-shadow:0 12px 30px rgba(214,160,205,.18)}
-.mood-input{width:100%;padding:13px 15px;border-radius:16px;border:1.5px solid var(--border);background:rgba(255,255,255,.8);font-size:13.5px;color:var(--title);outline:none;font-family:var(--serif)}
-.mood-input:focus{border-color:var(--pink)}
-.mood-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
-.mood-tag{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:rgba(255,255,255,.7);color:#a79cb8;font-size:12px;font-family:var(--serif);cursor:pointer;transition:all .25s ease;-webkit-tap-highlight-color:transparent}
-.mood-tag:hover{border-color:rgba(242,155,194,.5)}
-.mood-tag.sel{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 5px 14px rgba(236,144,179,.32)}
-.mood-ta-wrap{position:relative;margin-top:14px}
-.mood-ta{width:100%;min-height:74px;resize:none;padding:13px 15px;border-radius:16px;border:1.5px solid var(--border);background:rgba(255,255,255,.8);font-size:13.5px;line-height:1.6;color:var(--title);outline:none;font-family:var(--serif)}
-.mood-ta:focus{border-color:var(--pink)}
-.mood-count-char{text-align:right;font-family:var(--display);font-size:11px;color:#c2b9d0;margin-top:6px;letter-spacing:.5px}
-.mood-err{color:var(--pink);font-size:11.5px;text-align:center;min-height:16px;margin-top:8px;opacity:0;transition:opacity .2s}
-.mood-err.show{opacity:1}
-.mood-submit{display:block;width:100%;margin-top:6px;padding:14px;border-radius:24px;background:var(--grad);color:#fff;border:none;font-family:var(--serif);font-size:14px;letter-spacing:2px;cursor:pointer;box-shadow:0 10px 24px rgba(236,144,179,.32);transition:transform .15s ease,filter .2s ease}
-.mood-submit:active{transform:scale(.97);filter:brightness(1.06)}
-.mood-submit.done{filter:brightness(1.05)}
-.mood-list{padding:22px 20px 0}
-.mood-note{background:rgba(255,255,255,.62);backdrop-filter:blur(8px);border:1px solid rgba(242,200,228,.55);border-radius:18px;padding:15px 17px;margin-bottom:12px;box-shadow:0 8px 20px rgba(214,160,205,.14);transition:transform .25s ease,box-shadow .25s ease}
-.mood-note:hover{transform:translateY(-3px);box-shadow:0 14px 28px rgba(214,160,205,.22)}
-.mood-note.new{animation:noteIn .55s ease both}
-@keyframes noteIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-.mood-note-top{display:flex;align-items:center;gap:9px;margin-bottom:9px}
-.mood-note-name{font-family:var(--display);font-size:13px;font-weight:600;color:#7a6e92}
-.mood-note-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--pink);background:rgba(242,155,194,.12);padding:3px 10px;border-radius:14px;letter-spacing:.5px;white-space:nowrap;flex-shrink:0}
-.mood-note-text{font-size:13.5px;line-height:1.7;color:#5f5872;letter-spacing:.3px}
-.mood-note-time{font-family:var(--display);font-size:10.5px;color:#c2b9d0;margin-top:9px;letter-spacing:.5px}
-
-/* tab bar */
-.tab-bar{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:430px;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.tab-btn{flex:1;padding:13px 0 11px;background:none;border:none;color:#a79cb8;font-family:var(--serif);font-weight:500;font-size:10.5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;letter-spacing:1px;-webkit-tap-highlight-color:transparent}
-.tab-btn:focus,.tab-btn:focus-visible{outline:none}
-.tab-btn.active{color:var(--pink)}
-.tab-btn svg{width:20px;height:20px}
-
-.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--title);color:#fff;padding:9px 18px;border-radius:22px;font-size:12.5px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:300;white-space:nowrap;max-width:80%;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,600;1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="app-frame">
-  <div class="app">
+<div id="stage" role="main">
 
-    <div class="page active" id="page-player">
-      <div class="topbar">
-        <div class="eyebrow"><span class="ttl">《<span class="s-accent">S</span>ecret Lover》</span><span class="sub">Original Soundtrack</span></div>
-        <button class="menu-btn" onclick="switchTab('purchase')" aria-label="方案">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
-        </button>
-      </div>
-      <div class="cover-stage">
-        <div class="cover-wrap"><img src="images/cover.png" alt="靠近你的安全距離"></div>
-        <div class="heart-field" id="heart-field"></div>
-        <div class="deco heart"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z" opacity=".9"/></svg></div>
-      </div>
-      <div class="album-meta">
-        <div class="t2">秘密關係 配樂 原聲帶</div>
-        <div class="t3">21 Tracks · Original Soundtrack</div>
-      </div>
-      <div class="prog-section">
-        <div class="prog-wrap" id="prog-wrap">
-          <div class="prog-fill" id="prog-fill"></div>
-          <div class="prog-start"></div>
-          <div class="prog-thumb" id="prog-thumb"><span class="lover-dot tuo" id="play-dot">拓</span></div>
+  <!-- ========== PLAYER ========== -->
+  <div id="screen-player" class="screen" style="display:block">
+
+    <div class="player-viewport">
+      <!-- Cover Card -->
+      <div class="cover-card">
+        <img src="image/cover.png" alt="秘密關係 OST 封面" id="cover-img" class="cover-img">
+        <div class="cover-gradient"></div>
+        <div class="cover-header">
+          <div class="cover-label">Original Soundtrack</div>
+          <div class="cover-title">Secret Lover</div>
         </div>
-        <div class="time-row"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
+        <div id="heart-burst-overlay"   class="heart-burst-overlay"></div>
+        <div id="unlock-burst-overlay"  class="unlock-burst-overlay">
+          <div class="unlock-burst-bg"></div>
+          <div id="unlock-particles" class="unlock-particles"></div>
+        </div>
       </div>
-      <div class="controls">
-        <button class="ctrl-btn" onclick="prevTrack()"><svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-        <button class="play-btn" onclick="togglePlay()"><svg width="27" height="27" viewBox="0 0 24 24" fill="white"><path id="play-path" d="M8 5v14l11-7z"/></svg></button>
-        <button class="ctrl-btn" onclick="nextTrack()"><svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
-      </div>
-      <div class="section-label">TRACK LIST · 曲目列表</div>
-      <div class="track-list" id="track-list"></div>
-      <div class="unlock-cta" id="unlock-cta"></div>
-    </div>
 
-    <div class="page" id="page-purchase">
-      <div class="purchase-head">
-        <div class="disp">Unlock the Album</div>
-        <h2>解鎖完整 21 首專輯</h2>
-        <p>免費試聽前 2 首，解鎖後可線上聽 + 下載收藏</p>
-      </div>
-      <div class="plans">
-        <div class="plan-card" data-plan="299" onclick="selectPlan('299')">
-          <div class="plan-name">數位專輯</div>
-          <div class="plan-price">NT$299</div>
-          <div class="plan-feats">
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首，線上收聽</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數，隨時重播</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可加入手機主畫面</div>
+      <!-- Now Playing Card -->
+      <div class="np-card">
+        <div class="np-meta">
+          <div class="np-info">
+            <div class="np-eyebrow">Now Playing</div>
+            <div id="now-title" class="np-title">我們之間的祕密</div>
+            <div id="now-sub"   class="np-sub">track 01 · 拓把距離靠近的那一秒</div>
           </div>
+          <button id="heart-btn" class="heart-btn" onclick="captureHeart(event)" aria-label="收藏這一刻">
+            <svg id="heart-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f3a0c4" stroke-width="2" stroke-linejoin="round" style="animation:heartbeat 2.6s ease-in-out infinite">
+              <path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/>
+            </svg>
+          </button>
         </div>
-        <div class="plan-card featured" data-plan="599" onclick="selectPlan('599')">
-          <div class="badge">收藏推薦</div>
-          <div class="plan-name">典藏版 + WAV</div>
-          <div class="plan-price">NT$599</div>
-          <div class="plan-feats">
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>上面全部內容</div>
-            <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質，可下載收藏</div>
-          </div>
+
+        <!-- Progress Bar -->
+        <div id="prog-el" class="prog-bar" onpointerdown="onProgDown(event)" role="slider" aria-label="播放進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="prog-fill" class="prog-fill" style="background:linear-gradient(90deg,#f7b8d2,#f3a0c4 60%,#f29bc2)"></div>
+          <div id="prog-glow" class="prog-glow" style="background:rgba(243,160,196,.9)"></div>
+          <div id="prog-dot"  class="prog-dot"  style="background:linear-gradient(135deg,#cdbcf2,#b59cf0);box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 12px rgba(176,156,228,.9)">拓</div>
         </div>
-      </div>
-      <div class="checkout-wrap">
-        <button class="btn-grad" id="checkout-btn" onclick="goCheckout()">前往結帳</button>
-        <button class="btn-grad secondary" style="margin-top:11px" onclick="switchTab('unlock')">已經購買？輸入兌換碼</button>
+        <div class="prog-time">
+          <span id="t-cur">0:00</span>
+          <span id="t-tot">0:00</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+          <button class="btn-prev" onclick="prevTrack()" aria-label="上一首">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          </button>
+          <button class="btn-play" onclick="togglePlay()" aria-label="播放／暫停">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="#2c1f3a"><path id="play-path" d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="btn-next" onclick="nextTrack()" aria-label="下一首">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+        </div>
+
+        <div class="np-next-row" onclick="openSheet()" role="button" aria-label="打開曲目列表">
+          <span class="np-next-label">Next Scene · 共 21 首</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
       </div>
     </div>
 
-    <div class="page" id="page-unlock">
-      <div class="unlock-head">
-        <div class="unlock-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
-        <div class="disp">Enter Your Code</div>
-        <h2>輸入你的兌換碼</h2>
-        <p>購買後會寄到信箱，請用購買時的 email 解鎖</p>
-      </div>
-      <div class="form-wrap">
-        <label>EMAIL</label>
-        <input type="email" id="in-email" placeholder="you@example.com" autocomplete="email">
-        <label>兌換碼 · CODE</label>
-        <input type="text" id="in-code" placeholder="SR-XXXX-XXXX" autocomplete="off">
-        <button class="btn-grad" onclick="redeem()">解鎖</button>
-        <div class="unlock-link" onclick="switchTab('purchase')">還沒購買？<b>看方案 →</b></div>
-      </div>
+    <!-- Track List -->
+    <div class="tracklist-section">
+      <div class="tracklist-label">Tracks · 21 首</div>
+      <div id="track-list" role="list"></div>
     </div>
-
-    <div class="page" id="page-mood">
-      <div class="mood-head">
-        <div class="disp">FAN MOOD WALL</div>
-        <div class="sub-zh">把沒說出口的心情，留在這首歌裡。</div>
-        <div class="sub-en">Leave your hidden feeling here</div>
-      </div>
-      <div class="mood-count">今晚有 <b id="mood-num">0</b> 個人，把秘密留在這裡。</div>
-      <div class="glass-card">
-        <input class="mood-input" id="mood-name" type="text" placeholder="你的暱稱" maxlength="16" autocomplete="off">
-        <div class="mood-tags" id="mood-tags"></div>
-        <div class="mood-ta-wrap">
-          <textarea class="mood-ta" id="mood-text" maxlength="80" placeholder="現在聽這首歌，你想留下什麼心情？"></textarea>
-          <div class="mood-count-char"><span id="mood-chars">0</span> / 80</div>
-        </div>
-        <div class="mood-err" id="mood-err">先寫下一點心情吧。</div>
-        <button class="mood-submit" id="mood-submit" onclick="submitMood()">留下心情</button>
-      </div>
-      <div class="mood-list" id="mood-list"></div>
-    </div>
-
-    <nav class="tab-bar">
-      <button class="tab-btn active" id="tab-player" onclick="switchTab('player')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>聽歌
-      </button>
-      <button class="tab-btn" id="tab-purchase" onclick="switchTab('purchase')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1"/></svg>完整版
-      </button>
-      <button class="tab-btn" id="tab-unlock" onclick="switchTab('unlock')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>我的
-      </button>
-      <button class="tab-btn" id="tab-mood" onclick="switchTab('mood')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M12 14.5s-2-1.2-2-2.6a1.3 1.3 0 0 1 2-1.1 1.3 1.3 0 0 1 2 1.1c0 1.4-2 2.6-2 2.6z" fill="currentColor" stroke="none"/></svg>心情牆
-      </button>
-    </nav>
-
-    <div class="toast" id="toast"></div>
   </div>
+
+  <!-- ========== BOTTOM SHEET ========== -->
+  <div id="sheet-overlay" class="sheet-overlay" onclick="closeSheet()"></div>
+  <div id="sheet" role="dialog" aria-modal="true" aria-label="曲目列表">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-eyebrow">Track List</div>
+        <div class="sheet-title">曲目列表 · 21 首</div>
+      </div>
+      <button class="sheet-close" onclick="closeSheet()" aria-label="關閉曲目列表">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="sheet-list" class="sheet-list" role="list"></div>
+  </div>
+
+  <!-- ========== PURCHASE ========== -->
+  <div id="screen-purchase" class="screen">
+    <div class="purchase-hero">
+      <div class="purchase-title">Unlock the Album</div>
+      <div class="purchase-sub">解鎖完整 21 首專輯</div>
+      <div class="purchase-note">免費試聽前 2 首 · 解鎖後可線上聽 + 下載收藏</div>
+    </div>
+    <div class="plans">
+      <div id="plan299" class="plan-card" onclick="selectPlan('299')" role="button" aria-label="選擇 NT$299 數位專輯方案">
+        <div class="plan-name">數位專輯</div>
+        <div class="plan-price">NT$299</div>
+        <div class="plan-features">
+          <div class="plan-feature"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首 MP3</div>
+          <div class="plan-feature"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數隨時重播</div>
+          <div class="plan-feature"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可加入手機主畫面</div>
+        </div>
+      </div>
+      <div id="plan599" class="plan-card" onclick="selectPlan('599')" role="button" aria-label="選擇 NT$599 典藏版方案">
+        <div class="plan-badge">收藏推薦</div>
+        <div class="plan-name">典藏版 + WAV</div>
+        <div class="plan-price">NT$599</div>
+        <div class="plan-features">
+          <div class="plan-feature"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>上面全部內容</div>
+          <div class="plan-feature"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質</div>
+        </div>
+      </div>
+    </div>
+    <div class="purchase-actions">
+      <button id="checkout-btn" class="btn-checkout" onclick="goCheckout()">前往結帳 · NT$299</button>
+      <button class="btn-have-code" onclick="go('unlock')">已經購買？輸入兌換碼</button>
+    </div>
+  </div>
+
+  <!-- ========== UNLOCK ========== -->
+  <div id="screen-unlock" class="screen">
+    <div class="unlock-hero">
+      <div class="unlock-title">Secret</div>
+      <div class="unlock-sub">秘密 · 兌換與解鎖</div>
+    </div>
+
+    <div id="unlock-locked-state">
+      <div class="unlock-locked-ui">
+        <div class="lock-icon-wrap" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        </div>
+        <div class="unlock-hint">購買後兌換碼會寄到信箱，請用購買時的 email 解鎖完整專輯</div>
+      </div>
+      <div class="unlock-form">
+        <label class="form-label" for="in-email">EMAIL</label>
+        <input id="in-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
+        <label class="form-label" for="in-code">兌換碼 · CODE</label>
+        <input id="in-code" class="form-input" type="text" placeholder="SR-XXXX-XXXX" autocomplete="off" style="margin-bottom:22px">
+        <button class="btn-redeem" onclick="redeem()">解鎖</button>
+        <div class="demo-hint">想先體驗解鎖動畫？輸入兌換碼 <b style="color:#f29bc2">LOVE</b> 試試</div>
+        <div class="goto-purchase" onclick="go('purchase')" role="button">還沒購買？<b style="color:#f29bc2;font-weight:500">看方案 →</b></div>
+      </div>
+    </div>
+
+    <div id="unlock-success-state" class="unlock-success-wrap" style="display:none">
+      <div class="unlock-success-card">
+        <div class="unlock-check" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="unlock-eyebrow">FULL ALBUM UNLOCKED</div>
+        <div class="unlock-cta-title">已解鎖完整 21 首專輯</div>
+        <div class="unlock-note">所有曲目都已開放，可線上聽 + 下載收藏</div>
+        <div class="unlock-actions">
+          <button class="btn-go-player" onclick="go('player')">前往聽歌 →</button>
+          <a id="wav-dl-link" href="#" rel="noopener" aria-label="下載 WAV 無損">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            下載 WAV 無損 ↗
+          </a>
+        </div>
+        <div id="wav-dl-row">你的方案：典藏版 + WAV 無損 · 點上方按鈕前往雲端下載完整 WAV</div>
+        <div class="unlock-reset" onclick="resetUnlock()" role="button">重設解鎖（測試用）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MOOD WALL ========== -->
+  <div id="screen-profile" class="screen">
+    <div class="mood-hero">
+      <div class="mood-wall-title">FAN MOOD WALL</div>
+      <div class="mood-wall-sub">把沒說出口的心情，留在這首歌裡。</div>
+      <div class="mood-wall-eyebrow">Leave your hidden feeling here</div>
+    </div>
+    <div class="mood-count">今晚有 <b id="mood-num" style="color:#f29bc2;font-weight:600;font-family:'Bodoni Moda',serif">0</b> 個人，把秘密留在這裡。</div>
+    <div class="mood-form">
+      <input id="mood-name" class="mood-name-input" type="text" placeholder="你的暱稱" maxlength="16" autocomplete="off" aria-label="你的暱稱">
+      <div id="mood-tags" class="mood-tags" role="group" aria-label="選擇心情標籤"></div>
+      <div class="mood-textarea-wrap">
+        <textarea id="mood-text" class="mood-textarea" oninput="onMoodInput(event)" maxlength="80" placeholder="現在聽這首歌，你想留下什麼心情？" aria-label="留言內容"></textarea>
+        <div class="mood-char-count"><span id="mood-chars">0</span> / 80</div>
+      </div>
+      <div id="mood-err" class="mood-err" role="alert">先寫下一點心情吧。</div>
+      <button id="mood-submit" class="btn-mood-submit" onclick="submitMood()">留下心情</button>
+    </div>
+    <div id="mood-list" class="mood-list" role="list"></div>
+  </div>
+
+  <!-- ========== FLOATING ISLAND NAV ========== -->
+  <nav class="nav-wrap" aria-label="主導航">
+    <div id="nav-inner">
+      <div class="nav-gloss" aria-hidden="true"></div>
+      <div class="navind"    aria-hidden="true"></div>
+      <button class="navbtn" onclick="navTo('player')"   aria-label="聽歌" aria-current="page">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        <span class="navlbl">聽歌</span>
+      </button>
+      <button class="navbtn" onclick="navTo('purchase')" aria-label="完整版" aria-current="false">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1"/></svg></span>
+        <span class="navlbl">完整版</span>
+      </button>
+      <button class="navbtn" onclick="navTo('unlock')"   aria-label="秘密兌換" aria-current="false">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span>
+        <span class="navlbl">秘密</span>
+      </button>
+      <button class="navbtn" onclick="navTo('profile')"  aria-label="心情牆" aria-current="false">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.49 4.04 3 5.5l7 7Z"/></svg></span>
+        <span class="navlbl">心情牆</span>
+      </button>
+    </div>
+  </nav>
+
+  <div id="toast" role="status" aria-live="polite"></div>
 </div>
 
 <audio id="audio" preload="none"></audio>
-
-<script>
-/* ====== 設定（後端就緒後填入） ====== */
-const CONFIG = {
-  STRIPE_LINK_299: "https://buy.stripe.com/test_5kQ6oGdP8dny2H1atU1RC02",   // 測試模式，一次性 TWD 299
-  STRIPE_LINK_599: "https://buy.stripe.com/test_aFa14mdP85V66XhcC21RC01",   // 測試模式，一次性 TWD 599
-  WORKER_API_BASE: "https://secret-lover-ost-api.anthonywen0693.workers.dev",   // Cloudflare Worker API
-};
-
-/* ====== 曲目資料 ====== */
-const TRACKS=[
- {n:1,title:"我們之間的祕密",file:"01_我們之間的祕密.mp3",free:true},
- {n:2,title:"真的喜歡是藏不住的",file:"02_真的喜歡是藏不住的.mp3",free:true},
- {n:3,title:"假裝教你戀愛",file:"03_假裝教你戀愛.mp3",free:false},
- {n:4,title:"越界以後",file:"04_越界以後.mp3",free:false},
- {n:5,title:"Sometimes, I See You",file:"05_Sometimes_I_See_You.mp3",free:false},
- {n:6,title:"藍色的暗戀",file:"06_藍色的暗戀.mp3",free:false},
- {n:7,title:"晴天裡擁抱你",file:"07_晴天裡擁抱你.mp3",free:false},
- {n:8,title:"心跳先說了祕密",file:"08_心跳先說了祕密.mp3",free:false},
- {n:9,title:"喜歡你的回音",file:"09_喜歡你的回音.mp3",free:false},
- {n:10,title:"電影院沒有第三個人",file:"10_電影院沒有第三個人.mp3",free:false},
- {n:11,title:"如果你也害怕",file:"11_如果你也害怕.mp3",free:false},
- {n:12,title:"把喜歡藏進音樂盒",file:"12_把喜歡藏進音樂盒.mp3",free:false},
- {n:13,title:"戀愛練習題",file:"13_戀愛練習題.mp3",free:false},
- {n:14,title:"幼稚鬼決鬥",file:"14_幼稚鬼決鬥.mp3",free:false},
- {n:15,title:"喜歡你這件小事",file:"15_喜歡你這件小事.mp3",free:false},
- {n:16,title:"靠近你的安全距離",file:"16_靠近你的安全距離.mp3",free:false},
- {n:17,title:"晴天裡，我終於懂了",file:"17_晴天裡，我終於懂了.mp3",free:false},
- {n:18,title:"不能被發現的心意",file:"18_不能被發現的心意.mp3",free:false},
- {n:19,title:"拓晞爭吵，你為什麼不懂",file:"19_拓晞爭吵，你為什麼不懂.mp3",free:false},
- {n:20,title:"等待阿拓",file:"20_等待阿拓.mp3",free:false},
- {n:21,title:"最終的告白，我喜歡的一直是你",file:"21_最終的告白，我喜歡的一直是你.mp3",free:false},
-];
-
-const $=id=>document.getElementById(id);
-const audio=$('audio');
-let cur=0,playing=false,seeking=false,selectedPlan='299';
-
-/* ====== 解鎖狀態（localStorage） ====== */
-const UKEY='slo-unlock-v1';
-function isUnlocked(){try{return !!(JSON.parse(localStorage.getItem(UKEY)||'null')||{}).unlocked}catch(e){return false}}
-function setUnlocked(data){localStorage.setItem(UKEY,JSON.stringify(Object.assign({unlocked:true},data)))}
-function getUnlockData(){try{return JSON.parse(localStorage.getItem(UKEY)||'null')||{}}catch(e){return {}}}
-function trackLocked(t){return !t.free && !isUnlocked();}
-
-const fmt=s=>(!s||!isFinite(s))?'0:00':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-
-function lockIconSVG(){return `<div class="lock-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>`;}
-function playIconSmallSVG(){return `<div class="play-icon-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>`;}
-function dlIconSVG(file){return `<a class="dl-icon" href="songs/${encodeURIComponent(file)}" download onclick="event.stopPropagation()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>`;}
-
-/* ====== 角色情緒文案（解鎖後才顯示） ====== */
-const TRACK_SUBS={
- 1:"拓靠近晞的那一刻",
- 2:"晞沒有說出口的心跳",
- 3:"借練習之名的靠近",
- 4:"那一步跨過去了",
- 5:"餘光裡都是你",
- 6:"藏在制服裡的心事",
- 7:"陽光剛好你也剛好",
- 8:"還沒開口就被聽見",
- 9:"你的名字在心裡迴響",
- 10:"黑暗裡偷牽的手",
- 11:"我們都怕弄丟彼此",
- 12:"一打開全是你",
- 13:"沒有標準答案的心動",
- 14:"吵架也想黏著你",
- 15:"一點都不小的事",
- 16:"想再近一點點",
- 17:"原來一直都是你",
- 18:"只敢在夜裡承認",
- 19:"越在乎越說不清",
- 20:"燈為你留著",
- 21:"這次不再藏了",
-};
-function updatePlayhead(){
-  const dot=$('play-dot'); if(!dot)return;
-  const odd=(TRACKS[cur].n%2===1);
-  dot.textContent = odd?'拓':'晞';
-  dot.className = 'lover-dot ' + (odd?'tuo':'jun');
-}
-
-/* ====== 歌單渲染 ====== */
-function buildList(animateUnlock){
-  const unlocked=isUnlocked();
-  $('track-list').innerHTML=TRACKS.map((t,i)=>{
-    const locked=trackLocked(t);
-    const icon = locked ? lockIconSVG() : (unlocked ? dlIconSVG(t.file) : playIconSmallSVG());
-    const name = locked ? 'Secret Track' : t.title;
-    const sub = '';
-    const anim = (animateUnlock && !t.free) ? ' reveal-anim' : '';
-    return `<div class="track-item${locked?' locked':''}${anim}" data-i="${i}">
-      <div class="track-num">${String(t.n).padStart(2,'0')}</div>
-      <div class="track-info"><div class="track-name">${name}</div>${sub}</div>
-      ${icon}
-    </div>`;
-  }).join('');
-  [...$('track-list').children].forEach(el=>el.addEventListener('click',()=>onTrackClick(+el.dataset.i)));
-  updateListState();
-}
-function onTrackClick(i){
-  const t=TRACKS[i];
-  if(trackLocked(t)){showToast('需解鎖完整專輯才能播放');switchTab('purchase');return;}
-  playIdx(i);
-}
-
-/* ====== 播放控制 ====== */
-function playIdx(i){
-  cur=i;
-  const t=TRACKS[i];
-  if(t.free){
-    audio.src='songs/'+encodeURIComponent(t.file);
-  }else{
-    const u=getUnlockData();
-    audio.src=CONFIG.WORKER_API_BASE+'/track?file='+encodeURIComponent(t.file)+'&email='+encodeURIComponent(u.email||'')+'&code='+encodeURIComponent(u.code||'');
-  }
-  audio.play().catch(()=>{});
-  playing=true;
-  updateListState();updatePlayBtn();updatePlayhead();
-}
-function togglePlay(){
-  if(!audio.src){playIdx(0);return;}
-  if(audio.paused)audio.play().catch(()=>{});else audio.pause();
-}
-function nextTrack(){
-  let i=cur;
-  do{i=(i+1)%TRACKS.length;}while(trackLocked(TRACKS[i])&&i!==cur);
-  if(trackLocked(TRACKS[i])){showToast('其餘曲目需解鎖完整專輯');return;}
-  playIdx(i);
-}
-function prevTrack(){
-  if(audio.currentTime>3){audio.currentTime=0;return;}
-  let i=cur;
-  do{i=(i-1+TRACKS.length)%TRACKS.length;}while(trackLocked(TRACKS[i])&&i!==cur);
-  if(trackLocked(TRACKS[i])){return;}
-  playIdx(i);
-}
-audio.addEventListener('play',()=>{playing=true;updatePlayBtn();updateListState();startHearts();});
-audio.addEventListener('pause',()=>{playing=false;updatePlayBtn();updateListState();stopHearts();});
-audio.addEventListener('ended',()=>nextTrack());
-audio.addEventListener('timeupdate',()=>{
-  if(seeking||!audio.duration)return;
-  const p=(audio.currentTime/audio.duration)*100;
-  $('prog-fill').style.width=p+'%';$('prog-thumb').style.left=p+'%';
-  $('t-cur').textContent=fmt(audio.currentTime);$('t-tot').textContent=fmt(audio.duration);
-});
-
-const pw=$('prog-wrap');
-function getP(e){const r=pw.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));}
-function seekTo(e){const p=getP(e);$('prog-fill').style.width=p*100+'%';$('prog-thumb').style.left=p*100+'%';if(audio.duration){audio.currentTime=p*audio.duration;$('t-cur').textContent=fmt(p*audio.duration);}}
-pw.addEventListener('pointerdown',e=>{seeking=true;pw.setPointerCapture(e.pointerId);seekTo(e);});
-pw.addEventListener('pointermove',e=>{if(seeking)seekTo(e);});
-pw.addEventListener('pointerup',()=>{seeking=false;});
-pw.addEventListener('pointercancel',()=>{seeking=false;});
-
-function updateListState(){
-  [...$('track-list').children].forEach((el,i)=>el.classList.toggle('playing',i===cur&&!!audio.src));
-}
-function updatePlayBtn(){
-  $('play-path').setAttribute('d', playing ? 'M6 19h4V5H6v14zm8-14v14h4V5h-4z' : 'M8 5v14l11-7z');
-}
-
-/* ====== 分頁切換 ====== */
-function switchTab(t){
-  ['player','purchase','unlock','mood'].forEach(p=>{
-    $('page-'+p).classList.toggle('active',p===t);
-    $('tab-'+p).classList.toggle('active',p===t);
-  });
-  window.scrollTo(0,0);
-}
-
-/* ====== 購買方案 ====== */
-function selectPlan(p){
-  selectedPlan=p;
-  [...document.querySelectorAll('.plan-card')].forEach(c=>c.classList.toggle('selected',c.dataset.plan===p));
-  $('checkout-btn').textContent = p==='599' ? '前往結帳 · NT$599' : '前往結帳 · NT$299';
-}
-function goCheckout(){
-  const link = selectedPlan==='599' ? CONFIG.STRIPE_LINK_599 : CONFIG.STRIPE_LINK_299;
-  if(!link){showToast('尚未設定 Stripe 付款連結');return;}
-  window.open(link,'_blank');
-}
-
-/* ====== 兌換碼解鎖 ====== */
-async function redeem(){
-  const email=$('in-email').value.trim();
-  const code=$('in-code').value.trim().toUpperCase();
-  if(!email||!code){showToast('請輸入 email 和兌換碼');return;}
-  if(!CONFIG.WORKER_API_BASE){
-    showToast('後端尚未設定，暫時無法驗證兌換碼');
-    return;
-  }
-  try{
-    const res=await fetch(CONFIG.WORKER_API_BASE+'/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code})});
-    const data=await res.json();
-    if(data.ok){
-      setUnlocked({email,code,product:data.product||selectedPlan});
-      showToast('解鎖成功！');
-      buildList(true);updateCTA();
-      switchTab('player');
-    }else{
-      showToast(data.message||'兌換碼或 email 不正確');
-    }
-  }catch(e){
-    showToast('連線失敗，請稍後再試');
-  }
-}
-
-/* ====== CTA / 解鎖狀態顯示 ====== */
-function updateCTA(){
-  const el=$('unlock-cta');
-  if(isUnlocked()){
-    el.innerHTML='<div style="text-align:center;font-family:var(--display);font-size:13px;color:var(--pink);letter-spacing:2px;padding:8px 0">✓ 已解鎖完整專輯 · Full Album Unlocked</div>';
-  }else{
-    el.innerHTML='<button class="btn-grad" onclick="switchTab(\'purchase\')">解鎖完整專輯 · NT$299 起</button>';
-  }
-}
-
-let tt;
-function showToast(m){
-  const e=$('toast');e.textContent=m;e.classList.add('show');
-  clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2200);
-}
-
-/* ====== 心情牆 Mood Wall ====== */
-const MOOD_KEY='secretLoverMoodWallComments';
-const MOODS=['想他','心動','捨不得','偷偷嘖到','夜車聽歌','哭了','好甜','回不去了'];
-const defaultComments=[
-  {id:1,name:"匿名聽眾",mood:"夜車聽歌",text:"坐在車上聽到這首，突然覺得他們好像真的存在。",time:"剛剛"},
-  {id:2,name:"小秘密",mood:"偷偷嘖到",text:"明明只是 OST，為什麼我腦中都是他們靠近的畫面。",time:"3 分鐘前"},
-  {id:3,name:"不想睡",mood:"想他",text:"那句旋律一出來，就像回到他們沒說出口的那一晚。",time:"8 分鐘前"},
-  {id:4,name:"今天也暈船",mood:"心動",text:"真的喜歡是藏不住的，連歌都藏不住。",time:"12 分鐘前"},
-  {id:5,name:"第21首等我",mood:"捨不得",text:"希望完整 21 首快點解鎖，想把他們的故事聽完。",time:"18 分鐘前"},
-];
-let moodComments=[],selectedMood='';
-function loadMoods(){
-  const saved=localStorage.getItem(MOOD_KEY);
-  if(saved){try{moodComments=JSON.parse(saved);}catch(e){moodComments=defaultComments.slice();}}
-  else{moodComments=defaultComments.slice();}
-}
-function saveMoods(){localStorage.setItem(MOOD_KEY,JSON.stringify(moodComments));}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function buildMoodTags(){
-  $('mood-tags').innerHTML=MOODS.map(m=>`<button type="button" class="mood-tag" data-mood="${m}">${m}</button>`).join('');
-  [...$('mood-tags').children].forEach(el=>el.addEventListener('click',()=>{
-    const m=el.dataset.mood;
-    selectedMood = (selectedMood===m) ? '' : m;
-    [...$('mood-tags').children].forEach(b=>b.classList.toggle('sel',b.dataset.mood===selectedMood));
-  }));
-}
-function renderMoods(newId){
-  $('mood-num').textContent=moodComments.length;
-  $('mood-list').innerHTML=moodComments.map(c=>`
-    <div class="mood-note${c.id===newId?' new':''}">
-      <div class="mood-note-top">
-        <span class="mood-note-name">${esc(c.name)}</span>
-        <span class="mood-note-tag">♡ ${esc(c.mood)}</span>
-      </div>
-      <div class="mood-note-text">${esc(c.text)}</div>
-      <div class="mood-note-time">${esc(c.time)}</div>
-    </div>`).join('');
-}
-function submitMood(){
-  const text=$('mood-text').value.trim();
-  const err=$('mood-err');
-  if(!text){err.textContent='先寫下一點心情吧。';err.classList.add('show');return;}
-  err.classList.remove('show');
-  const c={id:Date.now(),name:$('mood-name').value.trim()||'匿名聽眾',mood:selectedMood||'聽歌中',text:text.slice(0,80),time:'剛剛',createdAt:new Date().toISOString()};
-  moodComments.unshift(c);
-  saveMoods();
-  renderMoods(c.id);
-  $('mood-name').value='';$('mood-text').value='';$('mood-chars').textContent='0';
-  selectedMood='';[...$('mood-tags').children].forEach(b=>b.classList.remove('sel'));
-  const btn=$('mood-submit');btn.textContent='已收藏這個瞬間 ♡';btn.classList.add('done');
-  setTimeout(()=>{btn.textContent='留下心情';btn.classList.remove('done');},1000);
-}
-
-/* ====== 播放時散落的愛心 ====== */
-let heartTimer=null;
-const HEART_COLORS=['#f29bc2','#f7b8d2','#c9b0ec','#cdbcf2','#afc7f6'];
-function spawnHeart(){
-  const field=$('heart-field'); if(!field) return;
-  const h=document.createElement('div'); h.className='heart-particle';
-  const ang=Math.random()*Math.PI*2;
-  const startR=40+Math.random()*8;            // 從封面邊緣附近出發
-  const cx=50+Math.cos(ang)*startR;
-  const cy=50+Math.sin(ang)*startR;
-  const dist=42+Math.random()*64;             // 向外飄出距離
-  const size=12+Math.random()*15;
-  const col=HEART_COLORS[Math.floor(Math.random()*HEART_COLORS.length)];
-  h.style.left=cx+'%'; h.style.top=cy+'%';
-  h.style.setProperty('--dx',(Math.cos(ang)*dist).toFixed(1)+'px');
-  h.style.setProperty('--dy',(Math.sin(ang)*dist-18).toFixed(1)+'px');
-  h.style.setProperty('--r',(Math.random()*50-25).toFixed(0)+'deg');
-  h.style.setProperty('--dur',(2.2+Math.random()*1.4).toFixed(2)+'s');
-  h.innerHTML=`<svg width="${size.toFixed(0)}" height="${size.toFixed(0)}" viewBox="0 0 24 24" fill="${col}"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>`;
-  field.appendChild(h);
-  setTimeout(()=>h.remove(),3700);
-}
-function startHearts(){
-  if(heartTimer) return;
-  spawnHeart();
-  heartTimer=setInterval(()=>{ spawnHeart(); if(Math.random()<.5) spawnHeart(); },360);
-}
-function stopHearts(){ clearInterval(heartTimer); heartTimer=null; }
-
-/* ====== 初始化 ====== */
-selectPlan('299');
-buildList();
-updatePlayhead();
-updateCTA();
-loadMoods();
-buildMoodTags();
-renderMoods();
-$('mood-text').addEventListener('input',e=>{$('mood-chars').textContent=e.target.value.length;if(e.target.value.trim())$('mood-err').classList.remove('show');});
-</script>
+<script src="app.js"></script>
 </body>
 </html>
