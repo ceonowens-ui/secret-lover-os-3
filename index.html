@@ -117,7 +117,7 @@ body{font-family:'Noto Serif TC','PingFang TC',sans-serif;color:#fff}
     <div style="padding:28px 22px 0;display:flex;flex-direction:column;gap:18px">
       <div id="plan299" onclick="selectPlan('299')" style="position:relative;border-radius:22px;background:rgba(255,255,255,.04);border:1.5px solid #f29bc2;padding:24px 22px;cursor:pointer">
         <div style="font-family:'Noto Serif TC',serif;font-size:15px;color:#fff;letter-spacing:1px">數位專輯</div>
-        <div style="font-family:'Bodoni Moda',serif;font-size:30px;color:#fff;margin-top:4px;font-weight:700">NT$399</div>
+        <div style="font-family:'Bodoni Moda',serif;font-size:30px;color:#fff;margin-top:4px;font-weight:700">NT$299</div>
         <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
           <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首 MP3</div>
           <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數隨時重播</div>
@@ -135,7 +135,7 @@ body{font-family:'Noto Serif TC','PingFang TC',sans-serif;color:#fff}
       </div>
     </div>
     <div style="padding:18px 24px 0">
-      <button id="checkout-btn" onclick="goCheckout()" style="display:block;width:100%;text-align:center;padding:15px;border-radius:16px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:none;font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:2px;cursor:pointer;font-weight:600">前往結帳 · NT$399</button>
+      <button id="checkout-btn" onclick="goCheckout()" style="display:block;width:100%;text-align:center;padding:15px;border-radius:16px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:none;font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:2px;cursor:pointer;font-weight:600">前往結帳 · NT$299</button>
       <button onclick="go('unlock')" style="display:block;width:100%;text-align:center;padding:14px;margin-top:11px;border-radius:16px;background:none;color:#f29bc2;border:1.5px solid rgba(242,155,194,.5);font-family:'Noto Serif TC',serif;font-size:13px;letter-spacing:2px;cursor:pointer">已經購買？輸入兌換碼</button>
     </div>
   </div>
@@ -280,7 +280,7 @@ audio.addEventListener('loadedmetadata',resolveDur);
 audio.addEventListener('durationchange',()=>{const d=audio.duration;if(isFinite(d)&&d>0)$('t-tot').textContent=fmt(d);});
 function onProgDown(e){seeking=true;seekAt(e);const el=$('prog-el');el.setPointerCapture(e.pointerId);el.addEventListener('pointermove',seekAt);el.addEventListener('pointerup',()=>{seeking=false;el.removeEventListener('pointermove',seekAt);},{once:true});}
 function seekAt(e){const r=$('prog-el').getBoundingClientRect();let p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));const ad=audio.duration;const d=(isFinite(ad)&&ad>0)?ad:0;if(d>0){try{audio.currentTime=p*d;}catch(err){}}const ps=(p*100).toFixed(2)+'%';$('prog-fill').style.width=ps;$('prog-dot').style.left=ps;$('prog-glow').style.left=ps;$('t-cur').textContent=fmt(p*d);}
-function selectPlan(p){selectedPlan=p;try{localStorage.setItem('slo-plan',p);}catch(e){}$('plan299').style.borderColor=p==='299'?'#f29bc2':'rgba(255,255,255,.12)';$('plan599').style.borderColor=p==='599'?'#f29bc2':'rgba(242,155,194,.45)';$('checkout-btn').textContent='前往結帳 · NT$'+(p==='599'?'599':'399');}
+function selectPlan(p){selectedPlan=p;try{localStorage.setItem('slo-plan',p);}catch(e){}$('plan299').style.borderColor=p==='299'?'#f29bc2':'rgba(255,255,255,.12)';$('plan599').style.borderColor=p==='599'?'#f29bc2':'rgba(242,155,194,.45)';$('checkout-btn').textContent='前往結帳 · NT$'+(p==='599'?'599':'299');}
 function goCheckout(){const l=selectedPlan==='599'?CONFIG.STRIPE_LINK_599:CONFIG.STRIPE_LINK_299;if(!l){showToast('尚未設定付款連結');return;}window.open(l,'_blank');}
 function resetUnlock(){try{localStorage.removeItem(UKEY);localStorage.removeItem('slo-plan');}catch(e){}selectedPlan='299';buildTrackList();syncUnlock();showToast('已重設 · 回到未解鎖狀態');}
 async function redeem(){const email=$('in-email').value.trim(),code=$('in-code').value.trim().toUpperCase();if(!email||!code){showToast('請輸入 email 和兌換碼');return;}if(code==='LOVE'||code==='SECRET'){unlockNow({email,code,product:selectedPlan});return;}if(!CONFIG.WORKER_API_BASE){showToast('後端尚未設定 · 試試兌換碼 LOVE');return;}try{const res=await fetch(CONFIG.WORKER_API_BASE+'/verify',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({email,code})});const d=await res.json();if(d.ok){unlockNow({email,code,product:d.product||selectedPlan});}else{showToast(d.message||'兌換碼或 email 不正確');}}catch(e){showToast('連線失敗 · 後端未回應（可先用兌換碼 LOVE）');}}
