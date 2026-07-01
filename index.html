@@ -34,19 +34,19 @@ body{font-family:'Noto Serif TC','PingFang TC',sans-serif;color:#fff}
 </style>
 </head>
 <body>
-<div id="stage" style="width:100vw;height:100vh;height:100dvh;position:relative;overflow:hidden;background:#0d0a12;color:#fff">
+<div id="stage" style="width:100vw;height:100dvh;position:relative;overflow:hidden;background:#0d0a12;color:#fff">
 
   <!-- ========== PLAYER ========== -->
   <div id="screen-player" style="position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0d0a12">
 
     <!-- First viewport: flex column — cover card + NP card -->
-    <div style="height:100vh;height:100dvh;min-height:520px;display:flex;flex-direction:column">
+    <div style="height:100dvh;min-height:520px;display:flex;flex-direction:column">
 
       <!-- Cover floating card -->
-      <div style="position:relative;flex:1;min-height:240px;overflow:hidden;margin:0;border-radius:0">
+      <div style="position:relative;flex:1;min-height:240px;overflow:hidden;margin:calc(16px + env(safe-area-inset-top,0px)) 12px 0;border-radius:28px;box-shadow:0 22px 50px rgba(0,0,0,.58),0 5px 16px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.06)">
         <img src="image/cover.png" alt="" id="cover-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform-origin:center 45%;animation:breathe 7s ease-in-out infinite;animation-play-state:paused">
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,18,.6) 0%,rgba(13,10,18,.33) 7%,rgba(13,10,18,0) 15%,rgba(13,10,18,0) 78%,rgba(13,10,18,.30) 91%,rgba(13,10,18,.51) 100%)"></div>
-        <div style="position:absolute;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top,0px)) 24px 0;text-align:center;z-index:2">
+        <div style="position:absolute;top:0;left:0;right:0;padding:14px 24px 0;text-align:center;z-index:2">
           <div style="font-family:'Bodoni Moda',serif;font-weight:500;font-size:9px;letter-spacing:4.5px;color:rgba(255,255,255,.85);text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5)">Original Soundtrack</div>
           <div style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:28px;color:#fff;letter-spacing:.5px;line-height:1;margin-top:5px;text-shadow:0 3px 20px rgba(0,0,0,.6)">Secret Lover</div>
         </div>
