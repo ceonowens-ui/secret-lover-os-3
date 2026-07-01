@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d0a12">
+<title>秘密關係 OST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Serif+TC:wght@400;600&family=Playfair+Display:ital,wght@0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d0a12}
+body{font-family:'Noto Serif TC','PingFang TC',sans-serif;color:#fff}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes floatUp{0%{opacity:0;transform:translateY(0) scale(.5)}12%{opacity:1}100%{opacity:0;transform:translateY(-220px) scale(1.15)}}
+@keyframes reveal{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:none}}
+@keyframes burstGlow{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}30%{transform:scale(1.22)}55%{transform:scale(1)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ring{0%{transform:translate(-50%,-50%) scale(.6);opacity:.7}100%{transform:translate(-50%,-50%) scale(2.4);opacity:0}}
+@keyframes floatHeart{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}18%{opacity:.95;transform:translate(-50%,-50%) scale(var(--s))}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% - var(--rise))) scale(calc(var(--s)*.62)) rotate(var(--r2))}}
+@keyframes bloomHeart{0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}32%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}48%{transform:translate(-50%,-50%) scale(.92)}62%{transform:translate(-50%,-50%) scale(1.04)}100%{opacity:0;transform:translate(-50%,-72%) scale(1.08)}}
+@keyframes ringPulse{0%{opacity:.7;transform:translate(-50%,-50%) scale(.35)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.8)}}
+@keyframes glowFade{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}28%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.25)}}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:translate(-50%,-50%) scale(.8)}50%{opacity:.78;transform:translate(-50%,-50%) scale(1.25)}}
+@keyframes bounce{0%{transform:scale(1)}30%{transform:scale(1.2)}55%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes tabPop{0%{transform:scale(1)}32%{transform:scale(.9)}66%{transform:scale(1.07)}100%{transform:scale(1)}}
+.navbtn:active{transform:scale(.92)}
+</style>
+</head>
+<body>
+<div id="stage" style="width:100vw;height:100dvh;position:relative;overflow:hidden;background:#0d0a12;color:#fff">
+
+  <!-- ========== PLAYER ========== -->
+  <div id="screen-player" style="position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0d0a12">
+
+    <!-- First viewport: flex column — cover card + NP card -->
+    <div style="height:100dvh;min-height:520px;display:flex;flex-direction:column">
+
+      <!-- Cover floating card -->
+      <div style="position:relative;flex:1;min-height:240px;overflow:hidden;margin:calc(16px + env(safe-area-inset-top,0px)) 12px 0;border-radius:28px;box-shadow:0 22px 50px rgba(0,0,0,.58),0 5px 16px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.06)">
+        <img src="image/cover.png" alt="" id="cover-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform-origin:center 45%;animation:breathe 7s ease-in-out infinite;animation-play-state:paused">
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,10,18,.6) 0%,rgba(13,10,18,.33) 7%,rgba(13,10,18,0) 15%,rgba(13,10,18,0) 78%,rgba(13,10,18,.30) 91%,rgba(13,10,18,.51) 100%)"></div>
+        <div style="position:absolute;top:0;left:0;right:0;padding:14px 24px 0;text-align:center;z-index:2">
+          <div style="font-family:'Bodoni Moda',serif;font-weight:500;font-size:9px;letter-spacing:4.5px;color:rgba(255,255,255,.85);text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5)">Original Soundtrack</div>
+          <div style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:28px;color:#fff;letter-spacing:.5px;line-height:1;margin-top:5px;text-shadow:0 3px 20px rgba(0,0,0,.6)">Secret Lover</div>
+        </div>
+        <!-- heart burst overlay inside cover -->
+        <div id="heart-burst-overlay" style="position:absolute;inset:0;z-index:80;pointer-events:none;overflow:hidden;display:none"></div>
+        <!-- unlock burst -->
+        <div id="unlock-burst-overlay" style="display:none;position:absolute;inset:0;z-index:90;pointer-events:none">
+          <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 45%,rgba(243,160,196,.55),rgba(243,160,196,.3) 45%,transparent 72%);animation:burstGlow 1.8s ease-out forwards"></div>
+          <div id="unlock-particles" style="position:absolute;inset:0;z-index:91;pointer-events:none"></div>
+        </div>
+      </div>
+
+      <!-- Now Playing glass card — overlaps cover by 52px -->
+      <div style="position:relative;margin:-52px 18px calc(86px + env(safe-area-inset-bottom,0px));background:rgba(22,16,28,.55);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:12px 18px 4px;z-index:3;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Bodoni Moda',serif;font-size:9px;letter-spacing:4px;color:#f29bc2;text-transform:uppercase">Now Playing</div>
+            <div id="now-title" style="font-family:'Noto Serif TC',serif;font-size:22px;font-weight:600;color:#fff;margin-top:3px;letter-spacing:1.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">我們之間的祕密</div>
+            <div id="now-sub" style="font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:rgba(255,255,255,.7);margin-top:4px">track 01 · 拓把距離靠近的那一秒</div>
+          </div>
+          <button id="heart-btn" onclick="captureHeart(event)" style="border-radius:50%;background:rgba(243,160,196,.12);border:1px solid rgba(243,160,196,.45);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-left:12px;flex:none;width:44px;height:44px">
+            <svg id="heart-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f3a0c4" stroke-width="2" stroke-linejoin="round" style="animation:heartbeat 2.6s ease-in-out infinite"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>
+          </button>
+        </div>
+        <!-- progress -->
+        <div id="prog-el" onpointerdown="onProgDown(event)" style="position:relative;height:4px;border-radius:4px;background:rgba(255,255,255,.18);cursor:pointer;margin-top:9px">
+          <div id="prog-fill" style="position:absolute;left:0;top:0;height:100%;border-radius:4px;background:linear-gradient(90deg,#f7b8d2,#f3a0c4 60%,#f29bc2);width:0%"></div>
+          <div id="prog-glow" style="position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;width:32px;height:32px;border-radius:50%;background:rgba(243,160,196,.9);filter:blur(7px);opacity:.34;pointer-events:none"></div>
+          <div id="prog-dot" style="position:absolute;top:50%;transform:translate(-50%,-50%);left:0%;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#cdbcf2,#b59cf0);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif TC',serif;font-size:12px;font-weight:600;color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4),0 0 12px rgba(176,156,228,.9);z-index:1">拓</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:9px;font-family:'Bodoni Moda',serif;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.55)"><span id="t-cur">0:00</span><span id="t-tot">0:00</span></div>
+        <!-- controls -->
+        <div style="display:flex;align-items:center;justify-content:center;gap:28px;margin-top:2px">
+          <button onclick="prevTrack()" style="background:none;border:none;cursor:pointer;padding:6px"><svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+          <button onclick="togglePlay()" style="width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 10px 30px rgba(120,90,160,.45),inset 0 1px 10px rgba(243,160,196,.55),inset 0 0 0 1px rgba(255,255,255,.55)">
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="#2c1f3a"><path id="play-path" d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button onclick="nextTrack()" style="background:none;border:none;cursor:pointer;padding:6px"><svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+        </div>
+        <!-- next scene strip -->
+        <div onclick="openSheet()" style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.10);margin-top:6px;padding:6px 2px 2px;cursor:pointer">
+          <span style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.6);text-transform:uppercase">Next Scene · 共 21 首</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track list below fold -->
+    <div style="background:#0d0a12;margin-top:calc(-70px - env(safe-area-inset-bottom,0px));padding:18px 16px calc(120px + env(safe-area-inset-bottom,0px))">
+      <div style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.5);text-transform:uppercase;padding:0 12px 8px">Tracks · 21 首</div>
+      <div id="track-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== SHEET ========== -->
+  <div id="sheet-overlay" onclick="closeSheet()" style="display:none;position:absolute;inset:0;z-index:60;background:rgba(8,6,12,.55);animation:fadeIn .25s ease"></div>
+  <div id="sheet" style="display:none;position:absolute;left:0;right:0;bottom:0;z-index:61;height:84%;background:linear-gradient(180deg,#16111d,#0d0a12);border-radius:26px 26px 0 0;border-top:1px solid rgba(255,255,255,.12);flex-direction:column;animation:slideUp .32s cubic-bezier(.22,.9,.3,1)">
+    <div style="padding:18px 24px 8px;display:flex;align-items:center;justify-content:space-between;flex:none">
+      <div>
+        <div style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:4px;color:#f29bc2;text-transform:uppercase">Track List</div>
+        <div style="font-family:'Noto Serif TC',serif;font-size:15px;color:#fff;margin-top:4px;letter-spacing:2px">曲目列表 · 21 首</div>
+      </div>
+      <button onclick="closeSheet()" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:6px 14px 30px" id="sheet-list"></div>
+  </div>
+
+  <!-- ========== PURCHASE ========== -->
+  <div id="screen-purchase" style="display:none;position:absolute;inset:0;overflow-y:auto;padding:62px 0 96px;background:radial-gradient(120% 60% at 50% 0%,#1c1426,#0d0a12 70%)">
+    <div style="text-align:center;padding:0 28px">
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:27px;color:#fff">Unlock the Album</div>
+      <div style="font-family:'Noto Serif TC',serif;font-size:16px;color:rgba(255,255,255,.85);letter-spacing:2px;margin-top:8px">解鎖完整 21 首專輯</div>
+      <div style="font-size:12.5px;color:rgba(255,255,255,.5);margin-top:12px;line-height:1.75">免費試聽前 2 首 · 解鎖後可線上聽 + 下載收藏</div>
+    </div>
+    <div style="padding:28px 22px 0;display:flex;flex-direction:column;gap:18px">
+      <div id="plan299" onclick="selectPlan('299')" style="position:relative;border-radius:22px;background:rgba(255,255,255,.04);border:1.5px solid #f29bc2;padding:24px 22px;cursor:pointer">
+        <div style="font-family:'Noto Serif TC',serif;font-size:15px;color:#fff;letter-spacing:1px">數位專輯</div>
+        <div style="font-family:'Bodoni Moda',serif;font-size:30px;color:#fff;margin-top:4px;font-weight:700">NT$299</div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>完整 21 首 MP3</div>
+          <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>不限次數隨時重播</div>
+          <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>可加入手機主畫面</div>
+        </div>
+      </div>
+      <div id="plan599" onclick="selectPlan('599')" style="position:relative;border-radius:22px;background:rgba(242,155,194,.07);border:1.5px solid rgba(242,155,194,.45);padding:24px 22px;cursor:pointer">
+        <div style="position:absolute;top:-11px;right:18px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;font-family:'Bodoni Moda',serif;font-size:10px;padding:5px 12px;border-radius:20px;letter-spacing:2px">收藏推薦</div>
+        <div style="font-family:'Noto Serif TC',serif;font-size:15px;color:#fff;letter-spacing:1px">典藏版 + WAV</div>
+        <div style="font-family:'Bodoni Moda',serif;font-size:30px;color:#fff;margin-top:4px;font-weight:700">NT$599</div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>上面全部內容</div>
+          <div style="display:flex;gap:9px;font-size:12.5px;color:rgba(255,255,255,.7)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>無損 WAV 音質</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:18px 24px 0">
+      <button id="checkout-btn" onclick="goCheckout()" style="display:block;width:100%;text-align:center;padding:15px;border-radius:16px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:none;font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:2px;cursor:pointer;font-weight:600">前往結帳 · NT$299</button>
+      <button onclick="go('unlock')" style="display:block;width:100%;text-align:center;padding:14px;margin-top:11px;border-radius:16px;background:none;color:#f29bc2;border:1.5px solid rgba(242,155,194,.5);font-family:'Noto Serif TC',serif;font-size:13px;letter-spacing:2px;cursor:pointer">已經購買？輸入兌換碼</button>
+    </div>
+  </div>
+
+  <!-- ========== UNLOCK ========== -->
+  <div id="screen-unlock" style="display:none;position:absolute;inset:0;overflow-y:auto;padding:64px 0 96px;background:radial-gradient(120% 60% at 50% 0%,#1c1426,#0d0a12 70%)">
+    <div style="text-align:center;padding:0 28px">
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:24px;color:#fff">Secret</div>
+      <div style="font-family:'Noto Serif TC',serif;font-size:14px;color:rgba(255,255,255,.6);margin-top:6px;letter-spacing:3px">秘密 · 兌換與解鎖</div>
+    </div>
+    <div id="unlock-locked-state">
+      <div style="text-align:center;padding:26px 28px 0">
+        <div style="width:62px;height:62px;border-radius:50%;background:rgba(242,155,194,.14);border:1px solid rgba(242,155,194,.4);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#f29bc2"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
+        <div style="font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.7;padding:0 10px">購買後兌換碼會寄到信箱，請用購買時的 email 解鎖完整專輯</div>
+      </div>
+      <div style="padding:22px 28px 0">
+        <label style="font-family:'Bodoni Moda',serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:3px">EMAIL</label>
+        <input id="in-email" type="email" placeholder="you@example.com" autocomplete="email" style="width:100%;margin:9px 0 18px;padding:15px;border-radius:16px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);font-size:14px;color:#fff;outline:none;font-family:'Noto Serif TC',serif">
+        <label style="font-family:'Bodoni Moda',serif;font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:3px">兌換碼 · CODE</label>
+        <input id="in-code" type="text" placeholder="SR-XXXX-XXXX" autocomplete="off" style="width:100%;margin:9px 0 22px;padding:15px;border-radius:16px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);font-size:14px;color:#fff;outline:none;font-family:'Noto Serif TC',serif">
+        <button onclick="redeem()" style="display:block;width:100%;text-align:center;padding:15px;border-radius:16px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:none;font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:2px;cursor:pointer;font-weight:600">解鎖</button>
+        <div style="text-align:center;font-size:11.5px;color:rgba(255,255,255,.4);margin-top:16px;line-height:1.7">想先體驗解鎖動畫？輸入兌換碼 <b style="color:#f29bc2">LOVE</b> 試試</div>
+        <div onclick="go('purchase')" style="text-align:center;font-size:12px;color:rgba(255,255,255,.5);margin-top:14px;cursor:pointer">還沒購買？<b style="color:#f29bc2;font-weight:500">看方案 →</b></div>
+      </div>
+    </div>
+    <div id="unlock-success-state" style="display:none;padding:26px 24px 0">
+      <div style="border-radius:22px;background:rgba(242,155,194,.08);border:1px solid rgba(242,155,194,.3);padding:28px 22px;text-align:center">
+        <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div style="font-family:'Bodoni Moda',serif;font-size:11px;color:#f29bc2;letter-spacing:3px">FULL ALBUM UNLOCKED</div>
+        <div style="font-family:'Noto Serif TC',serif;font-size:17px;color:#fff;margin-top:8px;letter-spacing:1px">已解鎖完整 21 首專輯</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:8px;line-height:1.7">所有曲目都已開放，可線上聽 + 下載收藏</div>
+        <button onclick="go('player')" style="margin-top:20px;padding:13px 28px;border-radius:14px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:none;font-family:'Noto Serif TC',serif;font-size:13px;letter-spacing:2px;cursor:pointer">前往聽歌 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MOOD WALL ========== -->
+  <div id="screen-profile" style="display:none;position:absolute;inset:0;overflow-y:auto;padding:54px 0 100px;background:radial-gradient(120% 55% at 50% 0%,#1c1426,#0d0a12 70%)">
+    <div style="text-align:center;padding:0 28px">
+      <div style="font-family:'Bodoni Moda',serif;font-weight:700;font-size:23px;letter-spacing:3px;color:#fff">FAN MOOD WALL</div>
+      <div style="font-family:'Noto Serif TC',serif;font-size:13px;color:rgba(255,255,255,.65);margin-top:12px;letter-spacing:1px;line-height:1.7">把沒說出口的心情，留在這首歌裡。</div>
+      <div style="font-family:'Bodoni Moda',serif;font-size:10px;letter-spacing:3px;color:#f29bc2;margin-top:7px;text-transform:uppercase">Leave your hidden feeling here</div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.5);letter-spacing:.5px;padding:18px 28px 4px">今晚有 <b id="mood-num" style="color:#f29bc2;font-weight:600;font-family:'Bodoni Moda',serif">0</b> 個人，把秘密留在這裡。</div>
+    <div style="margin:10px 20px 0;background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(242,155,194,.22);border-radius:22px;padding:18px 17px;box-shadow:0 12px 30px rgba(0,0,0,.3)">
+      <input id="mood-name" type="text" placeholder="你的暱稱" maxlength="16" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);font-size:13.5px;color:#fff;outline:none;font-family:'Noto Serif TC',serif">
+      <div id="mood-tags" style="display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px"></div>
+      <div style="position:relative;margin-top:12px">
+        <textarea id="mood-text" oninput="onMoodInput(event)" maxlength="80" placeholder="現在聽這首歌，你想留下什麼心情？" style="width:100%;min-height:74px;resize:none;padding:13px 15px;border-radius:14px;border:1.5px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);font-size:13.5px;line-height:1.6;color:#fff;outline:none;font-family:'Noto Serif TC',serif"></textarea>
+        <div style="text-align:right;font-family:'Bodoni Moda',serif;font-size:11px;color:rgba(255,255,255,.4);margin-top:6px"><span id="mood-chars">0</span> / 80</div>
+      </div>
+      <div id="mood-err" style="color:#f29bc2;font-size:11.5px;text-align:center;margin-top:4px;display:none">先寫下一點心情吧。</div>
+      <button id="mood-submit" onclick="submitMood()" style="display:block;width:100%;margin-top:10px;padding:14px;border-radius:22px;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:none;font-family:'Noto Serif TC',serif;font-size:14px;letter-spacing:2px;cursor:pointer">留下心情</button>
+    </div>
+    <div id="mood-list" style="padding:20px 20px 0"></div>
+  </div>
+
+  <!-- ========== FLOATING ISLAND NAV ========== -->
+  <nav style="position:absolute;left:0;right:0;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:70;display:flex;justify-content:center;pointer-events:none">
+    <div id="nav-inner" style="position:relative;display:flex;padding:6px;border-radius:30px;background:rgba(18,18,22,.16);backdrop-filter:blur(44px) saturate(1.7);-webkit-backdrop-filter:blur(44px) saturate(1.7);border:1px solid rgba(255,255,255,.1);box-shadow:0 16px 42px rgba(0,0,0,.44),0 2px 8px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.32),inset 0 -8px 16px rgba(255,255,255,.05);pointer-events:auto">
+      <div style="position:absolute;inset:0;border-radius:30px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,0) 42%);pointer-events:none"></div>
+      <div class="navind" style="position:absolute;top:6px;left:6px;width:64px;height:calc(100% - 12px);border-radius:21px;transform:translateX(0px);transition:transform .46s cubic-bezier(.34,1.32,.42,1);background:linear-gradient(180deg,rgba(255,255,255,.26),rgba(255,182,193,.12));box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 12px rgba(255,182,193,.18),inset 0 -6px 12px rgba(255,255,255,.06),0 4px 12px rgba(0,0,0,.16);backdrop-filter:blur(6px);pointer-events:none"></div>
+      <button class="navbtn" onclick="navTo('player')" style="position:relative;z-index:1;width:64px;padding:7px 0 6px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Noto Serif TC',serif;font-size:9px;letter-spacing:1.2px;color:#fbd6e6;transition:color .3s ease,transform .18s ease">
+        <span class="navico" style="display:flex;filter:drop-shadow(0 0 12px rgba(255,105,180,.35));transition:filter .35s ease"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        <span class="navlbl" style="opacity:1;transition:opacity .3s ease">聽歌</span>
+      </button>
+      <button class="navbtn" onclick="navTo('purchase')" style="position:relative;z-index:1;width:64px;padding:7px 0 6px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Noto Serif TC',serif;font-size:9px;letter-spacing:1.2px;color:#8f8a9c;transition:color .3s ease,transform .18s ease">
+        <span class="navico" style="display:flex;filter:none;transition:filter .35s ease"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1"/></svg></span>
+        <span class="navlbl" style="opacity:.62;transition:opacity .3s ease">完整版</span>
+      </button>
+      <button class="navbtn" onclick="navTo('unlock')" style="position:relative;z-index:1;width:64px;padding:7px 0 6px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Noto Serif TC',serif;font-size:9px;letter-spacing:1.2px;color:#8f8a9c;transition:color .3s ease,transform .18s ease">
+        <span class="navico" style="display:flex;filter:none;transition:filter .35s ease"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span>
+        <span class="navlbl" style="opacity:.62;transition:opacity .3s ease">秘密</span>
+      </button>
+      <button class="navbtn" onclick="navTo('profile')" style="position:relative;z-index:1;width:64px;padding:7px 0 6px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Noto Serif TC',serif;font-size:9px;letter-spacing:1.2px;color:#8f8a9c;transition:color .3s ease,transform .18s ease">
+        <span class="navico" style="display:flex;filter:none;transition:filter .35s ease"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.49 4.04 3 5.5l7 7Z"/></svg></span>
+        <span class="navlbl" style="opacity:.62;transition:opacity .3s ease">心情牆</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- toast -->
+  <div id="toast" style="display:none;position:absolute;left:50%;bottom:86px;z-index:100;transform:translateX(-50%);background:rgba(20,15,26,.96);border:1px solid rgba(242,155,194,.4);color:#fff;padding:10px 20px;border-radius:22px;font-size:12.5px;font-family:'Noto Serif TC',serif;white-space:nowrap;max-width:84%;text-align:center;animation:fadeIn .25s ease;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
+</div>
+
+<audio id="audio" preload="none"></audio>
+
+<script>
+const CONFIG={STRIPE_LINK_299:"https://buy.stripe.com/test_5kQ6oGdP8dny2H1atU1RC02",STRIPE_LINK_599:"https://buy.stripe.com/test_aFa14mdP85V66XhcC21RC01",WORKER_API_BASE:"https://secret-lover-ost-api.anthonywen0693.workers.dev"};
+const TRACKS=[{n:1,title:"我們之間的祕密",file:"01.mp3",free:true},{n:2,title:"真的喜歡是藏不住的",file:"02.mp3",free:true},{n:3,title:"假裝教你戀愛",file:"03.mp3",free:false},{n:4,title:"越界以後",file:"04.mp3",free:false},{n:5,title:"Sometimes, I See You",file:"05.mp3",free:false},{n:6,title:"藍色的暗戀",file:"06.mp3",free:false},{n:7,title:"晴天裡擁抱你",file:"07.mp3",free:false},{n:8,title:"心跳先說了祕密",file:"08.mp3",free:false},{n:9,title:"喜歡你的回音",file:"09.mp3",free:false},{n:10,title:"電影院沒有第三個人",file:"10.mp3",free:false},{n:11,title:"如果你也害怕",file:"11.mp3",free:false},{n:12,title:"把喜歡藏進音樂盒",file:"12.mp3",free:false},{n:13,title:"戀愛練習題",file:"13.mp3",free:false},{n:14,title:"幼稚鬼決鬥",file:"14.mp3",free:false},{n:15,title:"喜歡你這件小事",file:"15.mp3",free:false},{n:16,title:"靠近你的安全距離",file:"16.mp3",free:false},{n:17,title:"晴天裡，我終於懂了",file:"17.mp3",free:false},{n:18,title:"不能被發現的心意",file:"18.mp3",free:false},{n:19,title:"拓晞爭吵，你為什麼不懂",file:"19.mp3",free:false},{n:20,title:"等待阿拓",file:"20.mp3",free:false},{n:21,title:"最終的告白，我喜歡的一直是你",file:"21.mp3",free:false}];
+const SUBS={1:"拓把距離靠近的那一秒",2:"晞沒有說出口的心跳",3:"借練習之名的靠近",4:"那一步跨過去了",5:"餘光裡都是你",6:"藏在制服裡的心事",7:"陽光剛好你也剛好",8:"還沒開口就被聽見",9:"你的名字在心裡迴響",10:"黑暗裡偷牽的手",11:"我們都怕弄丟彼此",12:"一打開全是你",13:"沒有標準答案的心動",14:"吵架也想黏著你",15:"一點都不小的事",16:"想再近一點點",17:"原來一直都是你",18:"只敢在夜裡承認",19:"越在乎越說不清",20:"燈為你留著",21:"這次不再藏了"};
+const MOODS=['想他','心動','捨不得','偷偷嘖到','夜車聽歌','哭了','好甜','回不去了'];
+const DEFAULT_MOODS=[{id:1,name:"匿名聽眾",mood:"夜車聽歌",text:"坐在車上聽到這首，突然覺得他們好像真的存在。",time:"剛剛"},{id:2,name:"小秘密",mood:"偷偷嘖到",text:"明明只是 OST，為什麼我腦中都是他們靠近的畫面。",time:"3 分鐘前"},{id:3,name:"不想睡",mood:"想他",text:"那句旋律一出來，就像回到他們沒說出口的那一晚。",time:"8 分鐘前"},{id:4,name:"今天也暈船",mood:"心動",text:"真的喜歡是藏不住的，連歌都藏不住。",time:"12 分鐘前"},{id:5,name:"第21首等我",mood:"捨不得",text:"希望完整 21 首快點解鎖，想把他們的故事聽完。",time:"18 分鐘前"}];
+const $=id=>document.getElementById(id);
+const audio=$('audio');
+let cur=0,seeking=false,selectedPlan='299',moodComments=[],selectedMood='',newMoodId=null;
+const UKEY='slo-unlock-v1',MKEY='secretLoverMoodWallComments';
+function isUnlocked(){try{return !!(JSON.parse(localStorage.getItem(UKEY)||'null')||{}).unlocked}catch(e){return false}}
+function getUnlockData(){try{return JSON.parse(localStorage.getItem(UKEY)||'null')||{}}catch(e){return {}}}
+function setUnlocked(d){try{localStorage.setItem(UKEY,JSON.stringify(Object.assign({unlocked:true},d)));}catch(e){}}
+function trackLocked(t){return !t.free&&!isUnlocked();}
+const fmt=s=>(!s||!isFinite(s))?'0:00':Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const SCREENS=['player','purchase','unlock','profile'];
+const NAV_ORDER=['player','purchase','unlock','profile'];
+function go(s){SCREENS.forEach(sc=>{$('screen-'+sc).style.display=(sc===s)?'block':'none';});closeSheet();if(s==='unlock')syncUnlock();}
+function navTo(s){go(s);updateNav(s);popTabIcon(NAV_ORDER.indexOf(s));}
+function updateNav(s){const el=$('nav-inner');if(!el)return;const ci=NAV_ORDER.indexOf(s);const ind=el.querySelector('.navind');if(ind)ind.style.transform='translateX('+(ci*64)+'px)';el.querySelectorAll('.navbtn').forEach((b,i)=>{const a=i===ci;b.style.color=a?'#fbd6e6':'#8f8a9c';const ic=b.querySelector('.navico'),lb=b.querySelector('.navlbl');if(ic)ic.style.filter=a?'drop-shadow(0 0 12px rgba(255,105,180,.35))':'none';if(lb)lb.style.opacity=a?'1':'.62';});}
+function popTabIcon(i){const el=$('nav-inner');if(!el)return;const b=el.querySelectorAll('.navbtn')[i];if(!b)return;const sp=b.querySelector('.navico');if(!sp)return;sp.style.animation='none';void sp.offsetWidth;sp.style.animation='tabPop .26s cubic-bezier(.34,1.3,.4,1)';}
+function syncUnlock(){const u=isUnlocked();$('unlock-locked-state').style.display=u?'none':'block';$('unlock-success-state').style.display=u?'block':'none';}
+function openSheet(){$('sheet-overlay').style.display='block';const s=$('sheet');s.style.display='flex';buildSheet();}
+function closeSheet(){$('sheet-overlay').style.display='none';$('sheet').style.display='none';}
+function lockSVG(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f6680" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';}
+function playSVG(){return '<svg width="14" height="14" viewBox="0 0 24 24" fill="#f3a0c4"><path d="M8 5v14l11-7z"/></svg>';}
+function dlSVG(f){return '<a href="songs/'+encodeURIComponent(f)+'" download onclick="event.stopPropagation()" style="color:inherit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f29bc2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>';}
+function buildTrackList(anim){const u=isUnlocked();$('track-list').innerHTML=TRACKS.map((tk,i)=>{const lk=trackLocked(tk),ip=(i===cur),nc=ip?'#f29bc2':(lk?'#5f5870':'#9a93a8'),tc=ip?'#fff':(lk?'#7a7388':'rgba(255,255,255,.82)'),ts=lk?'font-style:italic;letter-spacing:1px':'',rb=ip?'background:rgba(243,160,196,.10);':'',ra=(anim&&!tk.free)?'animation:reveal .5s ease '+((i-2)*0.05).toFixed(2)+'s both;':'',ic=lk?lockSVG():(u?dlSVG(tk.file):playSVG());return '<div onclick="onTrackClick('+i+')" style="display:flex;align-items:center;gap:13px;padding:10px 12px;border-radius:14px;cursor:pointer;'+rb+ra+'"><span style="font-family:\'Bodoni Moda\',serif;font-size:13px;width:24px;text-align:center;color:'+nc+'">'+String(tk.n).padStart(2,'0')+'</span><div style="flex:1;min-width:0;font-family:\'Noto Serif TC\',serif;font-size:14px;color:'+tc+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'+ts+'">'+(lk?'Secret Track':tk.title)+'</div>'+ic+'</div>';}).join('');}
+function buildSheet(){const u=isUnlocked();$('sheet-list').innerHTML=TRACKS.map((tk,i)=>{const lk=trackLocked(tk),ip=(i===cur),nc=ip?'#f29bc2':(lk?'#5f5870':'rgba(255,255,255,.5)'),tc=ip?'#fff':(lk?'#7a7388':'rgba(255,255,255,.7)'),ts=lk?'font-style:italic;letter-spacing:1px':'',rb=ip?'background:rgba(243,160,196,.10);':'',ic=lk?lockSVG():(u?dlSVG(tk.file):playSVG());return '<div onclick="onTrackClick('+i+');closeSheet();" style="display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:14px;cursor:pointer;'+rb+'"><span style="font-family:\'Bodoni Moda\',serif;font-size:13px;width:24px;text-align:center;color:'+nc+'">'+String(tk.n).padStart(2,'0')+'</span><div style="flex:1;min-width:0;font-family:\'Noto Serif TC\',serif;font-size:17px;color:'+tc+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'+ts+'">'+(lk?'Secret Track':tk.title)+'</div>'+ic+'</div>';}).join('');}
+function updateNP(){const t=TRACKS[cur],lk=trackLocked(t),odd=(t.n%2===1);$('now-title').textContent=lk?'Secret Track':t.title;$('now-sub').textContent='track '+String(t.n).padStart(2,'0')+(SUBS[t.n]?' · '+SUBS[t.n]:'');const dBg=odd?'linear-gradient(135deg,#cdbcf2,#b59cf0)':'linear-gradient(135deg,#f7b8d2,#f3a0c4)',dG=odd?'rgba(176,156,228,.9)':'rgba(243,160,196,.9)',pF=odd?'linear-gradient(90deg,#c9b0ec,#b59cf0 60%,#cdbcf2)':'linear-gradient(90deg,#f7b8d2,#f3a0c4 60%,#f29bc2)';$('prog-dot').textContent=odd?'拓':'晞';$('prog-dot').style.background=dBg;$('prog-dot').style.boxShadow='0 2px 10px rgba(0,0,0,.4),0 0 12px '+dG;$('prog-fill').style.background=pF;$('prog-glow').style.background=dG;}
+function srcFor(t){if(t.free)return 'songs/'+encodeURIComponent(t.file);const u=getUnlockData();return CONFIG.WORKER_API_BASE+'/track?file='+encodeURIComponent(t.file)+'&email='+encodeURIComponent(u.email||'')+'&code='+encodeURIComponent(u.code||'');}
+function playIdx(i){cur=i;const t=TRACKS[i];audio.src=srcFor(t);audio.play().catch(()=>{});updateNP();buildTrackList();}
+function onTrackClick(i){const t=TRACKS[i];if(trackLocked(t)){showToast('需解鎖完整專輯才能播放');go('purchase');return;}playIdx(i);}
+function togglePlay(){if(!audio.src){playIdx(cur);return;}if(audio.paused)audio.play().catch(()=>{});else audio.pause();}
+function nextTrack(){let i=cur;do{i=(i+1)%TRACKS.length;}while(trackLocked(TRACKS[i])&&i!==cur);if(trackLocked(TRACKS[i])){showToast('其餘曲目需解鎖完整專輯');return;}playIdx(i);}
+function prevTrack(){if(audio.currentTime>3){audio.currentTime=0;return;}let i=cur;do{i=(i-1+TRACKS.length)%TRACKS.length;}while(trackLocked(TRACKS[i])&&i!==cur);if(trackLocked(TRACKS[i]))return;playIdx(i);}
+audio.addEventListener('play',()=>{$('play-path').setAttribute('d','M6 5h4v14H6zM14 5h4v14h-4z');$('cover-img').style.animationPlayState='running';});
+audio.addEventListener('pause',()=>{$('play-path').setAttribute('d','M8 5v14l11-7z');$('cover-img').style.animationPlayState='paused';});
+audio.addEventListener('ended',()=>nextTrack());
+audio.addEventListener('timeupdate',()=>{if(seeking||!audio.duration)return;const p=(audio.currentTime/audio.duration)*100,ps=p.toFixed(2)+'%';$('prog-fill').style.width=ps;$('prog-dot').style.left=ps;$('prog-glow').style.left=ps;$('t-cur').textContent=fmt(audio.currentTime);$('t-tot').textContent=fmt(audio.duration);});
+function onProgDown(e){seeking=true;seekAt(e);const el=$('prog-el');el.setPointerCapture(e.pointerId);el.addEventListener('pointermove',seekAt);el.addEventListener('pointerup',()=>{seeking=false;el.removeEventListener('pointermove',seekAt);},{once:true});}
+function seekAt(e){const r=$('prog-el').getBoundingClientRect();let p=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));const d=audio.duration||0;if(audio.duration)audio.currentTime=p*audio.duration;const ps=(p*100).toFixed(2)+'%';$('prog-fill').style.width=ps;$('prog-dot').style.left=ps;$('prog-glow').style.left=ps;$('t-cur').textContent=fmt(p*d);}
+function selectPlan(p){selectedPlan=p;$('plan299').style.borderColor=p==='299'?'#f29bc2':'rgba(255,255,255,.12)';$('plan599').style.borderColor=p==='599'?'#f29bc2':'rgba(242,155,194,.45)';$('checkout-btn').textContent='前往結帳 · NT$'+(p==='599'?'599':'299');}
+function goCheckout(){const l=selectedPlan==='599'?CONFIG.STRIPE_LINK_599:CONFIG.STRIPE_LINK_299;if(!l){showToast('尚未設定付款連結');return;}window.open(l,'_blank');}
+async function redeem(){const email=$('in-email').value.trim(),code=$('in-code').value.trim().toUpperCase();if(!email||!code){showToast('請輸入 email 和兌換碼');return;}if(code==='LOVE'||code==='SECRET'){unlockNow({email,code,product:selectedPlan});return;}if(!CONFIG.WORKER_API_BASE){showToast('後端尚未設定 · 試試兌換碼 LOVE');return;}try{const res=await fetch(CONFIG.WORKER_API_BASE+'/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code})});const d=await res.json();if(d.ok){unlockNow({email,code,product:d.product||selectedPlan});}else{showToast(d.message||'兌換碼或 email 不正確');}}catch(e){showToast('連線失敗 · 試試兌換碼 LOVE 體驗解鎖');}}
+function unlockNow(data){setUnlocked(data);buildTrackList(true);syncUnlock();navTo('player');const ov=$('unlock-burst-overlay');ov.style.display='block';const parts=$('unlock-particles');const cols=['#f29bc2','#f7b8d2','#c9b0ec'];parts.innerHTML=Array.from({length:8},()=>{const l=(10+Math.random()*78).toFixed(0),sz=(13+Math.random()*13).toFixed(0),d=(0.95+Math.random()*0.45).toFixed(2),dl=(Math.random()*0.3).toFixed(2),col=cols[Math.floor(Math.random()*cols.length)];return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="'+col+'" style="position:absolute;bottom:35%;left:'+l+'%;animation:floatUp '+d+'s ease-out '+dl+'s both"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>';}).join('');showToast('解鎖成功 · 21 首全部屬於你了 ♡');setTimeout(()=>{ov.style.display='none';},1800);}
+function captureHeart(e){const hi=$('heart-icon'),hb=$('heart-btn'),ov=$('heart-burst-overlay');ov.style.display='block';hi.setAttribute('fill','#f3a0c4');hi.setAttribute('stroke','none');hi.style.animation='bounce .5s ease';hb.style.animation='bounce .5s ease';const sr=$('stage').getBoundingClientRect(),br=hb.getBoundingClientRect(),ox=((br.left+br.width/2-sr.left)/sr.width*100).toFixed(1),oy=((br.top+br.height/2-sr.top)/sr.height*100).toFixed(1);const cols=['#f29bc2','#f7b8d2','#c9b0ec','#cdbcf2','#f3a0c4'];let h='<div style="position:absolute;left:'+ox+'%;top:'+oy+'%;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(243,160,196,.55),transparent 72%);transform:translate(-50%,-50%);animation:glowFade 1.1s ease-out both"></div>';h+='<div style="position:absolute;left:'+ox+'%;top:'+oy+'%;width:64px;height:64px;border-radius:50%;border:1.5px solid rgba(243,160,196,.8);transform:translate(-50%,-50%);animation:ringPulse .9s cubic-bezier(.2,.7,.3,1) both"></div>';h+='<svg width="60" height="60" viewBox="0 0 24 24" fill="#f3a0c4" style="position:absolute;left:'+ox+'%;top:'+oy+'%;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 14px rgba(243,160,196,.6));animation:bloomHeart 1s cubic-bezier(.3,1.3,.5,1) both"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>';for(let k=0;k<16;k++){const dx=((Math.random()*2-1)*72).toFixed(0),rise=(120+Math.random()*150).toFixed(0),sc=(0.65+Math.random()*.85).toFixed(2),r2=((Math.random()*2-1)*45).toFixed(0),d=(1.1+Math.random()*.9).toFixed(2),dl=(Math.random()*.4).toFixed(2),sz=(13+Math.random()*15).toFixed(0),col=cols[Math.floor(Math.random()*cols.length)];h+='<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="'+col+'" style="position:absolute;left:'+ox+'%;top:'+oy+'%;transform:translate(-50%,-50%);--dx:'+dx+'px;--rise:'+rise+'px;--s:'+sc+';--r2:'+r2+'deg;animation:floatHeart '+d+'s cubic-bezier(.4,.7,.5,1) '+dl+'s both"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>';}ov.innerHTML=h;showToast('已收藏這一刻',1000);setTimeout(()=>{hi.setAttribute('fill','none');hi.setAttribute('stroke','#f3a0c4');hi.style.animation='heartbeat 2.6s ease-in-out infinite';hb.style.animation='none';},1200);setTimeout(()=>{ov.style.display='none';ov.innerHTML='';},1700);}
+let _tt;function showToast(m,d){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(_tt);_tt=setTimeout(()=>e.style.display='none',d||2200);}
+function loadMoods(){try{const s=localStorage.getItem(MKEY);moodComments=s?JSON.parse(s):DEFAULT_MOODS.slice();}catch(e){moodComments=DEFAULT_MOODS.slice();}}
+function saveMoods(){try{localStorage.setItem(MKEY,JSON.stringify(moodComments));}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function buildMoodTags(){$('mood-tags').innerHTML=MOODS.map(m=>{const sel=selectedMood===m,st=sel?'background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);color:#fff;border:1px solid transparent;box-shadow:0 5px 14px rgba(242,155,194,.3)':'background:rgba(255,255,255,.05);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.16)';return '<button type="button" onclick="selMood(\''+m+'\')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-family:\'Noto Serif TC\',serif;cursor:pointer;'+st+'">'+m+'</button>';}).join('');}
+function selMood(m){selectedMood=(selectedMood===m)?'':m;buildMoodTags();}
+function onMoodInput(e){$('mood-chars').textContent=e.target.value.length;$('mood-err').style.display='none';}
+function renderMoods(){$('mood-num').textContent=moodComments.length;$('mood-list').innerHTML=moodComments.map(c=>'<div style="background:rgba(255,255,255,.04);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:15px 17px;margin-bottom:12px;'+(c.id===newMoodId?'animation:reveal .5s ease both;':'')+'"><div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><span style="font-family:\'Noto Serif TC\',serif;font-size:13px;font-weight:600;color:#e6def0">'+esc(c.name)+'</span><span style="font-size:10.5px;color:#f29bc2;background:rgba(242,155,194,.14);padding:3px 10px;border-radius:14px;letter-spacing:.5px;white-space:nowrap">♡ '+esc(c.mood)+'</span></div><div style="font-family:\'Noto Serif TC\',serif;font-size:13.5px;line-height:1.7;color:rgba(255,255,255,.85)">'+esc(c.text)+'</div><div style="font-family:\'Bodoni Moda\',serif;font-size:10.5px;color:rgba(255,255,255,.35);margin-top:9px;letter-spacing:.5px">'+esc(c.time)+'</div></div>').join('');}
+function submitMood(){const text=$('mood-text').value.trim();if(!text){$('mood-err').style.display='block';return;}$('mood-err').style.display='none';const c={id:Date.now(),name:$('mood-name').value.trim()||'匿名聽眾',mood:selectedMood||'聽歌中',text:text.slice(0,80),time:'剛剛'};moodComments.unshift(c);newMoodId=c.id;saveMoods();renderMoods();$('mood-name').value='';$('mood-text').value='';$('mood-chars').textContent='0';selectedMood='';buildMoodTags();const btn=$('mood-submit');btn.textContent='已收藏這個瞬間 ♡';setTimeout(()=>{btn.textContent='留下心情';newMoodId=null;},1100);}
+loadMoods();buildMoodTags();renderMoods();updateNP();buildTrackList();syncUnlock();updateNav('player');
+</script>
+</body>
+</html>
