@@ -240,9 +240,9 @@ window.open=function(u){try{var ref=getStored();if(ref&&typeof u==='string'&&u.i
 <script>(function(){
 function findC(){return document.querySelector('.phscreen')||document.body;}
 function isPlayerPage(){
-  var a=document.querySelectorAll('img');
+  var a=document.querySelectorAll('img,video');
   for(var i=0;i<a.length;i++){
-    var s=a[i].getAttribute('style')||'';
+    var s=(a[i].getAttribute('style')||'').replace(/\s+/g,'');
     if(s.indexOf('object-fit:cover')>-1 && s.indexOf('42%')>-1){
       var r=a[i].getBoundingClientRect();
       return r.width>0 && r.height>0 && a[i].offsetParent!==null;
