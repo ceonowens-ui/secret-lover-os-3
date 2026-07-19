@@ -547,11 +547,10 @@ html, body {
 
   <!-- ================= PLAYER（聽歌）================= -->
   <section id="screen-player" class="screen active">
-    <!-- 佈局調整：一進頁面就看到曲目 → fold 不撐滿整屏、封面固定比例（僅 inline 覆寫，styles.css 未動） -->
-    <div class="player-fold" style="height:auto;min-height:0">
+    <div class="player-fold">
 
       <!-- 封面（換圖：album-config.js → coverImage） -->
-      <div class="cover-card" id="cover-card" style="flex:none;height:44dvh;min-height:240px">
+      <div class="cover-card" id="cover-card">
         <img id="cover-img" src="" alt="">
         <video id="cover-video" autoplay muted loop playsinline webkit-playsinline></video>
         <div class="cover-shade"></div>
@@ -562,7 +561,7 @@ html, body {
       </div>
 
       <!-- Now Playing 毛玻璃卡片 -->
-      <div class="np-card" style="margin-bottom:14px">
+      <div class="np-card">
         <div class="np-head">
           <div style="flex:1;min-width:0">
             <div class="np-label" id="np-label"></div>
@@ -610,8 +609,8 @@ html, body {
       </div>
     </div>
 
-    <!-- 完整曲目列表：一進頁面就看到（緊貼 NP 卡，僅 inline 調整間距） -->
-    <div class="tracklist-block" style="padding-top:4px">
+    <!-- 完整曲目列表（fold 之下，與 OST 相同） -->
+    <div class="tracklist-block">
       <div class="tracklist-caption" id="tracklist-caption"></div>
       <div id="tracklist"></div>
     </div>
@@ -1574,13 +1573,18 @@ window.ALBUM_CONFIG = ALBUM_CONFIG;
 
 </script>
 <script>(function(){
-var w=document.createElement('div');
-w.id='__alsw';
-w.style.cssText='position:fixed;z-index:80;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));display:flex;gap:3px;padding:3.5px;border-radius:999px;background:rgba(22,17,30,.38);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);box-shadow:0 10px 26px rgba(0,0,0,.35);font-family:"Noto Sans TC",sans-serif';
-function seg(label,on,href){var s=document.createElement(on?'div':'a');s.textContent=label;var base='font-size:11px;letter-spacing:.5px;padding:6px 13px;border-radius:999px;white-space:nowrap;text-decoration:none;font-weight:500;';s.style.cssText=base+(on?'color:#2a1622;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);box-shadow:0 5px 14px rgba(242,155,194,.35)':'color:rgba(255,255,255,.72)');if(href)s.href=href;return s;}
-w.appendChild(seg('配樂原聲帶',false,'test.html'));
-w.appendChild(seg('完整專輯',true,null));
-document.body.appendChild(w);
+function ensure(){
+  if(document.getElementById('__alsw'))return;
+  if(!document.body)return;
+  var w=document.createElement('div');
+  w.id='__alsw';
+  w.style.cssText='position:fixed;z-index:2147483000;left:50%;transform:translateX(-50%);top:calc(10px + env(safe-area-inset-top));display:flex;gap:3px;padding:3.5px;border-radius:999px;background:rgba(22,17,30,.38);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);box-shadow:0 10px 26px rgba(0,0,0,.35);font-family:"Noto Sans TC",sans-serif';
+  function seg(label,on,href){var s=document.createElement(on?'div':'a');s.textContent=label;var base='font-size:11px;letter-spacing:.5px;padding:6px 13px;border-radius:999px;white-space:nowrap;text-decoration:none;font-weight:500;';s.style.cssText=base+(on?'color:#2a1622;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);box-shadow:0 5px 14px rgba(242,155,194,.35)':'color:rgba(255,255,255,.72)');if(href)s.href=href;return s;}
+  w.appendChild(seg('配樂原聲帶',false,'test.html'));
+  w.appendChild(seg('完整專輯',true,null));
+  document.body.appendChild(w);
+}
+ensure();document.addEventListener('DOMContentLoaded',ensure);window.addEventListener('load',ensure);setInterval(ensure,800);
 })();</script>
 </body>
 </html>
