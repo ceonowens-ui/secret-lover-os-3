@@ -211,5 +211,44 @@ function ensure(){
 }
 ensure();document.addEventListener('DOMContentLoaded',ensure);window.addEventListener('load',ensure);setInterval(ensure,800);
 })();</script>
+<script>(function(){
+/* 藝人歸因(方法一):?ref=藝人碼 → 記 30 天 → 訂單自動帶上 → /hit 記點擊 */
+var W='https://secret-lover-ost-api.anthonywen0693.workers.dev';
+var KEY='slo-ref', DAYS=30;
+function san(x){x=String(x||'').trim().toUpperCase();return /^[A-Z0-9_-]{1,20}$/.test(x)?x:'';}
+function getStored(){try{var o=JSON.parse(localStorage.getItem(KEY)||'null');if(o&&o.ref&&(Date.now()-o.ts)<DAYS*864e5)return o.ref;}catch(e){}return '';}
+var urlRef=san(new URLSearchParams(location.search).get('ref'));
+if(urlRef){
+  try{localStorage.setItem(KEY,JSON.stringify({ref:urlRef,ts:Date.now()}));}catch(e){}
+  try{
+    if(sessionStorage.getItem('slo-ref-hit')!==urlRef){
+      sessionStorage.setItem('slo-ref-hit',urlRef);
+      fetch(W+'/hit?ref='+urlRef,{keepalive:true}).catch(function(){});
+    }
+  }catch(e){}
+}
+/* fetch wrapper:任何打 /ecpay/create 的請求自動補 ref(不動原本程式) */
+var _fetch=window.fetch;
+window.fetch=function(input,init){
+  try{
+    var u=(typeof input==='string')?input:(input&&input.url)||'';
+    if(u.indexOf('/ecpay/create')>-1){
+      var ref=getStored();
+      if(ref){
+        if(init&&typeof init.body==='string'){
+          try{var b=JSON.parse(init.body);if(!b.ref){b.ref=ref;init=Object.assign({},init,{body:JSON.stringify(b)});}}catch(e){}
+        }else if(u.indexOf('ref=')===-1){
+          u+=(u.indexOf('?')>-1?'&':'?')+'ref='+ref;
+          if(typeof input==='string')input=u;
+        }
+      }
+    }
+  }catch(e){}
+  return _fetch.call(this,input,init);
+};
+/* 若購買是用 window.open / location 導頁的 GET,也補一手 */
+var _open=window.open;
+window.open=function(u){try{var ref=getStored();if(ref&&typeof u==='string'&&u.indexOf('/ecpay/create')>-1&&u.indexOf('ref=')===-1){u+=(u.indexOf('?')>-1?'&':'?')+'ref='+ref;}}catch(e){}return _open.apply(this,arguments);};
+})();</script>
 </body>
 </html>
