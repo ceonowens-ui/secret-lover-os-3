@@ -1765,7 +1765,15 @@ window.fetch=function(input,init){
   return p;
 };
 
-function tick(){ paint(); bindCheckout(); ensureArtist(); }
+function ensureStyle(){
+  if(document.getElementById('pv-x-style'))return;
+  var st=document.createElement('style'); st.id='pv-x-style';
+  st.textContent='#btn-heart{display:none!important}'+
+    '#lyrics-body,#lyrics-title,#lyrics-eyebrow{text-align:center!important}'+
+    '#lyrics-body{white-space:pre-line}';
+  document.head.appendChild(st);
+}
+function tick(){ ensureStyle(); paint(); bindCheckout(); ensureArtist(); }
 tick();
 document.addEventListener('DOMContentLoaded',tick);
 window.addEventListener('load',tick);
