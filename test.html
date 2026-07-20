@@ -838,7 +838,7 @@ html, body {
     score: {
       albumId: "sl-score", albumTitle: "配樂原聲帶", albumTitleEn: "Secret Lover",
       albumEyebrow: "ORIGINAL SCORE", artistName: "秘密關係 Secret Lover",
-      coverImage: "score-cover.jpg", coverVideo: "cover.mp4",
+      coverImage: "score-cover.jpg", coverVideo: "",
       tracks: SCORE,
       moodWall: {
         heading: "MOOD WALL", subheading: "哪一段配樂讓你想起劇裡的他們？", eyebrow: "Leave your feeling here",
@@ -869,7 +869,7 @@ html, body {
       primary: "#f29bc2", secondary: "#b59cf0", accent: "#afc7f6",
       text: "#ffffff", muted: "rgba(255,255,255,.62)", themeColor: "#0d0a12",
       progressDot: {
-        labels: VIEW === "songs" ? ["SL", "LOVE"] : ["拓", "晞"],
+        labels: ["拓", "晞"],
         gradients: [
           "linear-gradient(135deg,#f29bc2,#c9b0ec)",
           "linear-gradient(135deg,#b59cf0,#afc7f6)",
@@ -1601,15 +1601,15 @@ html, body {
 
 </script>
 <script>(function(){
-/* ===== 三商品購買頁(v3)— 疊加接管,styles.css/app.js 不動 ===== */
+/* ===== 三商品購買頁(v4 手風琴)— 疊加接管,styles.css/app.js 不動 ===== */
 var W='https://secret-lover-ost-api.anthonywen0693.workers.dev';
 var PRODUCTS={
   complete:{key:'complete',name:'完整原聲典藏版',price:499,badge:'最完整收藏',hot:true,
     sub:'兩套分開購買原價 NT$598，典藏版現省 NT$99',
-    feats:['一次收藏完整 34 軌原聲','13 軌歌曲＋21 段劇情配樂','完整 MP3 音檔收藏','永久解鎖完整播放器'],
+    feats:['一次收藏完整 33 軌原聲','12 軌歌曲＋21 段劇情配樂','完整 MP3 音檔收藏','永久解鎖完整播放器'],
     btn:'立即收藏完整原聲｜NT$499'},
   songs:{key:'songs',name:'歌曲原聲帶',price:299,
-    feats:['收錄 13 軌歌曲與伴奏版本','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
+    feats:['收錄 12 軌歌曲與伴奏版本','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
     btn:'立即解鎖歌曲原聲帶｜NT$299'},
   score:{key:'score',name:'原創配樂集',price:299,
     feats:['收錄 21 段劇情原創配樂','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
@@ -1617,23 +1617,59 @@ var PRODUCTS={
 };
 var ORDER=['complete','songs','score'];
 var sel='complete';
-var CHK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+var CHK='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><polyline points="20 6 9 17 4 12"/></svg>';
 function getRef(){try{var o=JSON.parse(localStorage.getItem('slo-ref')||'null');if(o&&o.ref)return o.ref;}catch(e){}return '';}
 function $(id){return document.getElementById(id);}
 
-function cards(){
-  return ORDER.map(function(k){
+/* 卡片只建一次;之後選取只切換狀態 → 才有 0.25s 平滑動畫 */
+function renderOnce(plans){
+  plans.setAttribute('data-pv4','1');
+  plans.style.display='grid'; plans.style.gap='10px'; plans.style.marginBottom='12px';
+  plans.innerHTML=ORDER.map(function(k){
     var p=PRODUCTS[k];
-    var on=(sel===k);
-    return '<div class="plan'+(p.hot?' deluxe':'')+(on?' selected':'')+'" data-pvcard="'+k+'" role="button" aria-checked="'+on+'" style="-webkit-tap-highlight-color:transparent">'+
-      (p.badge?'<div class="plan-badge">'+p.badge+'</div>':'')+
-      '<div class="plan-name">'+p.name+'</div>'+
-      '<div class="plan-price">NT$'+p.price+'</div>'+
-      '<div class="plan-features">'+p.feats.map(function(f){return '<div class="plan-feature">'+CHK+f+'</div>';}).join('')+'</div>'+
-      (p.sub?'<div style="margin-top:9px;font-size:11px;line-height:1.5;color:rgba(247,184,210,.85)">'+p.sub+'</div>':'')+
+    return '<div class="plan'+(p.hot?' deluxe':'')+'" data-pvcard="'+k+'" role="radio" tabindex="0" aria-checked="false" aria-expanded="false"'+
+      ' style="-webkit-tap-highlight-color:transparent;cursor:pointer;padding:12px 14px;transition:padding .25s ease">'+
+      '<div data-pvhead style="display:flex;align-items:center;gap:10px;min-height:26px">'+
+        '<div class="plan-name" style="margin:0;font-size:14px;flex:1;transition:font-size .25s ease">'+p.name+'</div>'+
+        '<div class="plan-price" style="margin:0;font-size:16px;transition:font-size .25s ease">NT$'+p.price+'</div>'+
+        '<span data-pvdot style="flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);transition:all .25s ease"></span>'+
+      '</div>'+
+      '<div data-pvbody aria-hidden="true" style="overflow:hidden;max-height:0;opacity:0;transition:max-height .25s ease,opacity .25s ease">'+
+        (p.badge?'<div style="display:inline-block;margin:9px 0 2px;padding:3px 9px;border-radius:99px;font-size:10.5px;letter-spacing:.08em;color:#1a1220;background:linear-gradient(135deg,#f29bc2,#c9b0ec)">'+p.badge+'</div>':'')+
+        '<div class="plan-features" style="margin-top:8px;display:grid;gap:6px">'+
+          p.feats.map(function(f){return '<div class="plan-feature" style="font-size:12px;line-height:1.5;display:flex;align-items:center;gap:7px">'+CHK+f+'</div>';}).join('')+
+        '</div>'+
+        (p.sub?'<div style="margin-top:8px;font-size:11px;line-height:1.5;color:rgba(247,184,210,.85)">'+p.sub+'</div>':'')+
+      '</div>'+
     '</div>';
   }).join('');
 }
+function update(){
+  var plans=$('plans'); if(!plans)return;
+  ORDER.forEach(function(k){
+    var c=plans.querySelector('[data-pvcard="'+k+'"]'); if(!c)return;
+    var on=(sel===k);
+    c.classList.toggle('selected',on);
+    c.setAttribute('aria-checked',on?'true':'false');
+    c.setAttribute('aria-expanded',on?'true':'false');
+    c.style.padding=on?'13px 16px':'12px 14px';
+    var head=c.querySelector('[data-pvhead]');
+    if(head){
+      head.querySelector('.plan-name').style.fontSize=on?'15px':'14px';
+      head.querySelector('.plan-price').style.fontSize=on?'21px':'16px';
+      var dot=head.querySelector('[data-pvdot]');
+      if(dot){ dot.style.border=on?'0':'1.5px solid rgba(255,255,255,.35)';
+        dot.style.background=on?'linear-gradient(135deg,#f29bc2,#b59cf0)':'transparent';
+        dot.style.boxShadow=on?'0 0 8px rgba(242,155,194,.45)':'none'; }
+    }
+    var body=c.querySelector('[data-pvbody]');
+    if(body){ body.style.maxHeight=on?(body.scrollHeight+'px'):'0';
+      body.style.opacity=on?'1':'0';
+      body.setAttribute('aria-hidden',on?'false':'true'); }
+  });
+  var btn=$('btn-checkout'); if(btn) btn.textContent=PRODUCTS[sel].btn;
+}
+function select(k){ if(PRODUCTS[k]&&sel!==k){ sel=k; update(); } else if(PRODUCTS[k]){ update(); } }
 
 function ensureEmail(){
   if($('pv-email'))return;
@@ -1641,37 +1677,43 @@ function ensureEmail(){
   if(!cta)return;
   var box=document.createElement('div');
   box.id='pv-emailbox';
-  box.style.cssText='padding:0 20px 4px';
+  box.style.cssText='padding:0 20px 2px';
   box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px">購買 Email・兌換碼將寄至信箱</label>'+
     '<input class="form-input" id="pv-email" type="email" placeholder="your@email.com" autocomplete="email">'+
-    '<div id="pv-emailerr" style="min-height:16px;font-size:12px;color:#f7a8c2;margin:5px 2px 2px"></div>';
+    '<div id="pv-emailerr" style="min-height:14px;font-size:12px;color:#f7a8c2;margin:4px 2px 0"></div>';
   cta.parentNode.insertBefore(box,cta);
+  cta.style.paddingTop='4px';
 }
 
 function paint(){
   var scr=$('screen-purchase'); if(!scr) return;
-  // 文案(覆蓋 app.js)
   var en=$('purchase-title-en'), tc=$('purchase-title-tc'), note=$('purchase-note');
-  if(en) en.textContent='Unlock the Soundtrack';
-  if(tc) tc.textContent='解鎖《秘密關係》完整原聲';
-  if(note) note.textContent='先試聽，喜歡再收藏。購買後永久解鎖，隨時回到劇中的聲音。';
+  if(en){ en.textContent='Unlock the Soundtrack'; en.style.margin='0 0 2px'; }
+  if(tc){ tc.textContent='解鎖《秘密關係》完整原聲'; tc.style.margin='0 0 6px'; }
+  if(note){ note.textContent='先試聽，喜歡再收藏。購買後永久解鎖，隨時回到劇中的聲音。';
+    note.style.fontSize='12.5px'; note.style.lineHeight='1.55'; note.style.margin='0 0 14px'; }
   var plans=$('plans');
-  if(plans && plans.getAttribute('data-pv')!=='1'){ plans.setAttribute('data-pv','1'); }
-  if(plans) plans.innerHTML=cards();
+  if(plans && (plans.getAttribute('data-pv4')!=='1' || !plans.querySelector('[data-pvcard]'))){
+    renderOnce(plans); update();
+  }
   ensureEmail();
-  var btn=$('btn-checkout'); if(btn) btn.textContent=PRODUCTS[sel].btn;
-  // 清掉解鎖完成頁殘留的 WAV 字樣(app.js 產生,這裡疊加移除)
+  var btn=$('btn-checkout'); if(btn && !btn.disabled) btn.textContent=PRODUCTS[sel].btn;
   var wav=$('btn-wav'); if(wav){ wav.remove(); }
   var pn=$('unlocked-plan-note'); if(pn && /WAV/.test(pn.textContent)){ pn.textContent='你的內容已永久解鎖，隨時回來聆聽 ♡'; }
 }
 
-// 選卡(事件委派,擋掉 app.js 舊 plans handler 用的 data-plan → 我們用 data-pv)
+/* 選卡:點整行任意處;鍵盤 Enter/空白 */
 document.addEventListener('click',function(e){
   var c=e.target.closest?e.target.closest('[data-pvcard]'):null;
-  if(c){ sel=c.getAttribute('data-pvcard'); paint(); }
+  if(c){ select(c.getAttribute('data-pvcard')); }
+},true);
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  var c=e.target.closest?e.target.closest('[data-pvcard]'):null;
+  if(c){ e.preventDefault(); select(c.getAttribute('data-pvcard')); }
 },true);
 
-// 接管結帳:clone 掉 app.js 的舊 listener,自己打 /ecpay/create
+/* 接管結帳:clone 掉 app.js 的舊 listener,自己打 /ecpay/create */
 function bindCheckout(){
   var old=$('btn-checkout'); if(!old || old.getAttribute('data-pv')==='1') return;
   var b=old.cloneNode(true); b.setAttribute('data-pv','1'); old.parentNode.replaceChild(b,old);
@@ -1701,7 +1743,6 @@ function ensureArtist(){
     '<input class="form-input" id="pv-artist" type="text" placeholder="JUNHAO / CHANCE" autocomplete="off" style="margin-bottom:22px">';
   codeInput.parentNode.insertBefore(wrap, codeInput.nextSibling);
 }
-// 包 fetch:/verify 自動帶上 artistCode(app.js 不用改)
 var _f=window.fetch;
 window.fetch=function(input,init){
   try{
