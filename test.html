@@ -1780,7 +1780,7 @@ function build(){
   w.id='__vsw';
   w.setAttribute('role','group');
   w.setAttribute('aria-label','原聲帶分類切換');
-  w.style.cssText='position:absolute;top:10px;right:16px;z-index:5;display:flex;gap:2px;padding:2.5px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
+  w.style.cssText='position:absolute;top:7px;right:14px;z-index:5;display:flex;gap:2px;padding:2px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
   function seg(label,view,title){
     var on=(VIEW===view);
     var b=document.createElement('button');
@@ -1788,7 +1788,7 @@ function build(){
     b.textContent=label;
     b.title=title;
     b.setAttribute('aria-pressed',on?'true':'false');
-    b.style.cssText='font-family:"Bodoni Moda",serif;font-size:9.5px;letter-spacing:1.5px;padding:4px 9px;border-radius:999px;border:0;cursor:pointer;line-height:1;transition:background .25s ease,color .25s ease,transform .15s ease;-webkit-tap-highlight-color:transparent;'+
+    b.style.cssText='font-family:"Bodoni Moda",serif;font-size:9px;letter-spacing:1.3px;padding:3.5px 8px;border-radius:999px;border:0;cursor:pointer;line-height:1;transition:background .25s ease,color .25s ease,transform .15s ease;-webkit-tap-highlight-color:transparent;'+
       (on?'color:#2a1622;background:linear-gradient(135deg,rgba(242,155,194,.95),rgba(201,176,236,.95));font-weight:700;'
          :'color:rgba(199,186,214,.62);background:transparent;font-weight:400;');
     if(!on){
