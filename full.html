@@ -1636,5 +1636,129 @@ function tick(){
 }
 tick();document.addEventListener('DOMContentLoaded',tick);window.addEventListener('load',tick);setInterval(tick,400);
 })();</script>
+<script>(function(){
+/* ===== 三商品購買頁(v3)— 疊加接管,styles.css/app.js 不動 ===== */
+var W='https://secret-lover-ost-api.anthonywen0693.workers.dev';
+var PRODUCTS={
+  complete:{key:'complete',name:'完整原聲典藏版',price:499,badge:'最完整收藏',hot:true,
+    sub:'兩套分開購買原價 NT$598，典藏版現省 NT$99',
+    feats:['一次收藏完整 34 軌原聲','13 軌歌曲＋21 段劇情配樂','完整 MP3 音檔收藏','永久解鎖完整播放器'],
+    btn:'立即收藏完整原聲｜NT$499'},
+  songs:{key:'songs',name:'歌曲原聲帶',price:299,
+    feats:['收錄 13 軌歌曲與伴奏版本','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
+    btn:'立即解鎖歌曲原聲帶｜NT$299'},
+  score:{key:'score',name:'原創配樂集',price:299,
+    feats:['收錄 21 段劇情原創配樂','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
+    btn:'立即解鎖原創配樂集｜NT$299'},
+};
+var ORDER=['complete','songs','score'];
+var sel='complete';
+var CHK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+function getRef(){try{var o=JSON.parse(localStorage.getItem('slo-ref')||'null');if(o&&o.ref)return o.ref;}catch(e){}return '';}
+function $(id){return document.getElementById(id);}
+
+function cards(){
+  return ORDER.map(function(k){
+    var p=PRODUCTS[k];
+    var on=(sel===k);
+    return '<div class="plan'+(p.hot?' deluxe':'')+(on?' selected':'')+'" data-pv="'+k+'" role="button" aria-checked="'+on+'" style="-webkit-tap-highlight-color:transparent">'+
+      (p.badge?'<div class="plan-badge">'+p.badge+'</div>':'')+
+      '<div class="plan-name">'+p.name+'</div>'+
+      '<div class="plan-price">NT$'+p.price+'</div>'+
+      '<div class="plan-features">'+p.feats.map(function(f){return '<div class="plan-feature">'+CHK+f+'</div>';}).join('')+'</div>'+
+      (p.sub?'<div style="margin-top:9px;font-size:11px;line-height:1.5;color:rgba(247,184,210,.85)">'+p.sub+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+
+function ensureEmail(){
+  if($('pv-email'))return;
+  var cta=document.querySelector('#screen-purchase .cta-block');
+  if(!cta)return;
+  var box=document.createElement('div');
+  box.id='pv-emailbox';
+  box.style.cssText='padding:0 20px 4px';
+  box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px">購買 Email・兌換碼將寄至信箱</label>'+
+    '<input class="form-input" id="pv-email" type="email" placeholder="your@email.com" autocomplete="email">'+
+    '<div id="pv-emailerr" style="min-height:16px;font-size:12px;color:#f7a8c2;margin:5px 2px 2px"></div>';
+  cta.parentNode.insertBefore(box,cta);
+}
+
+function paint(){
+  var scr=$('screen-purchase'); if(!scr) return;
+  // 文案(覆蓋 app.js)
+  var en=$('purchase-title-en'), tc=$('purchase-title-tc'), note=$('purchase-note');
+  if(en) en.textContent='Unlock the Soundtrack';
+  if(tc) tc.textContent='解鎖《秘密關係》完整原聲';
+  if(note) note.textContent='先試聽，喜歡再收藏。購買後永久解鎖，隨時回到劇中的聲音。';
+  var plans=$('plans');
+  if(plans && plans.getAttribute('data-pv')!=='1'){ plans.setAttribute('data-pv','1'); }
+  if(plans) plans.innerHTML=cards();
+  ensureEmail();
+  var btn=$('btn-checkout'); if(btn) btn.textContent=PRODUCTS[sel].btn;
+}
+
+// 選卡(事件委派,擋掉 app.js 舊 plans handler 用的 data-plan → 我們用 data-pv)
+document.addEventListener('click',function(e){
+  var c=e.target.closest?e.target.closest('[data-pv]'):null;
+  if(c){ sel=c.getAttribute('data-pv'); paint(); }
+},true);
+
+// 接管結帳:clone 掉 app.js 的舊 listener,自己打 /ecpay/create
+function bindCheckout(){
+  var old=$('btn-checkout'); if(!old || old.getAttribute('data-pv')==='1') return;
+  var b=old.cloneNode(true); b.setAttribute('data-pv','1'); old.parentNode.replaceChild(b,old);
+  b.addEventListener('click',function(){
+    var em=($('pv-email')&&$('pv-email').value||'').trim();
+    var err=$('pv-emailerr');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ if(err)err.textContent='請輸入正確的 Email'; if($('pv-email'))$('pv-email').focus(); return; }
+    if(err)err.textContent='';
+    b.disabled=true; var t=b.textContent; b.textContent='正在建立付款訂單…';
+    fetch(W+'/ecpay/create',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({productKey:sel,email:em,ref:getRef()})})
+      .then(function(r){return r.text();})
+      .then(function(html){
+        if(html.indexOf('<form')<0){ throw new Error('bad'); }
+        document.open(); document.write(html); document.close();   // 自動送出 → 轉綠界
+      })
+      .catch(function(){ b.disabled=false; b.textContent=t; if(err)err.textContent='建立訂單失敗，請稍後再試'; });
+  });
+}
+
+/* ===== 解鎖頁:選填藝人推廣碼 + 併入 /verify ===== */
+function ensureArtist(){
+  if($('pv-artist'))return;
+  var codeInput=$('in-code'); if(!codeInput)return;
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<label class="form-label" for="pv-artist" style="display:block;margin:14px 0 6px">藝人推廣碼（選填）</label>'+
+    '<input class="form-input" id="pv-artist" type="text" placeholder="JUNHAO / CHANCE" autocomplete="off" style="margin-bottom:22px">';
+  codeInput.parentNode.insertBefore(wrap, codeInput.nextSibling);
+}
+// 包 fetch:/verify 自動帶上 artistCode(app.js 不用改)
+var _f=window.fetch;
+window.fetch=function(input,init){
+  try{
+    var u=(typeof input==='string')?input:(input&&input.url)||'';
+    if(u.indexOf('/verify')>-1 && init && typeof init.body==='string'){
+      var a=$('pv-artist'); var ac=(a&&a.value||'').trim().toUpperCase();
+      if(ac){ var b=JSON.parse(init.body); if(!b.artistCode){ b.artistCode=ac; init=Object.assign({},init,{body:JSON.stringify(b)}); } }
+    }
+  }catch(e){}
+  var p=_f.call(this,input,init);
+  try{
+    var u2=(typeof input==='string')?input:(input&&input.url)||'';
+    if(u2.indexOf('/verify')>-1){ p.then(function(r){ r.clone().json().then(function(j){
+      if(j&&j.artist&&j.artist.ok){ if(window.__pvToast)window.__pvToast('已為你記錄支持的藝人：'+j.artist.displayName+' ♡'); }
+    }).catch(function(){}); }); }
+  }catch(e){}
+  return p;
+};
+
+function tick(){ paint(); bindCheckout(); ensureArtist(); }
+tick();
+document.addEventListener('DOMContentLoaded',tick);
+window.addEventListener('load',tick);
+setInterval(tick,700);
+})();</script>
 </body>
 </html>
