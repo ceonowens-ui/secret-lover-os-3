@@ -1661,7 +1661,7 @@ function cards(){
   return ORDER.map(function(k){
     var p=PRODUCTS[k];
     var on=(sel===k);
-    return '<div class="plan'+(p.hot?' deluxe':'')+(on?' selected':'')+'" data-pv="'+k+'" role="button" aria-checked="'+on+'" style="-webkit-tap-highlight-color:transparent">'+
+    return '<div class="plan'+(p.hot?' deluxe':'')+(on?' selected':'')+'" data-pvcard="'+k+'" role="button" aria-checked="'+on+'" style="-webkit-tap-highlight-color:transparent">'+
       (p.badge?'<div class="plan-badge">'+p.badge+'</div>':'')+
       '<div class="plan-name">'+p.name+'</div>'+
       '<div class="plan-price">NT$'+p.price+'</div>'+
@@ -1696,12 +1696,15 @@ function paint(){
   if(plans) plans.innerHTML=cards();
   ensureEmail();
   var btn=$('btn-checkout'); if(btn) btn.textContent=PRODUCTS[sel].btn;
+  // 清掉解鎖完成頁殘留的 WAV 字樣(app.js 產生,這裡疊加移除)
+  var wav=$('btn-wav'); if(wav){ wav.remove(); }
+  var pn=$('unlocked-plan-note'); if(pn && /WAV/.test(pn.textContent)){ pn.textContent='你的內容已永久解鎖，隨時回來聆聽 ♡'; }
 }
 
 // 選卡(事件委派,擋掉 app.js 舊 plans handler 用的 data-plan → 我們用 data-pv)
 document.addEventListener('click',function(e){
-  var c=e.target.closest?e.target.closest('[data-pv]'):null;
-  if(c){ sel=c.getAttribute('data-pv'); paint(); }
+  var c=e.target.closest?e.target.closest('[data-pvcard]'):null;
+  if(c){ sel=c.getAttribute('data-pvcard'); paint(); }
 },true);
 
 // 接管結帳:clone 掉 app.js 的舊 listener,自己打 /ecpay/create
