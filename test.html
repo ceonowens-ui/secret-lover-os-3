@@ -1771,7 +1771,10 @@ function ensureStyle(){
   var st=document.createElement('style'); st.id='pv-x-style';
   st.textContent=(_v==='songs'?'#btn-heart{display:none!important}':'')+
     '#lyrics-body,#lyrics-title,#lyrics-eyebrow{text-align:center!important}'+
-    '#lyrics-body{white-space:pre-line}';
+    '#lyrics-body{white-space:pre-line}'+
+    '.lyrics-head{position:relative!important}'+
+    '.lyrics-head>div:first-child{width:100%!important;text-align:center!important}'+
+    '.sheet-close{position:absolute!important;right:16px;top:16px}';
   document.head.appendChild(st);
 }
 function tick(){ ensureStyle(); paint(); bindCheckout(); ensureArtist(); }
