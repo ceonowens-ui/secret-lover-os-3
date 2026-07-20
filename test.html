@@ -1777,7 +1777,13 @@ function ensureStyle(){
     '.sheet-close{position:absolute!important;right:16px;top:16px}';
   document.head.appendChild(st);
 }
-function tick(){ ensureStyle(); paint(); bindCheckout(); ensureArtist(); }
+function labelLyrics(){
+  var lb=document.getElementById('btn-lyrics'); if(!lb) return;
+  if(lb.querySelector('[data-lyrlabel]')) return;   // 已標記就跳過(抗重繪)
+  lb.setAttribute('aria-label','Lyrics'); lb.setAttribute('title','歌詞');
+  lb.innerHTML='<span data-lyrlabel="1" style="font-size:9.5px;font-weight:600;letter-spacing:.02em;line-height:1">Lyrics</span>';
+}
+function tick(){ ensureStyle(); labelLyrics(); paint(); bindCheckout(); ensureArtist(); }
 tick();
 document.addEventListener('DOMContentLoaded',tick);
 window.addEventListener('load',tick);
