@@ -12,7 +12,7 @@
 <meta name="theme-color" content="#0d0a12">
 <!-- 標題與 icon 由 app.js 從 config 填入 -->
 <title>秘密關係 Secret Lover · 原聲平台</title>
-<link id="apple-touch-icon" rel="apple-touch-icon" href="icon-512.png">
+<link id="apple-touch-icon" rel="apple-touch-icon" href="score-cover.jpg">
 
 <!-- 字體（想換字體就改這行 + styles.css 的 --font-* 變數） -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -838,7 +838,7 @@ html, body {
     score: {
       albumId: "sl-score", albumTitle: "配樂原聲帶", albumTitleEn: "Secret Lover",
       albumEyebrow: "ORIGINAL SCORE", artistName: "秘密關係 Secret Lover",
-      coverImage: "icon-512.png", coverVideo: "cover.mp4",
+      coverImage: "score-cover.jpg", coverVideo: "cover.mp4",
       tracks: SCORE,
       moodWall: {
         heading: "MOOD WALL", subheading: "哪一段配樂讓你想起劇裡的他們？", eyebrow: "Leave your feeling here",
@@ -1767,29 +1767,48 @@ var _open=window.open;
 window.open=function(u){try{var ref=getStored();if(ref&&typeof u==='string'&&u.indexOf('/ecpay/create')>-1&&u.indexOf('ref=')===-1){u+=(u.indexOf('?')>-1?'&':'?')+'ref='+ref;}}catch(e){}return _open.apply(this,arguments);};
 })();</script>
 <script>(function(){
+/* SONGS|SCORE 切換器:放進 Now Playing 卡,與 NOW PLAYING 同行靠右 */
 var VIEW='songs';
 try{VIEW=localStorage.getItem('slv-view')||'songs';}catch(e){}
-function isPlayerPage(){var s=document.getElementById('screen-player');return !!(s&&s.classList.contains('active'));}
+if(VIEW!=='songs'&&VIEW!=='score')VIEW='songs';
 function build(){
-  var c=document.getElementById('stage')||document.body;
+  if(document.getElementById('__vsw'))return true;
+  var card=document.querySelector('.np-card');
+  if(!card)return false;
+  if(getComputedStyle(card).position==='static')card.style.position='relative';
   var w=document.createElement('div');
-  w.id='__alsw';
-  w.style.cssText='position:absolute;z-index:60;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top));display:flex;gap:3px;padding:3.5px;border-radius:999px;background:rgba(22,17,30,.42);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6);box-shadow:0 10px 26px rgba(0,0,0,.35);font-family:"Noto Sans TC",sans-serif';
-  function seg(label,view){
+  w.id='__vsw';
+  w.setAttribute('role','group');
+  w.setAttribute('aria-label','原聲帶分類切換');
+  w.style.cssText='position:absolute;top:10px;right:16px;z-index:5;display:flex;gap:2px;padding:2.5px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
+  function seg(label,view,title){
     var on=(VIEW===view);
-    var s=document.createElement('div');
-    s.textContent=label;
-    s.style.cssText='font-size:11px;letter-spacing:.5px;padding:6px 13px;border-radius:999px;white-space:nowrap;font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent;'+(on?'color:#2a1622;background:linear-gradient(135deg,#f29bc2,#c9b0ec 52%,#afc7f6);box-shadow:0 5px 14px rgba(242,155,194,.35)':'color:rgba(255,255,255,.75)');
-    if(!on){s.addEventListener('click',function(){try{localStorage.setItem('slv-view',view);}catch(e){}location.reload();});}
-    return s;
+    var b=document.createElement('button');
+    b.type='button';
+    b.textContent=label;
+    b.title=title;
+    b.setAttribute('aria-pressed',on?'true':'false');
+    b.style.cssText='font-family:"Bodoni Moda",serif;font-size:9.5px;letter-spacing:1.5px;padding:4px 9px;border-radius:999px;border:0;cursor:pointer;line-height:1;transition:background .25s ease,color .25s ease,transform .15s ease;-webkit-tap-highlight-color:transparent;'+
+      (on?'color:#2a1622;background:linear-gradient(135deg,rgba(242,155,194,.95),rgba(201,176,236,.95));font-weight:700;'
+         :'color:rgba(199,186,214,.62);background:transparent;font-weight:400;');
+    if(!on){
+      b.addEventListener('mouseenter',function(){b.style.color='rgba(247,184,210,.9)';});
+      b.addEventListener('mouseleave',function(){b.style.color='rgba(199,186,214,.62)';});
+      b.addEventListener('click',function(){
+        b.style.transform='scale(.94)';
+        try{localStorage.setItem('slv-view',view);}catch(e){}
+        setTimeout(function(){location.reload();},120);
+      });
+    }
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click();}});
+    return b;
   }
-  w.appendChild(seg('歌曲原聲帶','songs'));
-  w.appendChild(seg('配樂原聲帶','score'));
-  c.appendChild(w);
-  return w;
+  w.appendChild(seg('SONGS','songs','歌曲原聲帶'));
+  w.appendChild(seg('SCORE','score','配樂原聲帶'));
+  card.appendChild(w);
+  return true;
 }
-function tick(){var w=document.getElementById('__alsw');if(!w){w=build();if(!w)return;}w.style.display=isPlayerPage()?'flex':'none';}
-tick();document.addEventListener('DOMContentLoaded',tick);window.addEventListener('load',tick);setInterval(tick,400);
+if(!build()){document.addEventListener('DOMContentLoaded',build);window.addEventListener('load',build);var n=0,t=setInterval(function(){if(build()||++n>20)clearInterval(t);},400);}
 })();</script>
 </body>
 </html>
