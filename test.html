@@ -1696,6 +1696,9 @@ function paint(){
   if(plans && (plans.getAttribute('data-pv4')!=='1' || !plans.querySelector('[data-pvcard]'))){
     renderOnce(plans); update();
   }
+  /* 螢幕從隱藏變可見時 scrollHeight 才有值 → 補算展開高度 */
+  if(plans){ var sb=plans.querySelector('[data-pvcard="'+sel+'"] [data-pvbody]');
+    if(sb && sb.scrollHeight>0 && sb.style.maxHeight!==sb.scrollHeight+'px'){ update(); } }
   ensureEmail();
   var btn=$('btn-checkout'); if(btn && !btn.disabled) btn.textContent=PRODUCTS[sel].btn;
   var wav=$('btn-wav'); if(wav){ wav.remove(); }
