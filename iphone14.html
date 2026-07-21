@@ -45,8 +45,8 @@
   .cut{ position:absolute; left:50%; transform:translateX(-50%); background:#000; z-index:5; pointer-events:none; }
   .cut.notch{ top:0; width:200px; height:33px; border-radius:0 0 22px 22px; }
   .cut.island{ top:11px; width:126px; height:37px; border-radius:20px; }
-  /* 內容區:緊接狀態列下方，一路鋪到螢幕底 */
-  .content{ position:relative; flex:1 1 auto; min-height:0; }
+  /* 內容區:狀態列下方到底；底部保留安全區(同色連續，不另做塊) */
+  .content{ position:relative; flex:1 1 auto; min-height:0; padding-bottom:var(--bottom); background:#0d0a12; }
   iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
   /* home indicator:白條浮在內容上（不佔高度、不多一塊） */
   .homeind{
@@ -104,6 +104,7 @@
       phone.style.setProperty('--w',m.w+'px');
       phone.style.setProperty('--h',m.h+'px');
       phone.style.setProperty('--top',m.top+'px');
+      phone.style.setProperty('--bottom',m.bottom+'px');
       phone.style.setProperty('--radius',m.radius+'px');
       cut.className='cut '+(m.island?'island':'notch');
       spec.textContent=m.w+'×'+m.h+' pt · 上安全區 '+m.top+' · 下 '+m.bottom+' pt';
