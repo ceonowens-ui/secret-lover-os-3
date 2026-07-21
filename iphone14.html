@@ -3,99 +3,115 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>秘密關係 · iPhone 14 預覽</title>
+<title>秘密關係 · PWA 實機預覽</title>
 <style>
-  :root{ --scr-w:390px; --scr-h:844px; }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
+  html,body{min-height:100%}
   body{
     background:radial-gradient(120% 90% at 50% 0%, #1b1622, #06040a 65%);
-    min-height:100vh; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:22px;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    gap:16px; padding:20px 12px 40px;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#cfc7d8;
-    padding:28px 12px;
   }
   h1{font-size:15px;font-weight:600;letter-spacing:.5px;color:#e9e2f2}
-  .hint{font-size:12.5px;line-height:1.6;color:#9a91ad;text-align:center;max-width:var(--scr-w)}
-  .hint b{color:#e6cff0;font-weight:600}
-
-  /* iPhone 14 外框 */
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  select,button,.controls a{
+    font-size:12.5px;padding:7px 12px;border-radius:10px;cursor:pointer;font-family:inherit;
+    background:#171320;color:#e6cff0;border:1px solid rgba(242,155,194,.3);text-decoration:none;
+  }
+  .meta{font-size:12px;color:#9a91ad}
   .phone{
     position:relative;
-    width:calc(var(--scr-w) + 24px);
-    height:calc(var(--scr-h) + 24px);
+    width:calc(var(--w) + 24px); height:calc(var(--h) + 24px);
     background:linear-gradient(150deg,#3a3340,#141019 55%,#2a2532);
-    border-radius:58px;
-    padding:12px;
-    box-shadow:0 40px 90px rgba(0,0,0,.6),
-               0 0 0 2px rgba(255,255,255,.05),
-               inset 0 0 0 1px rgba(255,255,255,.08);
+    border-radius:calc(var(--radius) + 12px); padding:12px;
+    box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.05),inset 0 0 0 1px rgba(255,255,255,.08);
+    flex:none;
   }
   .screen{
-    position:relative;
-    width:var(--scr-w); height:var(--scr-h);
-    background:#0d0a12; border-radius:46px; overflow:hidden;
-    box-shadow:inset 0 0 0 2px rgba(0,0,0,.9);
+    position:relative; width:var(--w); height:var(--h);
+    background:#0d0a12; border-radius:var(--radius); overflow:hidden;
+    display:flex; flex-direction:column;
   }
-  iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
-
-  /* 瀏海(iPhone 14 notch) */
-  .notch{
-    position:absolute; top:0; left:50%; transform:translateX(-50%);
-    width:164px; height:33px; background:#000;
-    border-bottom-left-radius:20px; border-bottom-right-radius:20px;
-    z-index:5; pointer-events:none;
-    display:flex; align-items:center; justify-content:center; gap:44px;
-  }
-  .notch .spk{ width:44px; height:5px; border-radius:5px; background:#161016; }
-  .notch .cam{ width:9px; height:9px; border-radius:50%; background:#0b0710; box-shadow:inset 0 0 0 2px #1d1622; }
-
-  /* 狀態列(時間 / 訊號,疊在 notch 兩側) */
   .statusbar{
-    position:absolute; top:0; left:0; right:0; height:33px; z-index:4;
+    position:relative; height:var(--top); flex:none; background:#0d0a12;
     display:flex; align-items:center; justify-content:space-between;
-    padding:0 26px; color:#fff; font-size:13px; font-weight:600;
-    pointer-events:none; text-shadow:0 1px 3px rgba(0,0,0,.5);
+    padding:0 30px; color:#fff; font-weight:600; z-index:3;
   }
-  .statusbar .r{display:flex;align-items:center;gap:6px;font-size:12px}
-  /* 底部 home indicator */
-  .home{
-    position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
-    width:138px; height:5px; border-radius:5px; background:rgba(255,255,255,.6);
-    z-index:5; pointer-events:none;
+  .statusbar .clock{padding-top:8px;font-size:16px}
+  .statusbar .rt{display:flex;align-items:center;gap:7px;padding-top:8px}
+  .island{
+    position:absolute; top:11px; left:50%; transform:translateX(-50%);
+    height:37px; background:#000; z-index:4; pointer-events:none; border-radius:20px;
   }
-  .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-  .btns button, .btns a{
-    font-size:12.5px; padding:8px 14px; border-radius:999px; cursor:pointer;
-    background:rgba(255,255,255,.06); color:#e6cff0; border:1px solid rgba(242,155,194,.3);
-    text-decoration:none; font-family:inherit;
+  .island.notch{ top:0; height:33px; border-radius:0 0 20px 20px; }
+  .content{ position:relative; flex:1 1 auto; }
+  iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
+  .homebar{
+    position:relative; height:var(--bottom); flex:none; background:#0d0a12; z-index:3;
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:9px;
   }
-  .btns button:active{transform:scale(.96)}
+  .homebar .pill{width:140px;height:5px;border-radius:5px;background:rgba(255,255,255,.62)}
 </style>
 </head>
 <body>
-  <h1>秘密關係 · iPhone 14 實機預覽</h1>
+  <h1>秘密關係 · PWA 實機預覽</h1>
+  <div class="controls">
+    <label class="meta" for="model">機型</label>
+    <select id="model"></select>
+    <button id="reload">重新整理</button>
+    <a href="https://ceon0693.uk/test.html" target="_blank" rel="noopener">開播放器</a>
+  </div>
+  <div class="meta" id="spec"></div>
 
-  <div class="phone">
+  <div class="phone" id="phone">
     <div class="screen">
       <div class="statusbar">
-        <span>9:41</span>
-        <span class="r">●●●&nbsp;&nbsp;⌇&nbsp;&nbsp;100</span>
+        <span class="clock" id="clock">9:41</span>
+        <span class="island" id="island"></span>
+        <span class="rt">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3C13.8 1.4 11.3.4 8.5.4 5.7.4 3.2 1.4 1.3 3.3L2.5 4.6c1.6-1.5 3.7-2.4 6-2.4z"/><circle cx="8.5" cy="9.4" r="1.7"/></svg>
+          <span style="width:23px;height:12px;border:1px solid rgba(255,255,255,.55);border-radius:3px;position:relative;display:inline-block"><span style="position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:65%;background:#fff;border-radius:1px"></span></span>
+        </span>
       </div>
-      <div class="notch"><span class="spk"></span><span class="cam"></span></div>
-      <iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe>
-      <div class="home"></div>
+      <div class="content"><iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe></div>
+      <div class="homebar"><span class="pill"></span></div>
     </div>
   </div>
 
-  <div class="btns">
-    <button onclick="document.getElementById('pv').src='https://ceon0693.uk/test.html?r='+Date.now()">重新整理</button>
-    <a href="https://ceon0693.uk/test.html" target="_blank" rel="noopener">在瀏覽器開</a>
-  </div>
-
-  <p class="hint">
-    這就是 <b>iPhone 14</b> 上、加到主畫面以 App 模式開啟的樣子(含瀏海、無網址列、底部貼齊)。<br>
-    尺寸 390×844,和實機一致。若要縮小視窗仍看整台,瀏覽器縮放即可。
-  </p>
+  <script>
+    var MODELS=[
+      {n:"iPhone 16 Pro",     w:402,h:874,top:62,bottom:34,radius:55,island:true},
+      {n:"iPhone 16 Pro Max", w:440,h:956,top:62,bottom:34,radius:55,island:true},
+      {n:"iPhone 15 / 16",    w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 15 Pro",     w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 15/16 Plus", w:430,h:932,top:59,bottom:34,radius:54,island:true},
+      {n:"iPhone 14 Pro",     w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 14 / 13",    w:390,h:844,top:47,bottom:34,radius:47,island:false},
+      {n:"iPhone 14 Plus",    w:428,h:926,top:47,bottom:34,radius:50,island:false}
+    ];
+    var sel=document.getElementById('model'), phone=document.getElementById('phone'),
+        island=document.getElementById('island'), spec=document.getElementById('spec');
+    MODELS.forEach(function(m,i){var o=document.createElement('option');o.value=i;o.textContent=m.n;sel.appendChild(o);});
+    function apply(){
+      var m=MODELS[sel.value];
+      phone.style.setProperty('--w',m.w+'px');
+      phone.style.setProperty('--h',m.h+'px');
+      phone.style.setProperty('--top',m.top+'px');
+      phone.style.setProperty('--bottom',m.bottom+'px');
+      phone.style.setProperty('--radius',m.radius+'px');
+      if(m.island){ island.className='island'; island.style.width='126px'; }
+      else { island.className='island notch'; island.style.width='164px'; }
+      spec.textContent=m.w+'×'+m.h+' pt · 上安全區 '+m.top+' · 下 '+m.bottom+' pt';
+    }
+    sel.addEventListener('change',apply);
+    document.getElementById('reload').addEventListener('click',function(){
+      document.getElementById('pv').src='https://ceon0693.uk/test.html?r='+Date.now();
+    });
+    function tick(){var d=new Date();document.getElementById('clock').textContent=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
+    tick(); setInterval(tick,10000);
+    apply();
+  </script>
 </body>
 </html>
