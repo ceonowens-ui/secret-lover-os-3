@@ -1,39 +1,101 @@
-<!DOCTYPE html><html lang="zh-TW"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>iPhone 14 預覽 · Secret Lover OST</title>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>秘密關係 · iPhone 14 預覽</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0%,#2a2a30,#111);display:flex;flex-direction:column;align-items:center;gap:14px;padding:26px 12px;font-family:-apple-system,"PingFang TC",sans-serif;color:#cfcfd6}
-h1{font-size:15px;font-weight:600;margin:0}
-.hint{font-size:12px;color:#8b8b95;text-align:center;max-width:360px;line-height:1.6}
-.device{position:relative;width:390px;height:844px;flex:none;border-radius:55px;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 13px #1c1c1e,0 0 0 15px #3a3a3c}
-.screen{position:absolute;inset:13px;border-radius:44px;overflow:hidden;background:#0d0a12}
-.screen iframe{width:100%;height:100%;border:0;display:block;background:#0d0a12}
-.island{position:absolute;top:24px;left:50%;transform:translateX(-50%);width:118px;height:33px;background:#000;border-radius:20px;z-index:20;pointer-events:none}
-.statusbar{position:absolute;top:24px;left:13px;right:13px;height:44px;z-index:19;pointer-events:none;display:flex;justify-content:space-between;align-items:center;padding:0 34px;color:#fff;font-size:15px;font-weight:600;font-family:-apple-system,sans-serif}
-.home{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,.55);z-index:20;pointer-events:none}
-.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-button{padding:8px 14px;border-radius:10px;border:1px solid #4a4a52;background:#2a2a30;color:#fff;font-size:13px;cursor:pointer}
-button:hover{background:#3a3a42}
-</style></head><body>
-<h1>iPhone 14 預覽 · 390 × 844</h1>
-<div class="hint">已模擬瀏海(動態島)與底部安全區(上 47px / 下 34px)。這跟你真機看到的幾乎一樣,不受手機快取影響。</div>
-<div class="device">
-  <div class="statusbar"><span>9:41</span><span>􀙇 􀛨 􀋦</span></div>
-  <div class="island"></div>
-  <div class="screen"><iframe id="f" src="t-sim.html?fr"></iframe></div>
-  <div class="home"></div>
-</div>
-<div class="row">
-  <button onclick="reload()">重新整理</button>
-  <button onclick="setDev('iphone14','47','34')">iPhone 14 (47/34)</button>
-  <button onclick="setDev('iphone8','20','0')">舊機無瀏海 (20/0)</button>
-</div>
-<script>
-var f=document.getElementById('f'),SAT='47px',SAB='34px';
-function apply(){try{var d=f.contentDocument;if(!d||!d.documentElement)return;d.documentElement.style.setProperty('--sat',SAT);d.documentElement.style.setProperty('--sab',SAB);}catch(e){}}
-f.addEventListener('load',apply);setInterval(apply,400);
-function reload(){f.src=f.src.split('?')[0]+'?'+Date.now();}
-function setDev(n,t,b){SAT=t+'px';SAB=b+'px';apply();}
-</script>
-</body></html>
+  :root{ --scr-w:390px; --scr-h:844px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(120% 90% at 50% 0%, #1b1622, #06040a 65%);
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:22px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#cfc7d8;
+    padding:28px 12px;
+  }
+  h1{font-size:15px;font-weight:600;letter-spacing:.5px;color:#e9e2f2}
+  .hint{font-size:12.5px;line-height:1.6;color:#9a91ad;text-align:center;max-width:var(--scr-w)}
+  .hint b{color:#e6cff0;font-weight:600}
+
+  /* iPhone 14 外框 */
+  .phone{
+    position:relative;
+    width:calc(var(--scr-w) + 24px);
+    height:calc(var(--scr-h) + 24px);
+    background:linear-gradient(150deg,#3a3340,#141019 55%,#2a2532);
+    border-radius:58px;
+    padding:12px;
+    box-shadow:0 40px 90px rgba(0,0,0,.6),
+               0 0 0 2px rgba(255,255,255,.05),
+               inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .screen{
+    position:relative;
+    width:var(--scr-w); height:var(--scr-h);
+    background:#0d0a12; border-radius:46px; overflow:hidden;
+    box-shadow:inset 0 0 0 2px rgba(0,0,0,.9);
+  }
+  iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
+
+  /* 瀏海(iPhone 14 notch) */
+  .notch{
+    position:absolute; top:0; left:50%; transform:translateX(-50%);
+    width:164px; height:33px; background:#000;
+    border-bottom-left-radius:20px; border-bottom-right-radius:20px;
+    z-index:5; pointer-events:none;
+    display:flex; align-items:center; justify-content:center; gap:44px;
+  }
+  .notch .spk{ width:44px; height:5px; border-radius:5px; background:#161016; }
+  .notch .cam{ width:9px; height:9px; border-radius:50%; background:#0b0710; box-shadow:inset 0 0 0 2px #1d1622; }
+
+  /* 狀態列(時間 / 訊號,疊在 notch 兩側) */
+  .statusbar{
+    position:absolute; top:0; left:0; right:0; height:33px; z-index:4;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 26px; color:#fff; font-size:13px; font-weight:600;
+    pointer-events:none; text-shadow:0 1px 3px rgba(0,0,0,.5);
+  }
+  .statusbar .r{display:flex;align-items:center;gap:6px;font-size:12px}
+  /* 底部 home indicator */
+  .home{
+    position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+    width:138px; height:5px; border-radius:5px; background:rgba(255,255,255,.6);
+    z-index:5; pointer-events:none;
+  }
+  .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .btns button, .btns a{
+    font-size:12.5px; padding:8px 14px; border-radius:999px; cursor:pointer;
+    background:rgba(255,255,255,.06); color:#e6cff0; border:1px solid rgba(242,155,194,.3);
+    text-decoration:none; font-family:inherit;
+  }
+  .btns button:active{transform:scale(.96)}
+</style>
+</head>
+<body>
+  <h1>秘密關係 · iPhone 14 實機預覽</h1>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span class="r">●●●&nbsp;&nbsp;⌇&nbsp;&nbsp;100</span>
+      </div>
+      <div class="notch"><span class="spk"></span><span class="cam"></span></div>
+      <iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe>
+      <div class="home"></div>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button onclick="document.getElementById('pv').src='https://ceon0693.uk/test.html?r='+Date.now()">重新整理</button>
+    <a href="https://ceon0693.uk/test.html" target="_blank" rel="noopener">在瀏覽器開</a>
+  </div>
+
+  <p class="hint">
+    這就是 <b>iPhone 14</b> 上、加到主畫面以 App 模式開啟的樣子(含瀏海、無網址列、底部貼齊)。<br>
+    尺寸 390×844,和實機一致。若要縮小視窗仍看整台,瀏覽器縮放即可。
+  </p>
+</body>
+</html>
