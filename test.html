@@ -1872,5 +1872,8 @@ function build(){
 }
 if(!build()){document.addEventListener('DOMContentLoaded',build);window.addEventListener('load',build);var n=0,t=setInterval(function(){if(build()||++n>20)clearInterval(t);},400);}
 })();</script>
+
+<script>(function(){/* 正式站等效:全螢幕深色 backdrop + 100dvh，消 iOS 底部黑 bar（只在 test.html，注入式） */
+var s=document.createElement("style");s.id="__nobar_backdrop";s.textContent="html,body{background:#0d0a12!important}"+"@media(max-width:519px){html,body{min-height:100dvh!important}"+"#stage{min-height:100dvh!important;background:#0d0a12!important}}";document.head.appendChild(s);var d=document.createElement("div");d.setAttribute("aria-hidden","true");d.style.cssText="position:fixed;inset:0;background:#0d0a12;z-index:-1;pointer-events:none";document.body.insertBefore(d,document.body.firstChild);})();</script>
 </body>
 </html>
