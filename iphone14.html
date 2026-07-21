@@ -114,7 +114,7 @@
       try{
         var d=pv.contentDocument; if(!d||!d.head) return;
         var st=d.getElementById('__pv_safe'); if(!st){st=d.createElement('style');st.id='__pv_safe';d.head.appendChild(st);}
-        st.textContent='#nav-wrap{bottom:calc(4px + '+CUR.bottom+'px)!important}';
+        st.textContent='html #nav-wrap{bottom:calc(4px + '+CUR.bottom+'px)!important}';
       }catch(e){}
     }
     pv.addEventListener('load',injectSafe);
