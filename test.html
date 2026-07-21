@@ -2038,5 +2038,17 @@ apply();
 document.addEventListener('DOMContentLoaded',apply);
 window.addEventListener('load',apply);
 })();</script>
+
+<style id="nav-tune">
+/* 收起主畫面 inline 曲目列 → 改由 NEXT SCENE 開 Bottom Sheet */
+.tracklist-block{display:none!important}
+/* 分頁島:下移貼底(保留 safe-area,不可回黑 bar) */
+#nav-wrap{bottom:calc(4px + env(safe-area-inset-bottom))!important}
+/* 分頁島放大(維持 tab 寬 64px 以免選中指示塊跑位) */
+#nav{padding:9px 8px!important}
+.navbtn{padding:10px 0 9px!important;gap:4px!important}
+.navbtn .navico svg,.navbtn svg{width:23px!important;height:23px!important}
+.navbtn .navlbl{font-size:10.5px!important}
+</style>
 </body>
 </html>
