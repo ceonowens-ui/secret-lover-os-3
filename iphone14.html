@@ -10,7 +10,7 @@
   body{
     background:radial-gradient(120% 90% at 50% 0%, #1b1622, #06040a 65%);
     min-height:100vh; display:flex; flex-direction:column; align-items:center;
-    gap:16px; padding:20px 12px 40px;
+    gap:14px; padding:18px 12px 44px;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#cfc7d8;
   }
   h1{font-size:15px;font-weight:600;letter-spacing:.5px;color:#e9e2f2}
@@ -33,29 +33,31 @@
     background:#0d0a12; border-radius:var(--radius); overflow:hidden;
     display:flex; flex-direction:column;
   }
+  /* 上安全區:不透明深色狀態列（內容在它下面，不被瀏海/島壓到） */
   .statusbar{
     position:relative; height:var(--top); flex:none; background:#0d0a12;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:0 30px; color:#fff; font-weight:600; z-index:3;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    padding:14px 34px 0; color:#fff; font-weight:600; z-index:4;
   }
-  .statusbar .clock{padding-top:8px;font-size:16px}
-  .statusbar .rt{display:flex;align-items:center;gap:7px;padding-top:8px}
-  .island{
-    position:absolute; top:11px; left:50%; transform:translateX(-50%);
-    height:37px; background:#000; z-index:4; pointer-events:none; border-radius:20px;
-  }
-  .island.notch{ top:0; height:33px; border-radius:0 0 20px 20px; }
-  .content{ position:relative; flex:1 1 auto; }
+  .statusbar .clock{font-size:16px}
+  .statusbar .rt{display:flex;align-items:center;gap:7px}
+  /* 瀏海 / 靈動島 */
+  .cut{ position:absolute; left:50%; transform:translateX(-50%); background:#000; z-index:5; pointer-events:none; }
+  .cut.notch{ top:0; width:200px; height:33px; border-radius:0 0 22px 22px; }
+  .cut.island{ top:11px; width:126px; height:37px; border-radius:20px; }
+  /* 內容區:緊接狀態列下方，一路鋪到螢幕底 */
+  .content{ position:relative; flex:1 1 auto; min-height:0; }
   iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
-  .homebar{
-    position:relative; height:var(--bottom); flex:none; background:#0d0a12; z-index:3;
-    display:flex; align-items:flex-end; justify-content:center; padding-bottom:9px;
+  /* home indicator:白條浮在內容上（不佔高度、不多一塊） */
+  .homeind{
+    position:absolute; left:50%; bottom:9px; transform:translateX(-50%);
+    width:44%; max-width:150px; height:5px; border-radius:5px; background:rgba(255,255,255,.62);
+    z-index:6; pointer-events:none;
   }
-  .homebar .pill{width:140px;height:5px;border-radius:5px;background:rgba(255,255,255,.62)}
 </style>
 </head>
 <body>
-  <h1>秘密關係 · PWA 實機預覽</h1>
+  <h1>秘密關係 · PWA 實機預覽（1:1）</h1>
   <div class="controls">
     <label class="meta" for="model">機型</label>
     <select id="model"></select>
@@ -68,47 +70,56 @@
     <div class="screen">
       <div class="statusbar">
         <span class="clock" id="clock">9:41</span>
-        <span class="island" id="island"></span>
         <span class="rt">
           <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/></svg>
           <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3C13.8 1.4 11.3.4 8.5.4 5.7.4 3.2 1.4 1.3 3.3L2.5 4.6c1.6-1.5 3.7-2.4 6-2.4z"/><circle cx="8.5" cy="9.4" r="1.7"/></svg>
-          <span style="width:23px;height:12px;border:1px solid rgba(255,255,255,.55);border-radius:3px;position:relative;display:inline-block"><span style="position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:65%;background:#fff;border-radius:1px"></span></span>
+          <span style="width:23px;height:12px;border:1px solid rgba(255,255,255,.55);border-radius:3px;position:relative;display:inline-block"><span style="position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:#fff;border-radius:1px"></span></span>
         </span>
       </div>
-      <div class="content"><iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe></div>
-      <div class="homebar"><span class="pill"></span></div>
+      <span class="cut" id="cut"></span>
+      <div class="content">
+        <iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe>
+        <span class="homeind"></span>
+      </div>
     </div>
   </div>
 
   <script>
     var MODELS=[
-      {n:"iPhone 16 Pro",     w:402,h:874,top:62,bottom:34,radius:55,island:true},
-      {n:"iPhone 16 Pro Max", w:440,h:956,top:62,bottom:34,radius:55,island:true},
-      {n:"iPhone 15 / 16",    w:393,h:852,top:59,bottom:34,radius:52,island:true},
-      {n:"iPhone 15 Pro",     w:393,h:852,top:59,bottom:34,radius:52,island:true},
-      {n:"iPhone 15/16 Plus", w:430,h:932,top:59,bottom:34,radius:54,island:true},
-      {n:"iPhone 14 Pro",     w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 14 Plus",    w:428,h:926,top:47,bottom:34,radius:50,island:false},
       {n:"iPhone 14 / 13",    w:390,h:844,top:47,bottom:34,radius:47,island:false},
-      {n:"iPhone 14 Plus",    w:428,h:926,top:47,bottom:34,radius:50,island:false}
+      {n:"iPhone 14 Pro Max", w:430,h:932,top:59,bottom:34,radius:55,island:true},
+      {n:"iPhone 14 Pro",     w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 15 / 16",    w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 16 Pro",     w:402,h:874,top:62,bottom:34,radius:55,island:true},
+      {n:"iPhone 16 Pro Max", w:440,h:956,top:62,bottom:34,radius:55,island:true}
     ];
     var sel=document.getElementById('model'), phone=document.getElementById('phone'),
-        island=document.getElementById('island'), spec=document.getElementById('spec');
+        cut=document.getElementById('cut'), spec=document.getElementById('spec'),
+        pv=document.getElementById('pv');
     MODELS.forEach(function(m,i){var o=document.createElement('option');o.value=i;o.textContent=m.n;sel.appendChild(o);});
+    var CUR=MODELS[0];
     function apply(){
-      var m=MODELS[sel.value];
+      var m=MODELS[sel.value]; CUR=m;
       phone.style.setProperty('--w',m.w+'px');
       phone.style.setProperty('--h',m.h+'px');
       phone.style.setProperty('--top',m.top+'px');
-      phone.style.setProperty('--bottom',m.bottom+'px');
       phone.style.setProperty('--radius',m.radius+'px');
-      if(m.island){ island.className='island'; island.style.width='126px'; }
-      else { island.className='island notch'; island.style.width='164px'; }
+      cut.className='cut '+(m.island?'island':'notch');
       spec.textContent=m.w+'×'+m.h+' pt · 上安全區 '+m.top+' · 下 '+m.bottom+' pt';
+      injectSafe();
     }
+    /* 同網域 iframe 注入:模擬底部安全區(桌面 iframe env=0，補成該機型 bottom) */
+    function injectSafe(){
+      try{
+        var d=pv.contentDocument; if(!d||!d.head) return;
+        var st=d.getElementById('__pv_safe'); if(!st){st=d.createElement('style');st.id='__pv_safe';d.head.appendChild(st);}
+        st.textContent='#nav-wrap{bottom:calc(4px + '+CUR.bottom+'px)!important}';
+      }catch(e){}
+    }
+    pv.addEventListener('load',injectSafe);
     sel.addEventListener('change',apply);
-    document.getElementById('reload').addEventListener('click',function(){
-      document.getElementById('pv').src='https://ceon0693.uk/test.html?r='+Date.now();
-    });
+    document.getElementById('reload').addEventListener('click',function(){ pv.src='https://ceon0693.uk/test.html?r='+Date.now(); });
     function tick(){var d=new Date();document.getElementById('clock').textContent=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
     tick(); setInterval(tick,10000);
     apply();
