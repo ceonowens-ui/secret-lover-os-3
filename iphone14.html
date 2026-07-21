@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>秘密關係 · PWA 實機預覽</title>
+<title>秘密關係 · PWA 實機預覽（可調）</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{min-height:100%}
@@ -14,104 +14,82 @@
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:#cfc7d8;
   }
   h1{font-size:15px;font-weight:600;letter-spacing:.5px;color:#e9e2f2}
-  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
-  select,button,.controls a{
-    font-size:12.5px;padding:7px 12px;border-radius:10px;cursor:pointer;font-family:inherit;
-    background:#171320;color:#e6cff0;border:1px solid rgba(242,155,194,.3);text-decoration:none;
-  }
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  select,button{font-size:12.5px;padding:7px 12px;border-radius:10px;cursor:pointer;font-family:inherit;
+    background:#171320;color:#e6cff0;border:1px solid rgba(242,155,194,.3)}
   .meta{font-size:12px;color:#9a91ad}
-  .phone{
-    position:relative;
-    width:calc(var(--w) + 24px); height:calc(var(--h) + 24px);
-    background:linear-gradient(150deg,#3a3340,#141019 55%,#2a2532);
-    border-radius:calc(var(--radius) + 12px); padding:12px;
-    box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.05),inset 0 0 0 1px rgba(255,255,255,.08);
-    flex:none;
-  }
-  .screen{
-    position:relative; width:var(--w); height:var(--h);
-    background:#0d0a12; border-radius:var(--radius); overflow:hidden;
-    display:flex; flex-direction:column;
-  }
-  /* 上安全區:不透明深色狀態列（內容在它下面，不被瀏海/島壓到） */
-  .statusbar{
-    position:relative; height:var(--top); flex:none; background:#0d0a12;
-    display:flex; align-items:flex-start; justify-content:space-between;
-    padding:14px 34px 0; color:#fff; font-weight:600; z-index:4;
-  }
+  .panel{width:428px;max-width:96vw;background:rgba(23,19,32,.7);border:1px solid rgba(242,155,194,.22);
+    border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .ctl{display:grid;grid-template-columns:96px 1fr 52px;gap:10px;align-items:center;font-size:12.5px}
+  .ctl label{color:#cbb9dd}
+  .ctl input[type=range]{width:100%;accent-color:#f29bc2}
+  .ctl .val{text-align:right;color:#f7cbe0;font-variant-numeric:tabular-nums}
+  .panel .out{display:flex;gap:8px;align-items:center}
+  textarea{flex:1;height:52px;font:12px/1.5 ui-monospace,Menlo,monospace;background:#0f0b16;color:#d7cbe6;
+    border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 8px;resize:none}
+  .phone{position:relative;width:calc(var(--w) + 24px);height:calc(var(--h) + 24px);
+    background:linear-gradient(150deg,#3a3340,#141019 55%,#2a2532);border-radius:calc(var(--radius) + 12px);
+    padding:12px;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.05),inset 0 0 0 1px rgba(255,255,255,.08);flex:none}
+  .screen{position:relative;width:var(--w);height:var(--h);background:#0d0a12;border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+  .statusbar{position:relative;height:var(--top);flex:none;background:#0d0a12;display:flex;align-items:flex-start;justify-content:space-between;padding:14px 30px 0;color:#fff;font-weight:600;z-index:4}
   .statusbar .clock{font-size:16px}
   .statusbar .rt{display:flex;align-items:center;gap:7px}
-  /* 瀏海 / 靈動島 */
-  .cut{ position:absolute; left:50%; transform:translateX(-50%); background:#000; z-index:5; pointer-events:none; }
-  .cut.notch{ top:0; width:200px; height:33px; border-radius:0 0 22px 22px; }
-  .cut.island{ top:11px; width:126px; height:37px; border-radius:20px; }
-  /* 內容區:狀態列下方一路鋪到螢幕底(webview = 螢幕 − 上安全區) */
-  .content{ position:relative; flex:1 1 auto; min-height:0; background:#0d0a12; }
-  iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
-  /* home indicator:白條浮在內容上（不佔高度、不多一塊） */
-  .homeind{
-    position:absolute; left:50%; bottom:9px; transform:translateX(-50%);
-    width:44%; max-width:150px; height:5px; border-radius:5px; background:rgba(255,255,255,.62);
-    z-index:6; pointer-events:none;
-  }
+  .cut{position:absolute;left:50%;transform:translateX(-50%);background:#000;z-index:5;pointer-events:none}
+  .cut.notch{top:0;width:200px;height:33px;border-radius:0 0 22px 22px}
+  .cut.island{top:11px;width:126px;height:37px;border-radius:20px}
+  .content{position:relative;flex:1 1 auto;min-height:0;background:#0d0a12}
+  iframe{width:100%;height:100%;border:0;display:block;background:#0d0a12}
+  .homeind{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);width:44%;max-width:150px;height:5px;border-radius:5px;background:rgba(255,255,255,.62);z-index:6;pointer-events:none}
 </style>
 </head>
 <body>
-  <h1>秘密關係 · PWA 實機預覽（1:1）</h1>
-  <div class="controls">
+  <h1>秘密關係 · PWA 實機預覽（可即時調整）</h1>
+  <div class="row">
     <label class="meta" for="model">機型</label>
     <select id="model"></select>
     <button id="reload">重新整理</button>
-    <a href="https://ceon0693.uk/test.html" target="_blank" rel="noopener">開播放器</a>
+    <a style="font-size:12.5px;padding:7px 12px;border-radius:10px;background:#171320;color:#e6cff0;border:1px solid rgba(242,155,194,.3);text-decoration:none" href="https://ceon0693.uk/test.html" target="_blank" rel="noopener">開播放器</a>
   </div>
-  <div class="meta" id="spec"></div>
+
+  <div class="panel">
+    <div class="ctl"><label>封面上距</label><input id="s-cover" type="range" min="0" max="40" step="1" value="2"><span class="val" id="v-cover">2</span></div>
+    <div class="ctl"><label>nav 底距</label><input id="s-navb" type="range" min="0" max="24" step="1" value="0"><span class="val" id="v-navb">0</span></div>
+    <div class="ctl"><label>卡片間距</label><input id="s-npb" type="range" min="20" max="140" step="2" value="86"><span class="val" id="v-npb">86</span></div>
+    <div class="ctl"><label>nav 大小</label><input id="s-scale" type="range" min="88" max="108" step="1" value="98"><span class="val" id="v-scale">98%</span></div>
+    <div class="out">
+      <textarea id="out" readonly></textarea>
+      <button id="copy">複製設定</button>
+    </div>
+  </div>
 
   <div class="phone" id="phone">
     <div class="screen">
       <div class="statusbar">
         <span class="clock" id="clock">9:41</span>
+        <span class="cut" id="cut"></span>
         <span class="rt">
           <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/></svg>
-          <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3C13.8 1.4 11.3.4 8.5.4 5.7.4 3.2 1.4 1.3 3.3L2.5 4.6c1.6-1.5 3.7-2.4 6-2.4z"/><circle cx="8.5" cy="9.4" r="1.7"/></svg>
           <span style="width:23px;height:12px;border:1px solid rgba(255,255,255,.55);border-radius:3px;position:relative;display:inline-block"><span style="position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:70%;background:#fff;border-radius:1px"></span></span>
         </span>
       </div>
-      <span class="cut" id="cut"></span>
-      <div class="content">
-        <iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe>
-        <span class="homeind"></span>
-      </div>
+      <div class="content"><iframe id="pv" src="https://ceon0693.uk/test.html" title="秘密關係播放器"></iframe></div>
+      <div class="homeind"></div>
     </div>
   </div>
+  <p class="meta" style="max-width:428px;text-align:center">拖滑桿即時預覽 → 滿意按「複製設定」→ 把數值貼給我，我烘進 test.html（真機同步）。</p>
 
   <script>
     var MODELS=[
-      {n:"iPhone 14 Plus",    w:428,h:926,top:47,bottom:34,radius:50,island:false},
-      {n:"iPhone 14 / 13",    w:390,h:844,top:47,bottom:34,radius:47,island:false},
-      {n:"iPhone 14 Pro Max", w:430,h:932,top:59,bottom:34,radius:55,island:true},
-      {n:"iPhone 14 Pro",     w:393,h:852,top:59,bottom:34,radius:52,island:true},
-      {n:"iPhone 15 / 16",    w:393,h:852,top:59,bottom:34,radius:52,island:true},
-      {n:"iPhone 16 Pro",     w:402,h:874,top:62,bottom:34,radius:55,island:true},
-      {n:"iPhone 16 Pro Max", w:440,h:956,top:62,bottom:34,radius:55,island:true}
+      {n:"iPhone 14 Plus",w:428,h:926,top:47,bottom:34,radius:50,island:false},
+      {n:"iPhone 14 / 13",w:390,h:844,top:47,bottom:34,radius:47,island:false},
+      {n:"iPhone 15 / 16",w:393,h:852,top:59,bottom:34,radius:52,island:true},
+      {n:"iPhone 16 Pro",w:402,h:874,top:62,bottom:34,radius:55,island:true}
     ];
-    var sel=document.getElementById('model'), phone=document.getElementById('phone'),
-        cut=document.getElementById('cut'), spec=document.getElementById('spec'),
-        pv=document.getElementById('pv');
+    var sel=document.getElementById('model'),phone=document.getElementById('phone'),cut=document.getElementById('cut'),pv=document.getElementById('pv');
     MODELS.forEach(function(m,i){var o=document.createElement('option');o.value=i;o.textContent=m.n;sel.appendChild(o);});
     var CUR=MODELS[0];
-    function apply(){
-      var m=MODELS[sel.value]; CUR=m;
-      phone.style.setProperty('--w',m.w+'px');
-      phone.style.setProperty('--h',m.h+'px');
-      phone.style.setProperty('--top',m.top+'px');
-      phone.style.setProperty('--bottom',m.bottom+'px');
-      phone.style.setProperty('--radius',m.radius+'px');
-      cut.className='cut '+(m.island?'island':'notch');
-      spec.textContent=m.w+'×'+m.h+' pt · 上安全區 '+m.top+' · 下 '+m.bottom+' pt';
-      injectSafe();
-    }
-    /* 同網域 iframe 注入:模擬底部安全區(桌面 iframe env=0，補成該機型 bottom) */
-    function injectSafe(){
+    var S={cover:2,navb:0,npb:86,scale:0.98};
+    function inject(){
       try{
         var d=pv.contentDocument; if(!d||!d.head) return;
         var st=d.getElementById('__pv_safe'); if(!st){st=d.createElement('style');st.id='__pv_safe';d.head.appendChild(st);}
@@ -119,16 +97,35 @@
         st.textContent=
           'html,body{height:100%!important;min-height:100%!important}'+
           'html #stage{height:100%!important}'+
-          'html #nav-wrap{bottom:calc(0px + '+b+'px)!important}'+
-          'html .np-card{margin-bottom:calc(86px + '+b+'px)!important}'+
+          'html .cover-card{margin-top:'+S.cover+'px!important}'+
+          'html #nav-wrap{bottom:calc('+S.navb+'px + '+b+'px)!important}'+
+          'html .np-card{margin-bottom:calc('+S.npb+'px + '+b+'px)!important}'+
+          'html #nav{transform:scale('+S.scale+')!important;transform-origin:center bottom!important}'+
           'html .screen-sub{padding-bottom:calc(96px + '+b+'px)!important}';
       }catch(e){}
+      out();
     }
-    pv.addEventListener('load',injectSafe);
+    function out(){
+      document.getElementById('out').value=
+        '封面上距 '+S.cover+' · nav底距 '+S.navb+' · 卡片間距 '+S.npb+' · nav '+Math.round(S.scale*100)+'%\n'+
+        '.cover-card margin-top:'+S.cover+'px | #nav-wrap bottom base:'+S.navb+'px | .np-card mb base:'+S.npb+'px | #nav scale:'+S.scale;
+    }
+    function apply(){
+      var m=MODELS[sel.value]; CUR=m;
+      phone.style.setProperty('--w',m.w+'px');phone.style.setProperty('--h',m.h+'px');
+      phone.style.setProperty('--top',m.top+'px');phone.style.setProperty('--radius',m.radius+'px');
+      cut.className='cut '+(m.island?'island':'notch');
+      inject();
+    }
+    function bind(id,key,fmt){var s=document.getElementById('s-'+id),v=document.getElementById('v-'+id);
+      s.addEventListener('input',function(){var val=+s.value; S[key]=(key==='scale')?val/100:val; v.textContent=fmt?fmt(val):val; inject();});}
+    bind('cover','cover');bind('navb','navb');bind('npb','npb');bind('scale','scale',function(x){return x+'%';});
     sel.addEventListener('change',apply);
-    document.getElementById('reload').addEventListener('click',function(){ pv.src='https://ceon0693.uk/test.html?r='+Date.now(); });
+    pv.addEventListener('load',inject);
+    document.getElementById('reload').addEventListener('click',function(){pv.src='https://ceon0693.uk/test.html?r='+Date.now();});
+    document.getElementById('copy').addEventListener('click',function(){var o=document.getElementById('out');o.select();try{document.execCommand('copy');this.textContent='已複製';var t=this;setTimeout(function(){t.textContent='複製設定';},1500);}catch(e){}});
     function tick(){var d=new Date();document.getElementById('clock').textContent=d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
-    tick(); setInterval(tick,10000);
+    tick();setInterval(tick,10000);
     apply();
   </script>
 </body>
