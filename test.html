@@ -2019,10 +2019,20 @@ function ensureCSS(){
     '#__vsw .vsw-track{backdrop-filter:blur(14px) saturate(1.4) url(#lg-btn)!important;'+
       '-webkit-backdrop-filter:blur(14px) saturate(1.4)!important;'+
       'box-shadow:0 8px 24px rgba(0,0,0,.42),'+EDGE+'!important}',
-    /* 底部 nav */
-    '#nav{backdrop-filter:blur(16px) saturate(1.4) url(#lg-card)!important;'+
-      '-webkit-backdrop-filter:blur(16px) saturate(1.4)!important;'+
-      'box-shadow:0 12px 34px rgba(0,0,0,.5),'+EDGE+'!important}'
+    /* 底部分頁島：更透的霜面玻璃 + 加強邊緣反光（下方是深底，需靠亮邊撐出玻璃感） */
+    '#nav{background:rgba(255,255,255,.07)!important;'+
+      'backdrop-filter:blur(30px) saturate(1.7) url(#lg-card)!important;'+
+      '-webkit-backdrop-filter:blur(30px) saturate(1.7)!important;'+
+      'border:1px solid rgba(255,255,255,.24)!important;'+
+      'box-shadow:0 16px 42px rgba(0,0,0,.5),0 0 16px rgba(255,255,255,.12),'+EDGE+
+      ',inset 0 1px 0 rgba(255,255,255,.4)!important}',
+    /* 分頁島的光澤層調亮一點 */
+    '#nav::before{background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 46%)!important}',
+    /* 選中指示塊 → 液態玻璃錠 */
+    '#nav-ind{backdrop-filter:blur(8px) url(#lg-btn)!important;-webkit-backdrop-filter:blur(8px)!important;'+
+      'background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(242,155,194,.14))!important;'+
+      'box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 12px rgba(242,155,194,.2),'+EDGE+
+      ',0 4px 12px rgba(0,0,0,.2)!important}'
   ].join('');
   document.head.appendChild(st);
 }
