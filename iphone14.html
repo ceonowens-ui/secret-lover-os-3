@@ -117,6 +117,8 @@
         var st=d.getElementById('__pv_safe'); if(!st){st=d.createElement('style');st.id='__pv_safe';d.head.appendChild(st);}
         var b=CUR.bottom;
         st.textContent=
+          'html,body{height:100%!important;min-height:100%!important}'+
+          'html #stage{height:100%!important}'+
           'html #nav-wrap{bottom:calc(4px + '+b+'px)!important}'+
           'html .np-card{margin-bottom:calc(86px + '+b+'px)!important}'+
           'html .screen-sub{padding-bottom:calc(96px + '+b+'px)!important}';
