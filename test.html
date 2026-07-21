@@ -852,7 +852,6 @@ html, body {
   };
 
   var V = VIEWS[VIEW];
-  window.__slCounts = { songs: SONGS.length, score: SCORE.length };
 
   window.ALBUM_CONFIG = {
     albumId: V.albumId,
@@ -1830,163 +1829,48 @@ var _open=window.open;
 window.open=function(u){try{var ref=getStored();if(ref&&typeof u==='string'&&u.indexOf('/ecpay/create')>-1&&u.indexOf('ref=')===-1){u+=(u.indexOf('?')>-1?'&':'?')+'ref='+ref;}}catch(e){}return _open.apply(this,arguments);};
 })();</script>
 <script>(function(){
-/* ===== 浮動 SONGS/SCORE segmented control：封面/卡片交界、水平置中、半浮 ===== */
+/* SONGS|SCORE 切換器:放進 Now Playing 卡,與 NOW PLAYING 同行靠右 */
 var VIEW='songs';
 try{VIEW=localStorage.getItem('slv-view')||'songs';}catch(e){}
 if(VIEW!=='songs'&&VIEW!=='score')VIEW='songs';
-
-function ensureCSS(){
-  if(document.getElementById('vsw-style'))return;
-  var st=document.createElement('style'); st.id='vsw-style';
-  st.textContent=[
-    /* np-card 補頂距，讓 NOW PLAYING 落在浮動切換器下方不重疊 */
-    '.np-card{padding-top:30px!important}',
-    /* 浮動切換器 */
-    '#__vsw{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);z-index:6;'+
-      'width:clamp(140px,44vw,162px);height:44px;display:flex;align-items:center;justify-content:center;'+
-      '-webkit-tap-highlight-color:transparent}',
-    '#__vsw .vsw-track{position:relative;width:100%;height:32px;display:flex;border-radius:16px;'+
-      'background:rgba(20,14,28,.55);border:1px solid rgba(242,155,194,.28);'+
-      'box-shadow:0 8px 24px rgba(0,0,0,.42);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}',
-    '#__vsw .vsw-thumb{position:absolute;top:2px;bottom:2px;left:2px;width:calc(50% - 3px);border-radius:14px;'+
-      'background:linear-gradient(135deg,#f7cbe0,#e6d4f5);box-shadow:0 2px 8px rgba(242,155,194,.28);'+
-      'transition:transform .2s cubic-bezier(.4,0,.2,1);will-change:transform}',
-    '#__vsw[data-view="score"] .vsw-thumb{transform:translateX(calc(100% + 2px))}',
-    '#__vsw button{position:relative;z-index:1;flex:1;height:44px;margin:-6px 0;padding:0;background:transparent;'+
-      'border:0;cursor:pointer;font-family:"Bodoni Moda",serif;font-size:10px;letter-spacing:.6px;line-height:1;'+
-      'display:flex;align-items:center;justify-content:center;color:rgba(199,186,214,.58);'+
-      'transition:color .2s ease;-webkit-tap-highlight-color:transparent}',
-    '#__vsw button[aria-pressed="true"]{color:#4a2d5c;font-weight:700}',
-    '#__vsw button:not([aria-pressed="true"]):hover{color:rgba(247,184,210,.9)}',
-    '#__vsw button:focus-visible{outline:2px solid rgba(242,155,194,.75);outline-offset:2px;border-radius:14px}'
-  ].join('');
-  document.head.appendChild(st);
-}
-
-function counts(){
-  var c=(window.__slCounts||{}); return {songs:c.songs||12, score:c.score||21};
-}
 function build(){
-  ensureCSS();
   if(document.getElementById('__vsw'))return true;
   var card=document.querySelector('.np-card');
   if(!card)return false;
   if(getComputedStyle(card).position==='static')card.style.position='relative';
-  var cc=counts();
   var w=document.createElement('div');
-  w.id='__vsw'; w.setAttribute('role','group'); w.setAttribute('aria-label','原聲帶分類切換');
-  w.setAttribute('data-view',VIEW);
-  var track=document.createElement('div'); track.className='vsw-track';
-  var thumb=document.createElement('div'); thumb.className='vsw-thumb'; track.appendChild(thumb);
-  function seg(view,label,title){
+  w.id='__vsw';
+  w.setAttribute('role','group');
+  w.setAttribute('aria-label','原聲帶分類切換');
+  w.style.cssText='position:absolute;top:9px;right:64px;z-index:5;display:flex;gap:2px;padding:2px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)';
+  function seg(label,view,title){
     var on=(VIEW===view);
     var b=document.createElement('button');
-    b.type='button'; b.textContent=label; b.title=title;
+    b.type='button';
+    b.textContent=label;
+    b.title=title;
     b.setAttribute('aria-pressed',on?'true':'false');
-    b.setAttribute('aria-label',title+'（共 '+(view==='songs'?cc.songs:cc.score)+' 首）');
-    function go(){
-      if(VIEW===view)return;
-      w.setAttribute('data-view',view);      // 先滑動 highlight，再換頁
-      try{localStorage.setItem('slv-view',view);}catch(e){}
-      setTimeout(function(){location.reload();},210);
+    b.style.cssText='font-family:"Bodoni Moda",serif;font-size:9px;letter-spacing:1.3px;padding:3.5px 8px;border-radius:999px;border:0;cursor:pointer;line-height:1;transition:background .25s ease,color .25s ease,transform .15s ease;-webkit-tap-highlight-color:transparent;'+
+      (on?'color:#2a1622;background:linear-gradient(135deg,rgba(242,155,194,.95),rgba(201,176,236,.95));font-weight:700;'
+         :'color:rgba(199,186,214,.62);background:transparent;font-weight:400;');
+    if(!on){
+      b.addEventListener('mouseenter',function(){b.style.color='rgba(247,184,210,.9)';});
+      b.addEventListener('mouseleave',function(){b.style.color='rgba(199,186,214,.62)';});
+      b.addEventListener('click',function(){
+        b.style.transform='scale(.94)';
+        try{localStorage.setItem('slv-view',view);}catch(e){}
+        setTimeout(function(){location.reload();},120);
+      });
     }
-    b.addEventListener('click',go);
-    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click();}});
     return b;
   }
-  track.appendChild(seg('songs','ALBUM · '+cc.songs,'完整專輯'));
-  track.appendChild(seg('score','SCORE · '+cc.score,'配樂原聲帶'));
-  w.appendChild(track);
+  w.appendChild(seg('SONGS','songs','歌曲原聲帶'));
+  w.appendChild(seg('SCORE','score','配樂原聲帶'));
   card.appendChild(w);
   return true;
 }
 if(!build()){document.addEventListener('DOMContentLoaded',build);window.addEventListener('load',build);var n=0,t=setInterval(function(){if(build()||++n>20)clearInterval(t);},400);}
-})();</script>
-<script>(function(){
-/* ===== 即時歌詞條(LRC)— 只在歌曲檢視、有 .lrc 的曲目顯示 ===== */
-var VIEW='songs'; try{VIEW=localStorage.getItem('slv-view')||'songs';}catch(e){}
-if(VIEW!=='songs') return;               // 配樂檢視不顯示
-var LRC={6:'lyrics/06.lrc'};             // 目前只做第 6 首示範,之後逐首補
-// 攔截 play() 抓到 app.js 內部的 Audio 實例
-var _play=HTMLMediaElement.prototype.play;
-HTMLMediaElement.prototype.play=function(){window.__slAudio=this;return _play.apply(this,arguments);};
-var cache={}, curN=0, cues=null;
-function parseLRC(txt){
-  var out=[]; txt.split('\n').forEach(function(l){
-    var m=l.match(/^\[(\d{2}):(\d{2}(?:\.\d{1,2})?)\](.*)$/);
-    if(m){ out.push({t:parseInt(m[1])*60+parseFloat(m[2]), s:m[3].trim()}); }
-  });
-  out.sort(function(a,b){return a.t-b.t;}); return out;
-}
-function titleToN(){
-  var t=(document.getElementById('np-title')||{}).textContent||'';
-  var C=window.ALBUM_CONFIG; if(!C)return 0;
-  for(var i=0;i<C.tracks.length;i++){ if(C.tracks[i].title===t) return C.tracks[i].n; }
-  return 0;
-}
-function ensureBar(){
-  var bar=document.getElementById('lrc-ticker');
-  if(bar) return bar;
-  var npc=document.querySelector('.np-card'); if(!npc) return null;
-  var fold=npc.closest('.player-fold') || npc.parentNode;   // 放到 fold 之外,不佔封面(flex:1)空間
-  var mount=fold.parentNode||npc.parentNode, ref=fold.nextSibling;
-  bar=document.createElement('div'); bar.id='lrc-ticker';
-  bar.style.cssText='margin:0 20px;min-height:0;max-height:0;overflow:hidden;display:flex;flex-direction:column;'+
-    'align-items:center;justify-content:center;gap:4px;text-align:center;'+
-    'opacity:0;transition:opacity .4s ease,max-height .3s ease;pointer-events:none';
-  bar.innerHTML='<div id="lrc-now" style="font-size:15px;font-weight:600;color:#fff;line-height:1.35;'+
-      'transition:opacity .25s ease;text-shadow:0 1px 12px rgba(242,155,194,.35)"></div>'+
-    '<div id="lrc-next" style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.3;transition:opacity .25s"></div>';
-  // 放在 player-fold 之後(不影響封面高度),落在中島與曲目列之間的空隙
-  if(mount) mount.insertBefore(bar, ref); else npc.parentNode.insertBefore(bar, npc.nextSibling);
-  return bar;
-}
-function load(n){
-  if(cache[n]!==undefined){ cues=cache[n]; return; }
-  cache[n]=null; cues=null;
-  if(!LRC[n]) return;
-  fetch(LRC[n]).then(function(r){return r.ok?r.text():'';}).then(function(t){
-    cache[n]=t?parseLRC(t):null; cues=cache[n];
-  }).catch(function(){});
-}
-function tick(){
-  var bar=ensureBar(); if(!bar) return;
-  var n=titleToN();
-  if(n!==curN){ curN=n; load(n); }
-  var au=window.__slAudio;
-  var now=document.getElementById('lrc-now'), nx=document.getElementById('lrc-next');
-  if(!cues || !au){ bar.style.opacity='0'; bar.style.maxHeight='0'; bar.style.margin='0 20px'; return; }
-  var ct=au.currentTime||0, i=-1;
-  for(var k=0;k<cues.length;k++){ if(cues[k].t<=ct+0.15) i=k; else break; }
-  bar.style.opacity='1'; bar.style.maxHeight='60px'; bar.style.margin='12px 20px 2px';
-  var cur=(i>=0)?cues[i].s:'';
-  var next=(i+1<cues.length)?cues[i+1].s:'';
-  if(now.textContent!==cur){ now.style.opacity='0'; setTimeout(function(){now.textContent=cur;now.style.opacity='1';},120); }
-  if(nx.textContent!==next){ nx.textContent=next; }
-}
-setInterval(tick,120);
-document.addEventListener('DOMContentLoaded',tick);
-})();</script>
-<script>(function(){
-/* ===== iPhone 底部黑 bar 修正:手機寬度下導覽島改 fixed 錨到真實視窗底 =====
-   原因:#nav-wrap 是 absolute 錨在 #stage(height:100dvh),
-   iOS Safari 工具列讓 dvh < 實際螢幕 → 島浮高、下方露黑條。
-   fixed 錨到 visual viewport 底就貼齊。桌面(>=520px)維持原樣。 */
-function ensure(){
-  if(document.getElementById('fixnav-style'))return;
-  var st=document.createElement('style'); st.id='fixnav-style';
-  st.textContent=
-    '@media (max-width:519px){'+
-      '#nav-wrap{position:fixed!important;left:0!important;right:0!important;'+
-        'bottom:calc(12px + env(safe-area-inset-bottom))!important;z-index:70}'+
-      /* 保險:整個畫布底色鋪滿(含工具列後方/超出 dvh 區) */
-      'html,body{background:#0d0a12!important}'+
-      '#stage{min-height:100vh;min-height:100dvh}'+
-    '}';
-  document.head.appendChild(st);
-}
-ensure();
-document.addEventListener('DOMContentLoaded',ensure);
 })();</script>
 </body>
 </html>
