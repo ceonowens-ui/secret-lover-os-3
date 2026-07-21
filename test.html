@@ -1872,5 +1872,68 @@ function build(){
 }
 if(!build()){document.addEventListener('DOMContentLoaded',build);window.addEventListener('load',build);var n=0,t=setInterval(function(){if(build()||++n>20)clearInterval(t);},400);}
 })();</script>
+<script>(function(){
+/* ===== 即時歌詞條(LRC)— 只在歌曲檢視、有 .lrc 的曲目顯示 ===== */
+var VIEW='songs'; try{VIEW=localStorage.getItem('slv-view')||'songs';}catch(e){}
+if(VIEW!=='songs') return;               // 配樂檢視不顯示
+var LRC={6:'lyrics/06.lrc'};             // 目前只做第 6 首示範,之後逐首補
+// 攔截 play() 抓到 app.js 內部的 Audio 實例
+var _play=HTMLMediaElement.prototype.play;
+HTMLMediaElement.prototype.play=function(){window.__slAudio=this;return _play.apply(this,arguments);};
+var cache={}, curN=0, cues=null;
+function parseLRC(txt){
+  var out=[]; txt.split('\n').forEach(function(l){
+    var m=l.match(/^\[(\d{2}):(\d{2}(?:\.\d{1,2})?)\](.*)$/);
+    if(m){ out.push({t:parseInt(m[1])*60+parseFloat(m[2]), s:m[3].trim()}); }
+  });
+  out.sort(function(a,b){return a.t-b.t;}); return out;
+}
+function titleToN(){
+  var t=(document.getElementById('np-title')||{}).textContent||'';
+  var C=window.ALBUM_CONFIG; if(!C)return 0;
+  for(var i=0;i<C.tracks.length;i++){ if(C.tracks[i].title===t) return C.tracks[i].n; }
+  return 0;
+}
+function ensureBar(){
+  var bar=document.getElementById('lrc-ticker');
+  if(bar) return bar;
+  var npc=document.querySelector('.np-card'); if(!npc) return null;
+  bar=document.createElement('div'); bar.id='lrc-ticker';
+  bar.style.cssText='margin:14px 20px 4px;min-height:52px;display:flex;flex-direction:column;'+
+    'align-items:center;justify-content:center;gap:4px;text-align:center;'+
+    'opacity:0;transition:opacity .4s ease;pointer-events:none';
+  bar.innerHTML='<div id="lrc-now" style="font-size:15px;font-weight:600;color:#fff;line-height:1.35;'+
+      'transition:opacity .25s ease;text-shadow:0 1px 12px rgba(242,155,194,.35)"></div>'+
+    '<div id="lrc-next" style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.3;transition:opacity .25s"></div>';
+  // 插在 np-card 之後
+  npc.parentNode.insertBefore(bar, npc.nextSibling);
+  return bar;
+}
+function load(n){
+  if(cache[n]!==undefined){ cues=cache[n]; return; }
+  cache[n]=null; cues=null;
+  if(!LRC[n]) return;
+  fetch(LRC[n]).then(function(r){return r.ok?r.text():'';}).then(function(t){
+    cache[n]=t?parseLRC(t):null; cues=cache[n];
+  }).catch(function(){});
+}
+function tick(){
+  var bar=ensureBar(); if(!bar) return;
+  var n=titleToN();
+  if(n!==curN){ curN=n; load(n); }
+  var au=window.__slAudio;
+  var now=document.getElementById('lrc-now'), nx=document.getElementById('lrc-next');
+  if(!cues || !au){ bar.style.opacity='0'; return; }
+  var ct=au.currentTime||0, i=-1;
+  for(var k=0;k<cues.length;k++){ if(cues[k].t<=ct+0.15) i=k; else break; }
+  bar.style.opacity='1';
+  var cur=(i>=0)?cues[i].s:'';
+  var next=(i+1<cues.length)?cues[i+1].s:'';
+  if(now.textContent!==cur){ now.style.opacity='0'; setTimeout(function(){now.textContent=cur;now.style.opacity='1';},120); }
+  if(nx.textContent!==next){ nx.textContent=next; }
+}
+setInterval(tick,120);
+document.addEventListener('DOMContentLoaded',tick);
+})();</script>
 </body>
 </html>
