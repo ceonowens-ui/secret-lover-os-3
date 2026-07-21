@@ -1967,5 +1967,26 @@ function tick(){
 setInterval(tick,120);
 document.addEventListener('DOMContentLoaded',tick);
 })();</script>
+<script>(function(){
+/* ===== iPhone 底部黑 bar 修正:手機寬度下導覽島改 fixed 錨到真實視窗底 =====
+   原因:#nav-wrap 是 absolute 錨在 #stage(height:100dvh),
+   iOS Safari 工具列讓 dvh < 實際螢幕 → 島浮高、下方露黑條。
+   fixed 錨到 visual viewport 底就貼齊。桌面(>=520px)維持原樣。 */
+function ensure(){
+  if(document.getElementById('fixnav-style'))return;
+  var st=document.createElement('style'); st.id='fixnav-style';
+  st.textContent=
+    '@media (max-width:519px){'+
+      '#nav-wrap{position:fixed!important;left:0!important;right:0!important;'+
+        'bottom:calc(12px + env(safe-area-inset-bottom))!important;z-index:70}'+
+      /* 保險:整個畫布底色鋪滿(含工具列後方/超出 dvh 區) */
+      'html,body{background:#0d0a12!important}'+
+      '#stage{min-height:100vh;min-height:100dvh}'+
+    '}';
+  document.head.appendChild(st);
+}
+ensure();
+document.addEventListener('DOMContentLoaded',ensure);
+})();</script>
 </body>
 </html>
