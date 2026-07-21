@@ -1841,8 +1841,8 @@ function ensureCSS(){
   st.textContent=[
     /* np-card 補頂距，讓 NOW PLAYING 落在浮動切換器下方不重疊 */
     '.np-card{padding-top:30px!important}',
-    /* 收斂中島與曲目列的空隙（不改 styles.css，用 scoped 覆寫） */
-    '.tracklist-block{margin-top:-46px!important}',
+    /* （移除 tracklist 負值上拉：那會讓底色沒鋪到安全區 → 底部黑 bar；
+        依 styles.css 原設計不做任何負 margin 上拉） */
     /* 浮動切換器 */
     '#__vsw{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);z-index:6;'+
       'width:clamp(140px,44vw,162px);height:44px;display:flex;align-items:center;justify-content:center;'+
