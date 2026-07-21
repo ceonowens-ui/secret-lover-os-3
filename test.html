@@ -1841,8 +1841,6 @@ function ensureCSS(){
   st.textContent=[
     /* np-card 補頂距，讓 NOW PLAYING 落在浮動切換器下方不重疊 */
     '.np-card{padding-top:30px!important}',
-    /* （移除 tracklist 負值上拉：那會讓底色沒鋪到安全區 → 底部黑 bar；
-        依 styles.css 原設計不做任何負 margin 上拉） */
     /* 浮動切換器 */
     '#__vsw{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);z-index:6;'+
       'width:clamp(140px,44vw,162px);height:44px;display:flex;align-items:center;justify-content:center;'+
@@ -1968,78 +1966,6 @@ function tick(){
 }
 setInterval(tick,120);
 document.addEventListener('DOMContentLoaded',tick);
-})();</script>
-<script>(function(){
-/* ===== Liquid Glass 皮膚：SVG 位移折射 + 玻璃邊緣 inset（styles.css 不動，全注入） ===== */
-function ensureSVG(){
-  if(document.getElementById('lg-svg'))return;
-  var ns='http://www.w3.org/2000/svg';
-  var svg=document.createElementNS(ns,'svg');
-  svg.id='lg-svg'; svg.setAttribute('aria-hidden','true');
-  svg.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden;pointer-events:none');
-  svg.innerHTML=
-    '<defs>'+
-      '<filter id="lg-card" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">'+
-        '<feTurbulence type="fractalNoise" baseFrequency="0.011 0.011" numOctaves="1" seed="4" result="n"/>'+
-        '<feGaussianBlur in="n" stdDeviation="2" result="nb"/>'+
-        '<feDisplacementMap in="SourceGraphic" in2="nb" scale="14" xChannelSelector="R" yChannelSelector="B"/>'+
-      '</filter>'+
-      '<filter id="lg-btn" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">'+
-        '<feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="1" seed="7" result="n2"/>'+
-        '<feGaussianBlur in="n2" stdDeviation="1.6" result="n2b"/>'+
-        '<feDisplacementMap in="SourceGraphic" in2="n2b" scale="26" xChannelSelector="R" yChannelSelector="B"/>'+
-      '</filter>'+
-    '</defs>';
-  document.body.appendChild(svg);
-}
-function ensureCSS(){
-  if(document.getElementById('lg-style'))return;
-  var EDGE='inset 3px 3px .5px -3.5px rgba(255,255,255,.6),'+
-           'inset -3px -3px .5px -3.5px rgba(255,255,255,.55),'+
-           'inset 1px 1px 1px -.5px rgba(255,255,255,.42),'+
-           'inset -1px -1px 1px -.5px rgba(255,255,255,.42),'+
-           'inset 0 0 6px 6px rgba(255,255,255,.07),'+
-           'inset 0 0 2px 2px rgba(255,255,255,.04)';
-  var st=document.createElement('style'); st.id='lg-style';
-  st.textContent=[
-    /* 主資訊卡：更透的玻璃 + 位移折射 + 玻璃邊緣光 */
-    '.np-card{background:rgba(20,14,26,.30)!important;'+
-      'backdrop-filter:blur(11px) saturate(1.6) url(#lg-card)!important;'+
-      '-webkit-backdrop-filter:blur(11px) saturate(1.6)!important;'+
-      'border:1px solid rgba(255,255,255,.16)!important;'+
-      'box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 12px rgba(255,255,255,.06),'+EDGE+'!important}',
-    /* 圓形按鈕（Lyrics / 愛心） */
-    '.icon-round{background:rgba(255,255,255,.06)!important;'+
-      'backdrop-filter:blur(6px) url(#lg-btn)!important;-webkit-backdrop-filter:blur(6px)!important;'+
-      'border:1px solid rgba(255,255,255,.22)!important;'+
-      'box-shadow:0 4px 14px rgba(0,0,0,.3),'+EDGE+'!important}',
-    /* 大播放鈕：保留亮底，疊玻璃邊緣 */
-    '.btn-play{box-shadow:0 10px 30px rgba(120,90,160,.45),0 0 10px rgba(255,255,255,.25),'+EDGE+'!important}',
-    /* SONGS/SCORE 切換器 track */
-    '#__vsw .vsw-track{backdrop-filter:blur(14px) saturate(1.4) url(#lg-btn)!important;'+
-      '-webkit-backdrop-filter:blur(14px) saturate(1.4)!important;'+
-      'box-shadow:0 8px 24px rgba(0,0,0,.42),'+EDGE+'!important}',
-    /* 底部分頁島：更透的霜面玻璃 + 加強邊緣反光（下方是深底，需靠亮邊撐出玻璃感） */
-    '#nav{background:rgba(255,255,255,.07)!important;'+
-      'backdrop-filter:blur(30px) saturate(1.7) url(#lg-card)!important;'+
-      '-webkit-backdrop-filter:blur(30px) saturate(1.7)!important;'+
-      'border:1px solid rgba(255,255,255,.24)!important;'+
-      'box-shadow:0 16px 42px rgba(0,0,0,.5),0 0 16px rgba(255,255,255,.12),'+EDGE+
-      ',inset 0 1px 0 rgba(255,255,255,.4)!important}',
-    /* 分頁島的光澤層調亮一點 */
-    '#nav::before{background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 46%)!important}',
-    /* 選中指示塊 → 液態玻璃錠 */
-    '#nav-ind{backdrop-filter:blur(8px) url(#lg-btn)!important;-webkit-backdrop-filter:blur(8px)!important;'+
-      'background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(242,155,194,.14))!important;'+
-      'box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 12px rgba(242,155,194,.2),'+EDGE+
-      ',0 4px 12px rgba(0,0,0,.2)!important}'
-  ].join('');
-  document.head.appendChild(st);
-}
-function apply(){ ensureSVG(); ensureCSS(); }
-apply();
-document.addEventListener('DOMContentLoaded',apply);
-window.addEventListener('load',apply);
 })();</script>
 </body>
 </html>
