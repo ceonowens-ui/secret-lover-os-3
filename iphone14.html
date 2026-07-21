@@ -45,8 +45,8 @@
   .cut{ position:absolute; left:50%; transform:translateX(-50%); background:#000; z-index:5; pointer-events:none; }
   .cut.notch{ top:0; width:200px; height:33px; border-radius:0 0 22px 22px; }
   .cut.island{ top:11px; width:126px; height:37px; border-radius:20px; }
-  /* 內容區:狀態列下方到底；底部保留安全區(同色連續，不另做塊) */
-  .content{ position:relative; flex:1 1 auto; min-height:0; padding-bottom:var(--bottom); background:#0d0a12; }
+  /* 內容區:狀態列下方一路鋪到螢幕底(webview = 螢幕 − 上安全區) */
+  .content{ position:relative; flex:1 1 auto; min-height:0; background:#0d0a12; }
   iframe{ width:100%; height:100%; border:0; display:block; background:#0d0a12; }
   /* home indicator:白條浮在內容上（不佔高度、不多一塊） */
   .homeind{
@@ -115,7 +115,11 @@
       try{
         var d=pv.contentDocument; if(!d||!d.head) return;
         var st=d.getElementById('__pv_safe'); if(!st){st=d.createElement('style');st.id='__pv_safe';d.head.appendChild(st);}
-        st.textContent='html #nav-wrap{bottom:calc(4px + '+CUR.bottom+'px)!important}';
+        var b=CUR.bottom;
+        st.textContent=
+          'html #nav-wrap{bottom:calc(4px + '+b+'px)!important}'+
+          'html .np-card{margin-bottom:calc(86px + '+b+'px)!important}'+
+          'html .screen-sub{padding-bottom:calc(96px + '+b+'px)!important}';
       }catch(e){}
     }
     pv.addEventListener('load',injectSafe);
