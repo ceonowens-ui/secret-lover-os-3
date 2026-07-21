@@ -1969,5 +1969,67 @@ function tick(){
 setInterval(tick,120);
 document.addEventListener('DOMContentLoaded',tick);
 })();</script>
+<script>(function(){
+/* ===== Liquid Glass 皮膚：SVG 位移折射 + 玻璃邊緣 inset（styles.css 不動，全注入） ===== */
+function ensureSVG(){
+  if(document.getElementById('lg-svg'))return;
+  var ns='http://www.w3.org/2000/svg';
+  var svg=document.createElementNS(ns,'svg');
+  svg.id='lg-svg'; svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden;pointer-events:none');
+  svg.innerHTML=
+    '<defs>'+
+      '<filter id="lg-card" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">'+
+        '<feTurbulence type="fractalNoise" baseFrequency="0.011 0.011" numOctaves="1" seed="4" result="n"/>'+
+        '<feGaussianBlur in="n" stdDeviation="2" result="nb"/>'+
+        '<feDisplacementMap in="SourceGraphic" in2="nb" scale="14" xChannelSelector="R" yChannelSelector="B"/>'+
+      '</filter>'+
+      '<filter id="lg-btn" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">'+
+        '<feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="1" seed="7" result="n2"/>'+
+        '<feGaussianBlur in="n2" stdDeviation="1.6" result="n2b"/>'+
+        '<feDisplacementMap in="SourceGraphic" in2="n2b" scale="26" xChannelSelector="R" yChannelSelector="B"/>'+
+      '</filter>'+
+    '</defs>';
+  document.body.appendChild(svg);
+}
+function ensureCSS(){
+  if(document.getElementById('lg-style'))return;
+  var EDGE='inset 3px 3px .5px -3.5px rgba(255,255,255,.6),'+
+           'inset -3px -3px .5px -3.5px rgba(255,255,255,.55),'+
+           'inset 1px 1px 1px -.5px rgba(255,255,255,.42),'+
+           'inset -1px -1px 1px -.5px rgba(255,255,255,.42),'+
+           'inset 0 0 6px 6px rgba(255,255,255,.07),'+
+           'inset 0 0 2px 2px rgba(255,255,255,.04)';
+  var st=document.createElement('style'); st.id='lg-style';
+  st.textContent=[
+    /* 主資訊卡：更透的玻璃 + 位移折射 + 玻璃邊緣光 */
+    '.np-card{background:rgba(20,14,26,.30)!important;'+
+      'backdrop-filter:blur(11px) saturate(1.6) url(#lg-card)!important;'+
+      '-webkit-backdrop-filter:blur(11px) saturate(1.6)!important;'+
+      'border:1px solid rgba(255,255,255,.16)!important;'+
+      'box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 12px rgba(255,255,255,.06),'+EDGE+'!important}',
+    /* 圓形按鈕（Lyrics / 愛心） */
+    '.icon-round{background:rgba(255,255,255,.06)!important;'+
+      'backdrop-filter:blur(6px) url(#lg-btn)!important;-webkit-backdrop-filter:blur(6px)!important;'+
+      'border:1px solid rgba(255,255,255,.22)!important;'+
+      'box-shadow:0 4px 14px rgba(0,0,0,.3),'+EDGE+'!important}',
+    /* 大播放鈕：保留亮底，疊玻璃邊緣 */
+    '.btn-play{box-shadow:0 10px 30px rgba(120,90,160,.45),0 0 10px rgba(255,255,255,.25),'+EDGE+'!important}',
+    /* SONGS/SCORE 切換器 track */
+    '#__vsw .vsw-track{backdrop-filter:blur(14px) saturate(1.4) url(#lg-btn)!important;'+
+      '-webkit-backdrop-filter:blur(14px) saturate(1.4)!important;'+
+      'box-shadow:0 8px 24px rgba(0,0,0,.42),'+EDGE+'!important}',
+    /* 底部 nav */
+    '#nav{backdrop-filter:blur(16px) saturate(1.4) url(#lg-card)!important;'+
+      '-webkit-backdrop-filter:blur(16px) saturate(1.4)!important;'+
+      'box-shadow:0 12px 34px rgba(0,0,0,.5),'+EDGE+'!important}'
+  ].join('');
+  document.head.appendChild(st);
+}
+function apply(){ ensureSVG(); ensureCSS(); }
+apply();
+document.addEventListener('DOMContentLoaded',apply);
+window.addEventListener('load',apply);
+})();</script>
 </body>
 </html>
