@@ -56,6 +56,7 @@
     <div class="ctl"><label>nav 上下</label><input id="s-navb" type="range" min="0" max="180" step="2" value="0"><span class="val" id="v-navb">0</span></div>
     <div class="ctl"><label>卡片間距</label><input id="s-npb" type="range" min="10" max="240" step="2" value="86"><span class="val" id="v-npb">86</span></div>
     <div class="ctl"><label>nav 大小</label><input id="s-scale" type="range" min="70" max="140" step="1" value="98"><span class="val" id="v-scale">98%</span></div>
+    <div class="ctl"><label>nav 上下微移</label><input id="s-navy" type="range" min="-120" max="120" step="2" value="0"><span class="val" id="v-navy">0</span></div>
     <div class="out">
       <textarea id="out" readonly></textarea>
       <button id="copy">複製設定</button>
@@ -88,7 +89,7 @@
     var sel=document.getElementById('model'),phone=document.getElementById('phone'),cut=document.getElementById('cut'),pv=document.getElementById('pv');
     MODELS.forEach(function(m,i){var o=document.createElement('option');o.value=i;o.textContent=m.n;sel.appendChild(o);});
     var CUR=MODELS[0];
-    var S={cover:2,navb:0,npb:86,scale:0.98};
+    var S={cover:2,navb:0,npb:86,scale:0.98,navy:0};
     function inject(){
       try{
         var d=pv.contentDocument; if(!d||!d.head) return;
@@ -98,7 +99,7 @@
           'html,body{height:100%!important;min-height:100%!important}'+
           'html #stage{height:100%!important}'+
           'html .cover-card{margin-top:'+S.cover+'px!important}'+
-          'html #nav-wrap{bottom:calc('+S.navb+'px + '+b+'px)!important}'+
+          'html #nav-wrap{bottom:calc('+S.navb+'px + '+b+'px)!important;transform:translateY('+S.navy+'px)!important}'+
           'html .np-card{margin-bottom:calc('+S.npb+'px + '+b+'px)!important}'+
           'html #nav{transform:scale('+S.scale+')!important;transform-origin:center bottom!important}'+
           'html .screen-sub{padding-bottom:calc(96px + '+b+'px)!important}';
@@ -107,8 +108,8 @@
     }
     function out(){
       document.getElementById('out').value=
-        '封面上距 '+S.cover+' · nav底距 '+S.navb+' · 卡片間距 '+S.npb+' · nav '+Math.round(S.scale*100)+'%\n'+
-        '.cover-card margin-top:'+S.cover+'px | #nav-wrap bottom base:'+S.navb+'px | .np-card mb base:'+S.npb+'px | #nav scale:'+S.scale;
+        '封面上距 '+S.cover+' · nav底距 '+S.navb+' · nav微移 '+S.navy+' · 卡片間距 '+S.npb+' · nav '+Math.round(S.scale*100)+'%\n'+
+        '.cover-card mt:'+S.cover+'px | #nav-wrap bottom+'+S.navb+'px translateY:'+S.navy+'px | .np-card mb+'+S.npb+'px | #nav scale:'+S.scale;
     }
     function apply(){
       var m=MODELS[sel.value]; CUR=m;
@@ -119,7 +120,7 @@
     }
     function bind(id,key,fmt){var s=document.getElementById('s-'+id),v=document.getElementById('v-'+id);
       s.addEventListener('input',function(){var val=+s.value; S[key]=(key==='scale')?val/100:val; v.textContent=fmt?fmt(val):val; inject();});}
-    bind('cover','cover');bind('navb','navb');bind('npb','npb');bind('scale','scale',function(x){return x+'%';});
+    bind('cover','cover');bind('navb','navb');bind('npb','npb');bind('navy','navy');bind('scale','scale',function(x){return x+'%';});
     sel.addEventListener('change',apply);
     pv.addEventListener('load',inject);
     document.getElementById('reload').addEventListener('click',function(){pv.src='https://ceon0693.uk/test.html?r='+Date.now();});
