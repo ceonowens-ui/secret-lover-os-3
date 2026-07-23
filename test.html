@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<!-- iPhone 鐵則：viewport-fit=cover 必須有，安全區才會生效 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- PWA / iPhone 加入主畫面 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- theme-color 由 app.js 依 ALBUM_CONFIG.theme.themeColor 覆寫 -->
+<meta name="theme-color" content="#0d0a12">
+<meta name="app-version" content="v2-smooth">
+<link rel="manifest" href="test.webmanifest">
+<!-- 標題與 icon 由 app.js 從 config 填入 -->
+<title>秘密關係 Secret Lover · 原聲平台</title>
+<link id="apple-touch-icon" rel="apple-touch-icon" href="score-cover.jpg">
+
+<!-- 字體（想換字體就改這行 + styles.css 的 --font-* 變數） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* =====================================================================
+ * ALBUM APP TEMPLATE — styles.css
+ * =====================================================================
+ * 不含專輯專屬資料。所有顏色透過 CSS 變數（由 app.js 從
+ * ALBUM_CONFIG.theme 注入），換專輯不需要改這個檔案。
+ *
+ * iPhone 鐵則（來自實測，違反任何一條 iPhone Safari 就會壞）：
+ *   1. 每個 backdrop-filter 都「同時」有 -webkit-backdrop-filter
+ *   2. 安全區：env(safe-area-inset-top / bottom)
+ *   3. 高度：100vh 後面補 100dvh
+ *   4. viewport meta 必須有 viewport-fit=cover（在 index.html）
+ * ===================================================================== */
+
+:root {
+  /* 預設值 = Secret Lover 主題；app.js 會用 ALBUM_CONFIG.theme 覆寫 */
+  --bg: #0d0a12;
+  --bg-top: #1c1426;
+  --surface: rgba(22, 16, 28, .55);
+  --primary: #f29bc2;
+  --secondary: #c9b0ec;
+  --accent: #afc7f6;
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, .62);
+  /* app.js 會把 primary 換算成 r,g,b 填進來，供 rgba() 使用 */
+  --primary-rgb: 242, 155, 194;
+  --grad: linear-gradient(135deg, var(--primary), var(--secondary) 52%, var(--accent));
+  --font-display: 'Playfair Display', serif;   /* 英文斜體大標 */
+  --font-label: 'Bodoni Moda', serif;          /* 小型全大寫 label / 數字 */
+  --font-serif-tc: 'Noto Serif TC', serif;     /* 中文標題 */
+  --font-sans-tc: 'Noto Sans TC', sans-serif;  /* 中文內文 */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100vh;
+  height: 100dvh; /* iPhone：dvh 蓋掉 vh */
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans-tc);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- 舞台：手機滿版；桌機置中成手機比例 --------------------------- */
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--bg);
+}
+@media (min-width: 520px) {
+  body { display: flex; align-items: center; justify-content: center;
+         background: radial-gradient(130% 100% at 50% -5%, var(--bg-top), #060409 60%); }
+  #stage { width: 416px; height: min(870px, 96vh); border-radius: 44px;
+           box-shadow: 0 44px 90px rgba(0,0,0,.6), 0 0 0 12px #17131d, 0 0 0 13px rgba(255,255,255,.07); }
+}
+
+/* ---- 分頁 screen ---------------------------------------------------- */
+.screen { position: absolute; inset: 0; display: none; overflow-y: auto;
+          -webkit-overflow-scrolling: touch; }
+.screen.active { display: block; }
+.screen-sub { background: radial-gradient(120% 60% at 50% 0%, var(--bg-top), var(--bg) 70%);
+              padding: 62px 0 calc(96px + env(safe-area-inset-bottom)); }
+
+/* =====================================================================
+ * PLAYER
+ * =================================================================== */
+#screen-player { background: var(--bg); }
+.player-fold { height: 100%; min-height: 520px; display: flex; flex-direction: column; }
+
+/* 封面：圓角長方形 + 上方留白（DESIGN LOCK：不要改成貼頂滿版） */
+.cover-card {
+  position: relative; flex: 1; min-height: 240px; overflow: hidden;
+  margin: calc(16px + env(safe-area-inset-top)) 12px 0;
+  border-radius: 28px;
+  box-shadow: 0 22px 50px rgba(0,0,0,.58), 0 5px 16px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.06);
+}
+.cover-card img, .cover-card video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center 42%;
+  transform-origin: center 45%;
+  animation: breathe 7s ease-in-out infinite;
+  animation-play-state: paused; /* 播放時 app.js 切成 running（呼吸動畫） */
+}
+.cover-card.playing img, .cover-card.playing video { animation-play-state: running; }
+/* 有設定 coverVideo 時，影片顯示、圖片當作影片載入前的 poster 用途隱藏 */
+.cover-card video { display: none; }
+.cover-card.has-video video { display: block; }
+.cover-card.has-video img { display: none; }
+.cover-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,.33) 7%,
+              transparent 15%, transparent 78%, rgba(0,0,0,.3) 91%, rgba(0,0,0,.51) 100%);
+}
+.cover-titles { position: absolute; top: 0; left: 0; right: 0; padding: 14px 24px 0;
+                text-align: center; z-index: 2; }
+.cover-eyebrow { font-family: var(--font-label); font-weight: 500; font-size: 9px;
+                 letter-spacing: 4.5px; color: rgba(255,255,255,.85);
+                 text-transform: uppercase; text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+.cover-title-en { font-family: var(--font-display); font-style: italic; font-weight: 600;
+                  font-size: 28px; letter-spacing: .5px; line-height: 1; margin-top: 5px;
+                  text-shadow: 0 3px 20px rgba(0,0,0,.6); }
+
+/* Now Playing：毛玻璃卡片，往上疊在封面（DESIGN LOCK） */
+.np-card {
+  position: relative; z-index: 3;
+  margin: -52px 18px calc(86px + env(safe-area-inset-bottom));
+  padding: 12px 18px 4px;
+  background: var(--surface);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px); /* iPhone 必要 */
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+}
+.np-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.np-label { font-family: var(--font-label); font-size: 9px; letter-spacing: 4px;
+            color: var(--primary); text-transform: uppercase; }
+.np-title { font-family: var(--font-serif-tc); font-size: 22px; font-weight: 600;
+            margin-top: 3px; letter-spacing: 1.5px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-sub { font-family: var(--font-display); font-style: italic; font-size: 13px;
+          color: rgba(255,255,255,.7); margin-top: 4px;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-actions { display: flex; gap: 8px; margin-left: 12px; flex: none; }
+.icon-round {
+  position: relative; width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(var(--primary-rgb), .12); border: 1px solid rgba(var(--primary-rgb), .45);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--primary);
+}
+.icon-round:active { transform: scale(.92); }
+.icon-round.liked svg { animation: bounce .5s ease; }
+
+/* 進度條 */
+.prog { position: relative; height: 4px; border-radius: 4px;
+        background: rgba(255,255,255,.18); cursor: pointer; margin-top: 12px;
+        touch-action: none; }
+.prog-fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px;
+             width: 0%; background: var(--grad); }
+.prog-glow { position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
+             width: 32px; height: 32px; border-radius: 50%;
+             background: rgba(var(--primary-rgb), .9); filter: blur(7px); opacity: .34;
+             pointer-events: none; }
+.prog-glow.pulsing { animation: dotPulse 2.4s ease-in-out infinite; }
+.prog-dot { position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
+            width: 26px; height: 26px; border-radius: 50%; z-index: 1;
+            background: var(--grad); border: 2px solid #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-serif-tc); font-size: 12px; font-weight: 600; color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,.4), 0 0 12px rgba(var(--primary-rgb), .9); }
+.prog-dot:empty { width: 14px; height: 14px; } /* 沒設定角色標籤時退回小圓點 */
+.np-times { display: flex; justify-content: space-between; margin-top: 9px;
+            font-family: var(--font-label); font-size: 11px; letter-spacing: 1px;
+            color: rgba(255,255,255,.55); }
+
+/* 控制鍵 */
+.np-controls { display: flex; align-items: center; justify-content: center;
+               gap: 28px; margin-top: 2px; }
+.btn-ghost { background: none; border: none; cursor: pointer; padding: 6px;
+             color: rgba(255,255,255,.85); }
+.btn-ghost:active { transform: scale(.9); }
+.btn-play {
+  width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 30px rgba(120,90,160,.45),
+              inset 0 1px 10px rgba(var(--primary-rgb), .55),
+              inset 0 0 0 1px rgba(255,255,255,.55);
+}
+.btn-play:active { transform: scale(.94); }
+.btn-play svg { fill: #2c1f3a; }
+
+/* Next Scene（打開 Bottom Sheet） */
+.np-next { display: flex; align-items: center; justify-content: space-between;
+           border-top: 1px solid rgba(255,255,255,.10); margin-top: 6px;
+           padding: 6px 2px 2px; cursor: pointer; }
+.np-next span { font-family: var(--font-label); font-size: 10px; letter-spacing: 3px;
+                color: rgba(255,255,255,.6); text-transform: uppercase; }
+
+/* 曲目列表（fold 之下） */
+.tracklist-block { background: var(--bg);
+                   /* 依照《播放器設計系統－完整規格》：版面結構圖裡 NP 卡下面
+                      直接就是浮動 nav，曲目清單是靠 Next Scene 打開 Bottom Sheet
+                      看，不是在主畫面用負 margin 「偷跑」出來。這裡不做任何負值
+                      上拉，避免跟 nav 佔用的區域打架。 */
+                   margin-top: 0;
+                   padding: 18px 16px calc(120px + env(safe-area-inset-bottom)); }
+.tracklist-caption { font-family: var(--font-label); font-size: 10px; letter-spacing: 3px;
+                     color: rgba(255,255,255,.5); text-transform: uppercase; padding: 0 12px 8px; }
+.track-row { display: flex; align-items: center; gap: 13px; padding: 10px 12px;
+             border-radius: 14px; cursor: pointer; }
+.track-row:active { background: rgba(255,255,255,.05); }
+.track-row.current { background: rgba(var(--primary-rgb), .10); }
+.track-row.revealing { animation: reveal .5s ease both; }
+.track-num { font-family: var(--font-label); font-size: 13px; width: 24px;
+             text-align: center; color: #9a93a8; flex: none; }
+.track-name { flex: 1; min-width: 0; font-family: var(--font-serif-tc); font-size: 16px;
+              color: rgba(255,255,255,.82);
+              white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-row.current .track-num { color: var(--primary); }
+.track-row.current .track-name { color: #fff; }
+.track-row.locked .track-num { color: #5f5870; }
+.track-row.locked .track-name { color: #7a7388; font-style: italic; letter-spacing: 1px; }
+.track-dl { display: flex; align-items: center; justify-content: center;
+            width: 34px; height: 34px; flex: none; border: none; border-radius: 10px;
+            background: rgba(var(--primary-rgb), .12); cursor: pointer; color: var(--primary); }
+
+/* =====================================================================
+ * BOTTOM SHEET（曲目表：可滑動、iOS 拖曳把手關閉）
+ * =================================================================== */
+#sheet-backdrop { position: absolute; inset: 0; z-index: 60;
+                  background: rgba(8,6,12,.55); animation: fadeIn .25s ease; }
+#sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 61; height: 84%;
+  background: linear-gradient(180deg, var(--bg-top), var(--bg));
+  border-radius: 26px 26px 0 0;
+  border-top: 1px solid rgba(255,255,255,.12);
+  display: flex; flex-direction: column;
+  animation: slideUp .32s cubic-bezier(.22,.9,.3,1);
+  touch-action: none; /* 拖曳關閉時避免頁面捲動打架 */
+  will-change: transform;
+}
+#sheet.dragging { animation: none; transition: none; }
+#sheet.snapping { transition: transform .28s cubic-bezier(.22,.9,.3,1); }
+.sheet-grabber { width: 44px; height: 5px; border-radius: 3px;
+                 background: rgba(255,255,255,.28); margin: 10px auto 0; flex: none; }
+.sheet-head { padding: 8px 24px; display: flex; align-items: center;
+              justify-content: space-between; flex: none; }
+.sheet-eyebrow { font-family: var(--font-label); font-size: 10px; letter-spacing: 4px;
+                 color: var(--primary); text-transform: uppercase; }
+.sheet-title { font-family: var(--font-serif-tc); font-size: 15px; margin-top: 4px;
+               letter-spacing: 2px; }
+.sheet-close { width: 34px; height: 34px; border-radius: 50%;
+               background: rgba(255,255,255,.08); border: none; color: #fff;
+               cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.sheet-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+              padding: 6px 14px calc(30px + env(safe-area-inset-bottom));
+              touch-action: pan-y; }
+.sheet-list .track-row { padding: 13px 14px; }
+
+/* =====================================================================
+ * LYRICS OVERLAY
+ * =================================================================== */
+#lyrics-overlay { position: absolute; inset: 0; z-index: 65;
+                  background: rgba(10,7,14,.92);
+                  backdrop-filter: blur(18px);
+                  -webkit-backdrop-filter: blur(18px);
+                  display: flex; flex-direction: column; animation: fadeIn .25s ease; }
+.lyrics-head { flex: none; padding: calc(20px + env(safe-area-inset-top)) 24px 10px;
+               display: flex; align-items: flex-start; justify-content: space-between; }
+.lyrics-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+               padding: 8px 30px calc(60px + env(safe-area-inset-bottom));
+               font-family: var(--font-serif-tc); font-size: 16px; line-height: 2.2;
+               color: rgba(255,255,255,.86); white-space: pre-wrap; text-align: center;
+               letter-spacing: 1px; }
+.lyrics-empty { color: var(--muted); font-size: 13px; padding-top: 60px; text-align: center; }
+
+/* =====================================================================
+ * PURCHASE（付費解鎖頁）
+ * =================================================================== */
+.page-titles { text-align: center; padding: 0 28px; }
+.page-title-en { font-family: var(--font-display); font-style: italic; font-size: 27px; }
+.page-title-tc { font-family: var(--font-serif-tc); font-size: 16px;
+                 color: rgba(255,255,255,.85); letter-spacing: 2px; margin-top: 8px; }
+.page-note { font-size: 12.5px; color: rgba(255,255,255,.5); margin-top: 12px; line-height: 1.75; }
+
+.plans { padding: 28px 22px 0; display: flex; flex-direction: column; gap: 18px; }
+.plan { position: relative; border-radius: 22px; padding: 24px 22px; cursor: pointer;
+        background: rgba(255,255,255,.04); border: 1.5px solid rgba(255,255,255,.12); }
+.plan.deluxe { background: rgba(var(--primary-rgb), .07);
+               border-color: rgba(var(--primary-rgb), .45); }
+.plan.selected { border-color: var(--primary); }
+.plan-badge { position: absolute; top: -11px; right: 18px; background: var(--grad);
+              color: #fff; font-family: var(--font-label); font-size: 10px;
+              padding: 5px 12px; border-radius: 20px; letter-spacing: 2px; }
+.plan-name { font-family: var(--font-serif-tc); font-size: 15px; letter-spacing: 1px; }
+.plan-price { font-family: var(--font-label); font-size: 30px; font-weight: 700; margin-top: 4px; }
+.plan-features { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.plan-feature { display: flex; gap: 9px; font-size: 12.5px; color: rgba(255,255,255,.7);
+                align-items: center; }
+.plan-feature svg { flex: none; stroke: var(--primary); }
+
+.cta-block { padding: 18px 24px 0; }
+.btn-primary { display: block; width: 100%; text-align: center; padding: 15px;
+               border-radius: 16px; background: var(--grad); color: #fff; border: none;
+               font-family: var(--font-serif-tc); font-size: 14px; letter-spacing: 2px;
+               cursor: pointer; font-weight: 600; }
+.btn-primary:active { transform: scale(.98); }
+.btn-outline { display: block; width: 100%; text-align: center; padding: 14px;
+               margin-top: 11px; border-radius: 16px; background: none; color: var(--primary);
+               border: 1.5px solid rgba(var(--primary-rgb), .5);
+               font-family: var(--font-serif-tc); font-size: 13px; letter-spacing: 2px;
+               cursor: pointer; }
+
+/* =====================================================================
+ * UNLOCK（兌換頁）
+ * =================================================================== */
+.unlock-lock-badge { width: 62px; height: 62px; border-radius: 50%;
+                     background: rgba(var(--primary-rgb), .14);
+                     border: 1px solid rgba(var(--primary-rgb), .4);
+                     display: flex; align-items: center; justify-content: center;
+                     margin: 0 auto 16px; color: var(--primary); }
+.form-block { padding: 22px 28px 0; }
+.form-label { font-family: var(--font-label); font-size: 11px; font-weight: 600;
+              color: rgba(255,255,255,.5); letter-spacing: 3px; }
+.form-input { width: 100%; margin: 9px 0 18px; padding: 15px; border-radius: 16px;
+              border: 1.5px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05);
+              font-size: 14px; color: #fff; outline: none; font-family: var(--font-serif-tc); }
+.form-input:focus { border-color: rgba(var(--primary-rgb), .6); }
+.form-hint { text-align: center; font-size: 12px; color: rgba(255,255,255,.5); margin-top: 22px;
+             cursor: pointer; }
+.form-hint b { color: var(--primary); font-weight: 500; }
+
+.unlocked-card { border-radius: 22px; background: rgba(var(--primary-rgb), .08);
+                 border: 1px solid rgba(var(--primary-rgb), .3);
+                 padding: 28px 22px; text-align: center; margin: 26px 24px 0; }
+.unlocked-check { width: 58px; height: 58px; border-radius: 50%; background: var(--grad);
+                  display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.unlocked-eyebrow { font-family: var(--font-label); font-size: 11px; color: var(--primary);
+                    letter-spacing: 3px; }
+.unlocked-title { font-family: var(--font-serif-tc); font-size: 17px; margin-top: 8px;
+                  letter-spacing: 1px; }
+.unlocked-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center;
+                    flex-wrap: wrap; }
+.btn-chip { display: flex; align-items: center; gap: 7px; padding: 13px 22px;
+            border-radius: 14px; background: rgba(255,255,255,.08); color: #fff;
+            border: 1px solid rgba(255,255,255,.16); font-family: var(--font-serif-tc);
+            font-size: 13px; letter-spacing: 1.5px; cursor: pointer; text-decoration: none; }
+.btn-chip.grad { background: var(--grad); border: none; }
+.unlocked-note { font-size: 11px; color: rgba(255,255,255,.38); margin-top: 13px;
+                 letter-spacing: .5px; }
+.unlocked-reset { font-size: 11px; color: rgba(255,255,255,.28); margin-top: 16px;
+                  letter-spacing: .5px; cursor: pointer; text-decoration: underline;
+                  text-underline-offset: 3px; }
+
+/* =====================================================================
+ * MOOD WALL（粉絲心情牆）
+ * =================================================================== */
+.mood-count { text-align: center; font-size: 12px; color: rgba(255,255,255,.5);
+              letter-spacing: .5px; padding: 18px 28px 4px; }
+.mood-count b { color: var(--primary); font-weight: 600; font-family: var(--font-label); }
+.mood-form { margin: 10px 20px 0; padding: 18px 17px; border-radius: 22px;
+             background: rgba(255,255,255,.05);
+             backdrop-filter: blur(10px);
+             -webkit-backdrop-filter: blur(10px);
+             border: 1px solid rgba(var(--primary-rgb), .22);
+             box-shadow: 0 12px 30px rgba(0,0,0,.3); }
+.mood-form .form-input { margin: 0; padding: 12px 14px; border-radius: 14px; font-size: 13.5px; }
+.mood-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 4px; }
+.mood-tag { padding: 7px 14px; border-radius: 20px; font-size: 12px;
+            font-family: var(--font-serif-tc); cursor: pointer;
+            background: rgba(255,255,255,.05); color: rgba(255,255,255,.6);
+            border: 1px solid rgba(255,255,255,.16); }
+.mood-tag.selected { background: var(--grad); color: #fff; border-color: transparent;
+                     box-shadow: 0 5px 14px rgba(var(--primary-rgb), .3); }
+.mood-textarea { width: 100%; min-height: 74px; resize: none; margin-top: 12px;
+                 padding: 13px 15px; border-radius: 14px;
+                 border: 1.5px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05);
+                 font-size: 13.5px; line-height: 1.6; color: #fff; outline: none;
+                 font-family: var(--font-serif-tc); }
+.mood-chars { text-align: right; font-family: var(--font-label); font-size: 11px;
+              color: rgba(255,255,255,.4); margin-top: 6px; }
+.mood-err { color: var(--primary); font-size: 11.5px; text-align: center; margin-top: 4px; }
+.mood-submit { margin-top: 10px; border-radius: 22px; }
+.mood-notes { padding: 20px 20px 0; }
+.mood-note { background: rgba(255,255,255,.04);
+             backdrop-filter: blur(8px);
+             -webkit-backdrop-filter: blur(8px);
+             border: 1px solid rgba(255,255,255,.08); border-radius: 18px;
+             padding: 15px 17px; margin-bottom: 12px; }
+.mood-note.new { animation: reveal .5s ease both; }
+.mood-note-head { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.mood-note-name { font-family: var(--font-serif-tc); font-size: 13px; font-weight: 600;
+                  color: #e6def0; }
+.mood-note-tag { font-size: 10.5px; color: var(--primary);
+                 background: rgba(var(--primary-rgb), .14); padding: 3px 10px;
+                 border-radius: 14px; letter-spacing: .5px; white-space: nowrap; }
+.mood-note-text { font-family: var(--font-serif-tc); font-size: 13.5px; line-height: 1.7;
+                  color: rgba(255,255,255,.85); }
+.mood-note-time { font-family: var(--font-label); font-size: 10.5px;
+                  color: rgba(255,255,255,.35); margin-top: 9px; letter-spacing: .5px; }
+
+/* =====================================================================
+ * GALLERY（寫真牆：橫向滑動相簿，scroll-snap 一次一張）
+ * =================================================================== */
+.gallery-scroll {
+  display: flex; gap: 14px; margin-top: 22px; padding: 4px 28px 8px;
+  overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.gallery-scroll::-webkit-scrollbar { display: none; }
+.gallery-slide {
+  position: relative; flex: 0 0 78%; scroll-snap-align: center;
+  aspect-ratio: 3 / 4.4; border-radius: 24px; overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0,0,0,.5), 0 4px 14px rgba(0,0,0,.35),
+              0 0 0 1px rgba(255,255,255,.06);
+}
+.gallery-slide img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center 30%;
+}
+.gallery-slide .gallery-shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.55) 100%);
+}
+.gallery-slide .gallery-caption {
+  position: absolute; left: 16px; right: 16px; bottom: 14px;
+  font-family: var(--font-serif-tc); font-size: 12.5px; letter-spacing: .5px;
+  color: rgba(255,255,255,.9);
+}
+.gallery-dots { display: flex; justify-content: center; gap: 7px; margin-top: 16px; }
+.gallery-dot { width: 6px; height: 6px; border-radius: 50%;
+               background: rgba(255,255,255,.25); transition: background .25s ease, transform .25s ease; }
+.gallery-dot.active { background: var(--primary); transform: scale(1.3); }
+
+/* =====================================================================
+ * FLOATING ISLAND BOTTOM NAV（DESIGN LOCK：浮動島狀 pill）
+ * =================================================================== */
+#nav-wrap { position: absolute; left: 0; right: 0;
+            bottom: calc(12px + env(safe-area-inset-bottom)); /* 避開 home indicator */
+            z-index: 70; display: flex; justify-content: center; pointer-events: none; }
+#nav { position: relative; display: flex; padding: 6px; border-radius: 30px;
+       background: rgba(18,18,22,.16);
+       backdrop-filter: blur(44px) saturate(1.7);
+       -webkit-backdrop-filter: blur(44px) saturate(1.7); /* iPhone 必要 */
+       border: 1px solid rgba(255,255,255,.1);
+       box-shadow: 0 16px 42px rgba(0,0,0,.44), 0 2px 8px rgba(0,0,0,.26),
+                   inset 0 1px 0 rgba(255,255,255,.32), inset 0 -8px 16px rgba(255,255,255,.05);
+       pointer-events: auto; }
+#nav::before { content: ""; position: absolute; inset: 0; border-radius: 30px;
+               background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 42%);
+               pointer-events: none; }
+#nav-ind { position: absolute; top: 6px; left: 6px; width: 64px;
+           height: calc(100% - 12px); border-radius: 21px;
+           transform: translateX(0);
+           transition: transform .46s cubic-bezier(.34,1.32,.42,1);
+           background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(var(--primary-rgb), .12));
+           box-shadow: inset 0 1px 0 rgba(255,255,255,.45),
+                       inset 0 0 12px rgba(var(--primary-rgb), .18),
+                       inset 0 -6px 12px rgba(255,255,255,.06), 0 4px 12px rgba(0,0,0,.16);
+           backdrop-filter: blur(6px);
+           -webkit-backdrop-filter: blur(6px);
+           pointer-events: none; }
+.navbtn { position: relative; z-index: 1; width: 64px; padding: 7px 0 6px;
+          border: none; background: none; cursor: pointer;
+          display: flex; flex-direction: column; align-items: center; gap: 3px;
+          font-family: var(--font-serif-tc); font-size: 9px; letter-spacing: 1.2px;
+          color: #8f8a9c; transition: color .3s ease, transform .18s ease; }
+.navbtn:active { transform: scale(.92); }
+.navbtn .navico { display: flex; transition: filter .35s ease; }
+.navbtn .navlbl { opacity: .62; transition: opacity .3s ease; }
+.navbtn.active { color: #fbd6e6; }
+.navbtn.active .navico { filter: drop-shadow(0 0 7px rgba(var(--primary-rgb), .6)); }
+.navbtn.active .navlbl { opacity: 1; }
+.navbtn.pop .navico { animation: tabPop .26s cubic-bezier(.34,1.3,.4,1); }
+
+/* =====================================================================
+ * TOAST / 動畫特效
+ * =================================================================== */
+#toast { position: absolute; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom));
+         z-index: 100; transform: translateX(-50%);
+         background: rgba(20,15,26,.96); border: 1px solid rgba(var(--primary-rgb), .4);
+         color: #fff; padding: 10px 20px; border-radius: 22px; font-size: 12.5px;
+         font-family: var(--font-serif-tc); white-space: nowrap; max-width: 84%;
+         overflow: hidden; text-overflow: ellipsis; text-align: center;
+         box-shadow: 0 8px 24px rgba(0,0,0,.5);
+         opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+#toast.show { opacity: 1; }
+
+#fx-layer { position: absolute; inset: 0; z-index: 80; pointer-events: none; overflow: hidden; }
+.fx-heart { position: absolute; }
+.fx-glow { position: absolute; width: 150px; height: 150px; border-radius: 50%;
+           background: radial-gradient(circle, rgba(var(--primary-rgb), .55),
+                       rgba(var(--primary-rgb), .22) 55%, transparent 72%);
+           transform: translate(-50%, -50%); animation: glowFade 1.1s ease-out both; }
+.fx-ring { position: absolute; width: 64px; height: 64px; border-radius: 50%;
+           border: 1.5px solid rgba(var(--primary-rgb), .8);
+           transform: translate(-50%, -50%);
+           animation: ringPulse .9s cubic-bezier(.2,.7,.3,1) both; }
+.fx-bloom { position: absolute; transform: translate(-50%, -50%);
+            filter: drop-shadow(0 4px 14px rgba(var(--primary-rgb), .6));
+            animation: bloomHeart 1s cubic-bezier(.3,1.3,.5,1) both; }
+#unlock-fx { position: absolute; inset: 0; z-index: 90; pointer-events: none;
+             background: radial-gradient(60% 50% at 50% 45%,
+                         rgba(var(--primary-rgb), .55), rgba(var(--primary-rgb), .3) 45%,
+                         transparent 72%);
+             animation: burstGlow 1.8s ease-out forwards; }
+#unlock-fx .fx-ring2 { position: absolute; left: 50%; top: 42%;
+                       transform: translate(-50%, -50%); width: 120px; height: 120px;
+                       border-radius: 50%; border: 2px solid rgba(var(--primary-rgb), .7);
+                       animation: ring 1.4s ease-out forwards; }
+.fx-float { position: absolute; bottom: 35%; animation: floatUp 1.2s ease-out both; }
+
+.hidden { display: none !important; }
+
+/* ---- keyframes ------------------------------------------------------ */
+@keyframes breathe   { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes reveal    { 0% { opacity: 0; transform: translateY(12px); } 100% { opacity: 1; transform: none; } }
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp   { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes bounce    { 0% { transform: scale(1); } 30% { transform: scale(1.2); } 55% { transform: scale(.95); } 100% { transform: scale(1); } }
+@keyframes tabPop    { 0% { transform: scale(1); } 32% { transform: scale(.9); } 66% { transform: scale(1.07); } 100% { transform: scale(1); } }
+@keyframes dotPulse  { 0%,100% { opacity: .3; transform: translate(-50%,-50%) scale(.8); } 50% { opacity: .78; transform: translate(-50%,-50%) scale(1.25); } }
+@keyframes ring      { 0% { transform: translate(-50%,-50%) scale(.6); opacity: .7; } 100% { transform: translate(-50%,-50%) scale(2.4); opacity: 0; } }
+@keyframes ringPulse { 0% { opacity: .7; transform: translate(-50%,-50%) scale(.35); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(2.8); } }
+@keyframes glowFade  { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.5); } 28% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.6); } }
+@keyframes bloomHeart{ 0% { opacity: 0; transform: translate(-50%,-50%) scale(.25); } 32% { opacity: 1; transform: translate(-50%,-50%) scale(1.18); } 48% { transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(.9) translateY(-30px); } }
+@keyframes burstGlow { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes floatUp   { 0% { opacity: 0; transform: translateY(0) scale(.5); } 12% { opacity: 1; } 100% { opacity: 0; transform: translateY(-220px) scale(1.15); } }
+@keyframes floatHeart{ 0% { opacity: 0; transform: translate(-50%,-50%) scale(.2) rotate(0); }
+                       18% { opacity: .95; transform: translate(-50%,-50%) scale(var(--s)) rotate(0); }
+                       100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% - var(--rise))) scale(var(--s)) rotate(var(--r2)); } }
+@keyframes heartbeat { 0%,100% { transform: scale(1); } 30% { transform: scale(1.22); } 55% { transform: scale(1); } }
+
+</style>
+</head>
+<body>
+<div id="viewfade" style="position:fixed;inset:0;background:#0d0a12;z-index:99999;opacity:0;pointer-events:none;transition:opacity .2s ease"></div>
+<script>(function(){try{if(sessionStorage.getItem('slv-switch')==='1'){var f=document.getElementById('viewfade');f.style.transition='none';f.style.opacity='1';}}catch(e){}})();</script>
+<div id="stage">
+
+  <!-- ================= PLAYER（聽歌）================= -->
+  <section id="screen-player" class="screen active">
+    <div class="player-fold">
+
+      <!-- 封面（換圖：album-config.js → coverImage） -->
+      <div class="cover-card" id="cover-card">
+        <img id="cover-img" src="" alt="">
+        <video id="cover-video" autoplay muted loop playsinline webkit-playsinline></video>
+        <div class="cover-shade"></div>
+        <div class="cover-titles">
+          <div class="cover-eyebrow" id="cover-eyebrow"></div>
+          <div class="cover-title-en" id="cover-title-en"></div>
+        </div>
+      </div>
+
+      <!-- Now Playing 毛玻璃卡片 -->
+      <div class="np-card">
+        <div class="np-head">
+          <div style="flex:1;min-width:0">
+            <div class="np-label" id="np-label"></div>
+            <div class="np-title" id="np-title">—</div>
+            <div class="np-sub" id="np-sub"></div>
+          </div>
+          <div class="np-actions">
+            <!-- 歌詞按鈕（這首歌沒歌詞時 app.js 會自動隱藏） -->
+            <button class="icon-round" id="btn-lyrics" title="歌詞">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M4 20h2"/><path d="M4 4h16"/><path d="M4 12h10"/></svg>
+            </button>
+            <!-- 心動收藏 -->
+            <button class="icon-round" id="btn-heart" title="收藏這一刻">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 進度條（可點、可拖曳） -->
+        <div class="prog" id="prog">
+          <div class="prog-fill" id="prog-fill"></div>
+          <div class="prog-glow" id="prog-glow"></div>
+          <div class="prog-dot" id="prog-dot"></div>
+        </div>
+        <div class="np-times"><span id="t-cur">0:00</span><span id="t-dur">0:00</span></div>
+
+        <!-- 控制鍵 -->
+        <div class="np-controls">
+          <button class="btn-ghost" id="btn-prev" title="上一首">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          </button>
+          <button class="btn-play" id="btn-play" title="播放 / 暫停">
+            <svg width="23" height="23" viewBox="0 0 24 24"><path id="play-icon-path" d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="btn-ghost" id="btn-next" title="下一首">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+        </div>
+
+        <!-- Next Scene → 打開 Bottom Sheet 曲目表 -->
+        <div class="np-next" id="btn-open-sheet">
+          <span id="next-scene-label"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 完整曲目列表（fold 之下，與 OST 相同） -->
+    <div class="tracklist-block">
+      <div class="tracklist-caption" id="tracklist-caption"></div>
+      <div id="tracklist"></div>
+    </div>
+  </section>
+
+  <!-- ================= PURCHASE（付費解鎖）================= -->
+  <section id="screen-purchase" class="screen screen-sub">
+    <div class="page-titles">
+      <div class="page-title-en" id="purchase-title-en"></div>
+      <div class="page-title-tc" id="purchase-title-tc"></div>
+      <div class="page-note" id="purchase-note"></div>
+    </div>
+    <!-- 方案卡（app.js 依 config.payment 產生） -->
+    <div class="plans" id="plans"></div>
+    <div class="cta-block">
+      <button class="btn-primary" id="btn-checkout"></button>
+      <button class="btn-outline" id="btn-goto-unlock">已經購買？輸入兌換碼</button>
+    </div>
+  </section>
+
+  <!-- ================= UNLOCK（秘密 · 兌換）================= -->
+  <section id="screen-unlock" class="screen screen-sub">
+    <div class="page-titles">
+      <div class="page-title-en" id="unlock-title-en"></div>
+      <div class="page-title-tc" id="unlock-subtitle" style="font-size:14px;color:rgba(255,255,255,.6);letter-spacing:3px"></div>
+    </div>
+
+    <!-- 未解鎖：email + code 表單 -->
+    <div id="unlock-form-view">
+      <div style="text-align:center;padding:26px 28px 0">
+        <div class="unlock-lock-badge">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+        </div>
+        <div class="page-note" style="margin-top:0;padding:0 10px">購買後兌換碼會寄到信箱，請用「購買時的 email」解鎖完整專輯</div>
+      </div>
+      <div class="form-block">
+        <label class="form-label" for="in-email">EMAIL</label>
+        <input class="form-input" id="in-email" type="email" placeholder="you@example.com" autocomplete="email">
+        <label class="form-label" for="in-code">兌換碼 · CODE</label>
+        <input class="form-input" id="in-code" type="text" placeholder="" autocomplete="off" style="margin-bottom:22px">
+        <button class="btn-primary" id="btn-redeem">解鎖</button>
+        <div class="form-hint" id="btn-goto-purchase">還沒購買？<b>看方案 →</b></div>
+      </div>
+    </div>
+
+    <!-- 已解鎖 -->
+    <div id="unlock-done-view" class="hidden">
+      <div class="unlocked-card">
+        <div class="unlocked-check">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="unlocked-eyebrow">FULL ALBUM UNLOCKED</div>
+        <div class="unlocked-title" id="unlocked-title"></div>
+        <div class="page-note" id="unlocked-desc" style="margin-top:8px"></div>
+        <div class="unlocked-actions">
+          <button class="btn-chip" id="btn-goto-player">前往聽歌 →</button>
+          <a class="btn-chip grad hidden" id="btn-wav" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            下載 WAV 無損 ↗
+          </a>
+        </div>
+        <div class="unlocked-note" id="unlocked-plan-note"></div>
+        <div class="unlocked-reset" id="btn-reset-unlock">重設解鎖（測試用）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MOOD WALL（心情牆）================= -->
+  <section id="screen-mood" class="screen screen-sub">
+    <div class="page-titles">
+      <div style="font-family:var(--font-label);font-weight:700;font-size:23px;letter-spacing:3px" id="mood-heading"></div>
+      <div class="page-title-tc" id="mood-subheading" style="font-size:13px;color:rgba(255,255,255,.65);margin-top:12px;letter-spacing:1px;line-height:1.7"></div>
+      <div style="font-family:var(--font-label);font-size:10px;letter-spacing:3px;color:var(--primary);margin-top:7px;text-transform:uppercase" id="mood-eyebrow"></div>
+    </div>
+    <div class="mood-count">今晚有 <b id="mood-count">0</b> 個人，把秘密留在這裡。</div>
+    <div class="mood-form">
+      <input class="form-input" id="mood-name" type="text" placeholder="你的暱稱" maxlength="16" autocomplete="off">
+      <div class="mood-tags" id="mood-tags"></div>
+      <textarea class="mood-textarea" id="mood-text" maxlength="80" placeholder="現在聽這首歌，你想留下什麼心情？"></textarea>
+      <div class="mood-chars"><span id="mood-chars">0</span> / 80</div>
+      <div class="mood-err hidden" id="mood-err">先寫下一點心情吧。</div>
+      <button class="btn-primary mood-submit" id="btn-mood-submit">留下心情</button>
+    </div>
+    <div class="mood-notes" id="mood-notes"></div>
+  </section>
+
+  <!-- ================= GALLERY（寫真牆，滑動相簿）================= -->
+  <section id="screen-gallery" class="screen screen-sub">
+    <div class="page-titles">
+      <div style="font-family:var(--font-label);font-weight:700;font-size:23px;letter-spacing:3px" id="gallery-heading">GALLERY</div>
+      <div class="page-title-tc" id="gallery-subheading" style="font-size:13px;color:rgba(255,255,255,.65);margin-top:12px;letter-spacing:1px;line-height:1.7"></div>
+    </div>
+    <div class="gallery-scroll" id="gallery-scroll"></div>
+    <div class="gallery-dots" id="gallery-dots"></div>
+  </section>
+
+  <!-- ================= BOTTOM SHEET（曲目表，可拖曳關閉）================= -->
+  <div id="sheet-backdrop" class="hidden"></div>
+  <div id="sheet" class="hidden">
+    <div class="sheet-grabber" id="sheet-grabber"></div>
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-eyebrow">Track List</div>
+        <div class="sheet-title" id="sheet-title"></div>
+      </div>
+      <button class="sheet-close" id="btn-close-sheet">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-list" id="sheet-list"></div>
+  </div>
+
+  <!-- ================= LYRICS OVERLAY ================= -->
+  <div id="lyrics-overlay" class="hidden">
+    <div class="lyrics-head">
+      <div>
+        <div class="sheet-eyebrow" id="lyrics-eyebrow">Lyrics</div>
+        <div class="sheet-title" id="lyrics-title"></div>
+      </div>
+      <button class="sheet-close" id="btn-close-lyrics">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="lyrics-body" id="lyrics-body"></div>
+  </div>
+
+  <!-- ================= FLOATING ISLAND NAV ================= -->
+  <nav id="nav-wrap">
+    <div id="nav">
+      <div id="nav-ind"></div>
+      <button class="navbtn active" data-screen="player">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+        <span class="navlbl"></span>
+      </button>
+      <button class="navbtn" data-screen="purchase">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><circle cx="7" cy="7" r="1"/></svg></span>
+        <span class="navlbl"></span>
+      </button>
+      <button class="navbtn" data-screen="unlock">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span>
+        <span class="navlbl"></span>
+      </button>
+      <button class="navbtn" data-screen="mood">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.49 4.04 3 5.5l7 7Z"/></svg></span>
+        <span class="navlbl"></span>
+      </button>
+      <button class="navbtn" data-screen="gallery">
+        <span class="navico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span>
+        <span class="navlbl"></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- TOAST + 特效層 -->
+  <div id="toast"></div>
+  <div id="fx-layer"></div>
+
+</div>
+
+<!-- 專輯資料（換專輯只改這個檔）→ 再載入引擎 -->
+<script>
+/* 《秘密關係》合併版 config — 雙檢視(歌曲/配樂)、一套解鎖 */
+(function () {
+  var VIEW = "songs";
+  try { VIEW = localStorage.getItem("slv-view") || "songs"; } catch (e) {}
+  if (VIEW !== "songs" && VIEW !== "score") VIEW = "songs";
+
+  var SONGS = [
+    { n: 1,  title: "Fade away",            subtitle: "在淡出之前，再看你一眼",     free: true,  audioPath: "full-01.mp3", protectedPath: null,          category: "songs", lyricsPath: "lyrics/01.txt", artwork: null },
+    { n: 2,  title: "晴天裡擁抱",            subtitle: "陽光正好，抱住你的那一秒",   free: false, audioPath: null, protectedPath: "songs/02.mp3", category: "songs", lyricsPath: "lyrics/02.txt", artwork: null },
+    { n: 3,  title: "Round n Round",        subtitle: "繞來繞去，終點還是你",       free: false, audioPath: null, protectedPath: "songs/03.mp3", category: "songs", lyricsPath: "lyrics/03.txt", artwork: null },
+    { n: 4,  title: "Sometimes",            subtitle: "有時候，想你比呼吸還自然",   free: false, audioPath: null, protectedPath: "songs/04.mp3", category: "songs", lyricsPath: "lyrics/04.txt", artwork: null },
+    { n: 5,  title: "GOOD BOY",             subtitle: "乖，只在你面前",             free: false, audioPath: null, protectedPath: "songs/05.mp3", category: "songs", lyricsPath: "lyrics/05.txt", artwork: null },
+    { n: 6,  title: "留下來愛我",            subtitle: "別走，留下來愛我",           free: false, audioPath: null, protectedPath: "songs/06.mp3", category: "songs", lyricsPath: "lyrics/06.txt", artwork: null },
+    { n: 7,  title: "Fade away（伴奏）",     subtitle: "instrumental",              free: false, audioPath: null, protectedPath: "songs/07.mp3", category: "songs", lyricsPath: null, artwork: null },
+    { n: 8,  title: "晴天裡擁抱（伴奏）",     subtitle: "instrumental",              free: false, audioPath: null, protectedPath: "songs/08.mp3", category: "songs", lyricsPath: null, artwork: null },
+    { n: 9,  title: "Round n Round（伴奏）", subtitle: "instrumental",              free: false, audioPath: null, protectedPath: "songs/09.mp3", category: "songs", lyricsPath: null, artwork: null },
+    { n: 10, title: "Sometimes（伴奏）",     subtitle: "instrumental",              free: false, audioPath: null, protectedPath: "songs/10.mp3", category: "songs", lyricsPath: null, artwork: null },
+    { n: 11, title: "GOOD BOY（伴奏）",      subtitle: "instrumental",              free: false, audioPath: null, protectedPath: "songs/11.mp3", category: "songs", lyricsPath: null, artwork: null },
+    { n: 12, title: "留下來愛我（伴奏）",     subtitle: "instrumental",              free: false, audioPath: null, protectedPath: "songs/12.mp3", category: "songs", lyricsPath: null, artwork: null },
+  ];
+
+  var SCORE = [
+    ["我們之間的祕密", true, "songs/01.mp3", null],
+    ["真的喜歡是藏不住的", true, "songs/02.mp3", null],
+    ["假裝教你戀愛", false, null, "os3/03.mp3"],
+    ["越界以後", false, null, "os3/04.mp3"],
+    ["Sometimes, I See You", false, null, "os3/05.mp3"],
+    ["藍色的暗戀", false, null, "os3/06.mp3"],
+    ["晴天裡擁抱你", false, null, "os3/07.mp3"],
+    ["心跳先說了祕密", false, null, "os3/08.mp3"],
+    ["喜歡你的回音", false, null, "os3/09.mp3"],
+    ["電影院沒有第三個人", false, null, "os3/10.mp3"],
+    ["如果你也害怕", false, null, "os3/11.mp3"],
+    ["把喜歡藏進音樂盒", false, null, "os3/12.mp3"],
+    ["戀愛練習題", false, null, "os3/13.mp3"],
+    ["幼稚鬼決鬥", false, null, "os3/14.mp3"],
+    ["喜歡你這件小事", false, null, "os3/15.mp3"],
+    ["靠近你的安全距離", false, null, "os3/16.mp3"],
+    ["晴天裡，我終於懂了", false, null, "os3/17.mp3"],
+    ["不能被發現的心意", false, null, "os3/18.mp3"],
+    ["拓晞爭吵，你為什麼不懂", false, null, "os3/19.mp3"],
+    ["等待阿拓", false, null, "os3/20.mp3"],
+    ["最終的告白，我喜歡的一直是你", false, null, "os3/21.mp3"],
+  ].map(function (r, i) {
+    return { n: i + 1, title: r[0], subtitle: "劇情原創配樂 · Scene " + (i + 1 < 10 ? "0" : "") + (i + 1),
+      free: r[1], audioPath: r[2], protectedPath: r[3], category: "score", lyricsPath: null, artwork: null };
+  });
+
+  var VIEWS = {
+    songs: {
+      albumId: "sl-songs", albumTitle: "歌曲原聲帶", albumTitleEn: "Secret Lover",
+      albumEyebrow: "FULL ALBUM · SONGS", artistName: "秘密關係 Secret Lover",
+      coverImage: "full-cover.jpg", coverVideo: "",
+      tracks: SONGS,
+      moodWall: {
+        heading: "MOOD WALL", subheading: "聽完主打，把你此刻的心情留下來。", eyebrow: "Leave your feeling here",
+        tags: ["心動", "想抱", "單曲循環", "哭了", "好乖", "留下來", "晴天", "繞回你"],
+        seedComments: [
+          { name: "匿名心動", mood: "單曲循環", text: "留下來愛我 循環一整晚，走不出來。", time: "剛剛" },
+          { name: "晴天的人", mood: "晴天", text: "晴天裡擁抱 前奏一下就想到那個人。", time: "10 分鐘前" },
+        ],
+      },
+    },
+    score: {
+      albumId: "sl-score", albumTitle: "配樂原聲帶", albumTitleEn: "Secret Lover",
+      albumEyebrow: "ORIGINAL SCORE", artistName: "秘密關係 Secret Lover",
+      coverImage: "score-cover.jpg", coverVideo: "",
+      tracks: SCORE,
+      moodWall: {
+        heading: "MOOD WALL", subheading: "哪一段配樂讓你想起劇裡的他們？", eyebrow: "Leave your feeling here",
+        tags: ["心動", "越界", "暗戀", "告白", "捨不得", "重看一次", "拓晞", "哭了"],
+        seedComments: [
+          { name: "匿名訊號", mood: "告白", text: "最終告白那段一下,眼淚直接掉下來。", time: "剛剛" },
+          { name: "重看的人", mood: "重看一次", text: "為了配樂又把劇追了一遍。", time: "8 分鐘前" },
+        ],
+      },
+    },
+  };
+
+  var V = VIEWS[VIEW];
+  window.__slViewData = VIEWS;
+  window.__slCounts = { songs: SONGS.length, score: SCORE.length };
+
+  window.ALBUM_CONFIG = {
+    albumId: V.albumId,
+    albumTitle: V.albumTitle,
+    albumTitleEn: V.albumTitleEn,
+    albumEyebrow: V.albumEyebrow,
+    artistName: V.artistName,
+    coverImage: V.coverImage,
+    coverVideo: V.coverVideo,
+    backgroundImage: "",
+    viewCategory: VIEW,
+
+    theme: {
+      bg: "#0d0a12", bgTop: "#1c1426", surface: "rgba(22,16,28,.55)",
+      primary: "#f29bc2", secondary: "#b59cf0", accent: "#afc7f6",
+      text: "#ffffff", muted: "rgba(255,255,255,.62)", themeColor: "#0d0a12",
+      progressDot: {
+        labels: ["拓", "晞"],
+        gradients: [
+          "linear-gradient(135deg,#f29bc2,#c9b0ec)",
+          "linear-gradient(135deg,#b59cf0,#afc7f6)",
+        ],
+      },
+    },
+
+    /* 舊的雙方案卡不再使用(購買頁由三商品腳本接管),保留欄位避免 app.js 讀空 */
+    payment: {
+      stripeLinkBasic: "", stripeLinkDeluxe: "", currency: "NT$",
+      basicPrice: 299, deluxePrice: 499, basicName: "歌曲原聲帶", deluxeName: "完整原聲典藏版",
+      basicFeatures: [], deluxeFeatures: [], deluxeBadge: "",
+    },
+
+    api: {
+      workerBaseUrl: "https://secret-lover-ost-api.anthonywen0693.workers.dev",
+      wavDriveLink: "",
+    },
+
+    unlock: {
+      demoCodes: {},                       // 一律走 Worker /verify(TESTSONGS 等由後端驗)
+      localStorageKey: "slv3-" + VIEW,     // pos/mood 依檢視分開
+      sharedUnlockKey: "slv3",             // 解鎖狀態共用:輸一次碼,兩邊都認得
+      codePlaceholder: "SLOV-XXXX-XXXX",
+    },
+
+    tracks: V.tracks,
+    moodWall: V.moodWall,
+
+    gallery: {
+      heading: "GALLERY", subheading: "秘密關係 · 寫真牆",
+      photos: [{ src: "full-cover.jpg", caption: "" }],
+    },
+
+    strings: {
+      navTabs: ["聽歌", "完整版", "解鎖", "心情牆", "寫真牆"],
+      nowPlayingLabel: "Now Playing",
+      nextScene: VIEW === "songs" ? "Next Track" : "Next Scene",
+      purchaseTitleEn: "Unlock the Soundtrack",
+      unlockTitleEn: "Unlock",
+      unlockSubtitle: "輸入序號解鎖你收藏的內容",
+      lyricsLabel: "Lyrics",
+      noLyrics: "這首歌暫時沒有歌詞",
+    },
+  };
+})();
+
+</script>
+<script>
+/* =====================================================================
+ * ALBUM APP TEMPLATE — app.js（引擎）
+ * =====================================================================
+ * 完全從 window.ALBUM_CONFIG 讀取資料。這個檔案不含任何專輯內容，
+ * 換專輯「不需要」修改它 —— 只改 album-config.js。
+ *
+ * ⚠️ 已在 iPhone Safari 實測過的關鍵寫法（不要改壞）：
+ *   1. 播放一律 audio.src = 串流網址 + audio.play()，且 play() 要在
+ *      使用者手勢的同一個 tick 呼叫。不要改成 fetch → Blob → 播放，
+ *      iOS 的自動播放限制會擋掉（手勢過期）。
+ *   2. 付費曲串流靠 Worker /track 支援 HTTP Range（206）。
+ *   3. 付費曲的 file 參數 = config 的 protectedPath（含資料夾前綴，
+ *      例如 "os3/03.mp3"），必須與 Worker 白名單、R2 key 完全一致。
+ *
+ * ⚠️ 安全模型：
+ *   - localStorage 的 unlocked 只是「前端顯示狀態」。就算有人手動改，
+ *     也拿不到付費音檔 —— 每個 /track 請求都由 Worker 用 email+code
+ *     對 KV 驗證（server-side verification）。
+ *   - demo 碼（LOVE/SECRET）只是展示捷徑，正式版請在 config 清空
+ *     unlock.demoCodes，並移除 Worker 內的 DEMO_CODES。
+ * ===================================================================== */
+(function () {
+  "use strict";
+
+  var CFG = window.ALBUM_CONFIG;
+  if (!CFG) { console.error("找不到 ALBUM_CONFIG，請確認 album-config.js 有先載入"); return; }
+
+  /* ---------- 小工具 ---------- */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function fmt(s) {
+    if (!s || !isFinite(s)) return "0:00";
+    return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+  }
+  function pad2(n) { return String(n).padStart(2, "0"); }
+  function hap(p) { if (navigator.vibrate) { try { navigator.vibrate(p); } catch (e) {} } }
+  function hexToRgb(hex) {
+    var m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || "");
+    return m ? parseInt(m[1], 16) + "," + parseInt(m[2], 16) + "," + parseInt(m[3], 16) : "242,155,194";
+  }
+
+  var TRACKS = CFG.tracks || [];
+  var STR = CFG.strings || {};
+  var TOTAL = TRACKS.length;
+
+  /* ---------- localStorage keys（依專輯 namespace，避免不同專輯互相污染）---------- */
+  var NS = (CFG.unlock && CFG.unlock.localStorageKey) || ("album-" + CFG.albumId);
+  var NSU = (CFG.unlock && CFG.unlock.sharedUnlockKey) || NS;   // 解鎖狀態跨檢視共用
+  var LS = { unlock: NSU + ":unlock", pos: NS + ":pos", mood: NS + ":mood", hearts: NS + ":hearts" };
+  function lsGet(k, fb) { try { var v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? fb : v; } catch (e) { return fb; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  /* ---------- 主題注入：把 ALBUM_CONFIG.theme 寫進 CSS 變數 ---------- */
+  (function applyTheme() {
+    var t = CFG.theme || {}, r = document.documentElement.style;
+    if (t.bg) r.setProperty("--bg", t.bg);
+    if (t.bgTop) r.setProperty("--bg-top", t.bgTop);
+    if (t.surface) r.setProperty("--surface", t.surface);
+    if (t.primary) { r.setProperty("--primary", t.primary); r.setProperty("--primary-rgb", hexToRgb(t.primary)); }
+    if (t.secondary) r.setProperty("--secondary", t.secondary);
+    if (t.accent) r.setProperty("--accent", t.accent);
+    if (t.text) r.setProperty("--text", t.text);
+    if (t.muted) r.setProperty("--muted", t.muted);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = t.themeColor || t.bg || "#0d0a12";
+    document.title = CFG.albumTitle || "Album App";
+    var icon = $("apple-touch-icon"); if (icon && CFG.coverImage) icon.href = CFG.coverImage;
+    if (CFG.backgroundImage) {
+      document.body.style.background = 'url("' + CFG.backgroundImage + '") center/cover fixed';
+    }
+  })();
+
+  /* ---------- 靜態文案填入 ---------- */
+  $("cover-img").src = CFG.coverImage || "";
+  // 選填：coverVideo 設定就用循環影片取代靜態封面（自動播放需 muted+playsinline）
+  if (CFG.coverVideo) {
+    var cv = $("cover-video");
+    cv.muted = true; cv.defaultMuted = true; // iOS Safari 自動播放必須用 JS 也設一次
+    cv.src = CFG.coverVideo;
+    $("cover-card").classList.add("has-video");
+    cv.play && cv.play().catch(function(){});
+  }
+  $("cover-eyebrow").textContent = CFG.albumEyebrow || "";
+  $("cover-title-en").textContent = CFG.albumTitleEn || CFG.albumTitle || "";
+  $("np-label").textContent = STR.nowPlayingLabel || "Now Playing";
+  $("next-scene-label").textContent = (STR.nextScene || "Next Scene") + " · 共 " + TOTAL + " 首";
+  $("tracklist-caption").textContent = "Tracks · " + TOTAL + " 首";
+  $("sheet-title").textContent = "曲目列表 · " + TOTAL + " 首";
+  $("purchase-title-en").textContent = STR.purchaseTitleEn || "Unlock the Album";
+  $("purchase-title-tc").textContent = "解鎖完整 " + TOTAL + " 首專輯";
+  $("unlock-title-en").textContent = STR.unlockTitleEn || "Secret";
+  $("unlock-subtitle").textContent = STR.unlockSubtitle || "兌換與解鎖";
+  $("unlocked-title").textContent = "已解鎖完整 " + TOTAL + " 首專輯";
+  $("unlocked-desc").textContent = "所有曲目都已開放，可線上聽 + 下載收藏";
+  $("in-code").placeholder = (CFG.unlock && CFG.unlock.codePlaceholder) || "XXXX-XXXX";
+  var freeCount = TRACKS.filter(function (t) { return t.free; }).length;
+  $("purchase-note").textContent = "免費試聽前 " + freeCount + " 首 · 解鎖後可線上聽 + 下載收藏";
+  (CFG.moodWall || {}).heading != null && ($("mood-heading").textContent = CFG.moodWall.heading);
+  $("mood-subheading").textContent = (CFG.moodWall || {}).subheading || "";
+  $("mood-eyebrow").textContent = (CFG.moodWall || {}).eyebrow || "";
+  (function () {
+    var GAL = CFG.gallery || {};
+    if (GAL.heading != null) $("gallery-heading").textContent = GAL.heading;
+    $("gallery-subheading").textContent = GAL.subheading || "";
+    var photos = GAL.photos || [];
+    var scroll = $("gallery-scroll"), dots = $("gallery-dots");
+    scroll.innerHTML = photos.map(function (p) {
+      return '<div class="gallery-slide"><img src="' + esc(p.src) + '" alt="">' +
+        '<div class="gallery-shade"></div>' +
+        (p.caption ? '<div class="gallery-caption">' + esc(p.caption) + '</div>' : "") +
+        "</div>";
+    }).join("");
+    dots.innerHTML = photos.map(function (_, i) {
+      return '<div class="gallery-dot' + (i === 0 ? " active" : "") + '"></div>';
+    }).join("");
+    var dotEls = Array.prototype.slice.call(dots.children);
+    var slideEls = Array.prototype.slice.call(scroll.children);
+    if (slideEls.length) {
+      scroll.addEventListener("scroll", function () {
+        var center = scroll.scrollLeft + scroll.clientWidth / 2;
+        var closest = 0, best = Infinity;
+        slideEls.forEach(function (el, i) {
+          var mid = el.offsetLeft + el.offsetWidth / 2;
+          var d = Math.abs(mid - center);
+          if (d < best) { best = d; closest = i; }
+        });
+        dotEls.forEach(function (d, i) { d.classList.toggle("active", i === closest); });
+      }, { passive: true });
+    }
+  })();
+  (function () {
+    var labels = STR.navTabs || ["聽歌", "完整版", "秘密", "心情牆"];
+    document.querySelectorAll("#nav .navbtn .navlbl").forEach(function (el, i) { el.textContent = labels[i] || ""; });
+  })();
+
+  /* ---------- 狀態 ---------- */
+  var pos = lsGet(LS.pos, {});
+  var state = {
+    screen: "player",
+    cur: Math.min(pos.cur || 0, TOTAL - 1),
+    playing: false,
+    dur: 0,
+    selectedPlan: "basic",           // basic(299) / deluxe(599)
+    unlocked: !!(lsGet(LS.unlock, {}).unlocked),
+  };
+  var seeking = false, saveT = 0, durFixing = false, resumeAt = 0;
+  var lyricsCache = {};
+
+  function unlockInfo() { return lsGet(LS.unlock, {}); }
+  /* 分級正規化：只有真正的 599/deluxe 才算典藏版，其餘一律 basic。
+   * （對後端回傳做防呆 —— 見 PITFALLS #2） */
+  function purchasedProduct() {
+    var p = String(unlockInfo().product || "");
+    return (p === "599" || p === "deluxe" || p === String((CFG.payment || {}).deluxePrice)) ? "deluxe" : "basic";
+  }
+  function unlockTypeNow() {
+    var u = unlockInfo(); var ut = u.unlockType;
+    if (!ut) { var p = String(u.product || ""); ut = (p === "199") ? "songs" : (p === "299" || p === "599") ? "score" : "complete"; }
+    return ut;
+  }
+  function isLocked(t) {
+    if (t.free) return false;
+    if (!state.unlocked) return true;
+    var ut = unlockTypeNow();
+    if (ut === "complete") return false;
+    var cat = t.category || CFG.viewCategory || "songs";
+    return cat !== ut;   // songs 碼只開歌曲、score 碼只開配樂
+  }
+
+  /* ---------- 音源路徑 ----------
+   * 免費曲：本地檔（assets/audio/，可公開部署在 GitHub Pages）。
+   * 付費曲：一律走 Worker /track 驗證後串流 —— 真實音檔在私有 R2，
+   *         「絕對不要」把付費音檔放進前端 repo。
+   * ⚠️ PITFALLS #3：file 參數用 protectedPath（含 "os3/" 之類前綴），
+   *    必須與 worker.js 的 PROTECTED_FILES、R2 object key 完全一致。 */
+  function srcFor(t) {
+    if (t.free) return t.audioPath;
+    var u = unlockInfo();
+    return CFG.api.workerBaseUrl + "/track?file=" + encodeURIComponent(t.protectedPath || "") +
+      "&email=" + encodeURIComponent(u.email || "") + "&code=" + encodeURIComponent(u.code || "");
+  }
+
+  /* ---------- Audio 引擎 ---------- */
+  var audio = new Audio();
+  audio.preload = "none";
+
+  audio.addEventListener("timeupdate", function () {
+    if (seeking) return;
+    var d = audio.duration;
+    if (isFinite(d) && d > 0) state.dur = d;
+    renderProgress(audio.currentTime);
+    if (Date.now() - saveT > 4000) { saveT = Date.now(); lsSet(LS.pos, { cur: state.cur, time: audio.currentTime }); }
+  });
+  /* 串流檔常回報 duration:Infinity → 逼瀏覽器解析真實長度 */
+  function resolveDur() {
+    var d = audio.duration;
+    if (isFinite(d) && d > 0) { state.dur = d; renderProgress(audio.currentTime); return; }
+    if (durFixing) return; durFixing = true;
+    resumeAt = audio.currentTime || 0;
+    var onSeek = function () {
+      audio.removeEventListener("timeupdate", onSeek);
+      var real = audio.duration;
+      if (isFinite(real) && real > 0) state.dur = real;
+      try { audio.currentTime = resumeAt || 0; } catch (e) {}
+      resumeAt = 0; durFixing = false;
+    };
+    audio.addEventListener("timeupdate", onSeek);
+    try { audio.currentTime = 1e7; } catch (e) { durFixing = false; }
+  }
+  audio.addEventListener("loadedmetadata", resolveDur);
+  audio.addEventListener("durationchange", function () {
+    var d = audio.duration; if (isFinite(d) && d > 0) { state.dur = d; renderProgress(audio.currentTime); }
+  });
+  audio.addEventListener("play", function () { state.playing = true; renderPlayState(); });
+  audio.addEventListener("pause", function () { state.playing = false; renderPlayState(); });
+  audio.addEventListener("ended", function () { next(); });
+
+  function playTrack(i) {
+    var t = TRACKS[i];
+    if (isLocked(t)) { toast("需解鎖完整專輯才能播放"); go("purchase"); return; }
+    durFixing = false; resumeAt = 0;
+    state.cur = i; state.dur = 0;
+    audio.src = srcFor(t);
+    audio.play().catch(function () {});   // 同一手勢 tick 內呼叫（iOS 必要）
+    renderNowPlaying(); renderTrackLists(); renderProgress(0);
+    updateMediaSession();
+  }
+  function togglePlay() {
+    if (!audio.src) { playTrack(state.cur); return; }
+    if (audio.paused) audio.play().catch(function () {}); else audio.pause();
+  }
+  function next() {
+    var i = state.cur;
+    do { i = (i + 1) % TOTAL; } while (isLocked(TRACKS[i]) && i !== state.cur);
+    if (isLocked(TRACKS[i])) { toast("其餘曲目需解鎖完整專輯"); return; }
+    playTrack(i);
+  }
+  function prev() {
+    if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+    var i = state.cur;
+    do { i = (i - 1 + TOTAL) % TOTAL; } while (isLocked(TRACKS[i]) && i !== state.cur);
+    if (isLocked(TRACKS[i])) return;
+    playTrack(i);
+  }
+
+  /* ---------- Media Session（鎖定畫面 + 耳機控制）---------- */
+  function updateMediaSession() {
+    if (!("mediaSession" in navigator)) return;
+    var t = TRACKS[state.cur];
+    var art = t.artwork || CFG.coverImage;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: isLocked(t) ? "Secret Track" : t.title,
+        artist: CFG.artistName || "",
+        album: CFG.albumTitle || "",
+        artwork: art ? [{ src: art, sizes: "512x512", type: "image/png" }] : [],
+      });
+      navigator.mediaSession.setActionHandler("play", function () { audio.play().catch(function () {}); });
+      navigator.mediaSession.setActionHandler("pause", function () { audio.pause(); });
+      navigator.mediaSession.setActionHandler("previoustrack", prev);
+      navigator.mediaSession.setActionHandler("nexttrack", next);
+      navigator.mediaSession.setActionHandler("seekto", function (d) {
+        if (d.seekTime != null) { try { audio.currentTime = d.seekTime; } catch (e) {} }
+      });
+    } catch (e) {}
+  }
+
+  /* ---------- 進度條（點擊 + 拖曳）---------- */
+  var progEl = $("prog");
+  function renderProgress(cur) {
+    var pct = state.dur ? Math.max(0, Math.min(100, (cur / state.dur) * 100)) : 0;
+    $("prog-fill").style.width = pct + "%";
+    $("prog-dot").style.left = pct + "%";
+    $("prog-glow").style.left = pct + "%";
+    $("t-cur").textContent = fmt(cur);
+    $("t-dur").textContent = fmt(state.dur);
+  }
+  function seekAt(e) {
+    var r = progEl.getBoundingClientRect();
+    var p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    var ad = audio.duration;
+    var dur = (isFinite(ad) && ad > 0) ? ad : (state.dur || 0);
+    if (dur > 0) { try { audio.currentTime = p * dur; } catch (err) {} }
+    renderProgress(p * dur);
+  }
+  progEl.addEventListener("pointerdown", function (e) {
+    seeking = true; seekAt(e);
+    var move = function (ev) { seekAt(ev); };
+    var up = function () { seeking = false; document.removeEventListener("pointermove", move); document.removeEventListener("pointerup", up); };
+    document.addEventListener("pointermove", move);
+    document.addEventListener("pointerup", up);
+  });
+
+  /* ---------- Now Playing 卡片 ---------- */
+  function renderNowPlaying() {
+    var t = TRACKS[state.cur];
+    var locked = isLocked(t);
+    $("np-title").textContent = locked ? "Secret Track" : t.title;
+    $("np-sub").textContent = "track " + pad2(t.n) + (t.subtitle ? " · " + t.subtitle : "");
+    /* 進度圓點：config 有 progressDot 就交替顯示角色標籤 */
+    var pd = (CFG.theme || {}).progressDot;
+    var dot = $("prog-dot");
+    if (pd && pd.labels && pd.labels.length) {
+      var idx = (t.n % 2 === 1) ? 0 : 1;
+      dot.textContent = pd.labels[idx % pd.labels.length];
+      if (pd.gradients && pd.gradients[idx]) {
+        dot.style.background = pd.gradients[idx];
+        $("prog-fill").style.background = pd.gradients[idx];
+      }
+    } else { dot.textContent = ""; }
+    /* 歌詞按鈕：沒歌詞就藏起來（頁面不會壞） */
+    $("btn-lyrics").classList.toggle("hidden", !t.lyricsPath);
+  }
+  function renderPlayState() {
+    $("play-icon-path").setAttribute("d", state.playing ? "M6 5h4v14H6zM14 5h4v14h-4z" : "M8 5v14l11-7z");
+    $("cover-card").classList.toggle("playing", state.playing);   // 封面呼吸動畫
+    $("prog-glow").classList.toggle("pulsing", state.playing);
+    if ("mediaSession" in navigator) { try { navigator.mediaSession.playbackState = state.playing ? "playing" : "paused"; } catch (e) {} }
+  }
+
+  /* ---------- 曲目列表（主頁 + Bottom Sheet 共用同一份渲染）---------- */
+  function trackRowHTML(t, i, revealing) {
+    var locked = isLocked(t);
+    var isCur = i === state.cur;
+    var cls = "track-row" + (isCur ? " current" : "") + (locked ? " locked" : "") + (revealing && !t.free ? " revealing" : "");
+    var style = revealing && !t.free ? ' style="animation-delay:' + ((i - freeCount) * 0.05).toFixed(2) + 's"' : "";
+    var right;
+    if (locked) {
+      right = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f6680" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    } else if (state.unlocked && purchasedProduct() === "deluxe" && !t.free) {
+      right = '<button class="track-dl" data-dl="' + i + '" title="下載這首"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>';
+    } else {
+      right = '<svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary)"><path d="M8 5v14l11-7z"/></svg>';
+    }
+    return '<div class="' + cls + '" data-i="' + i + '"' + style + '>' +
+      '<span class="track-num">' + pad2(t.n) + "</span>" +
+      '<div class="track-name">' + (locked ? "Secret Track" : esc(t.title)) + "</div>" + right + "</div>";
+  }
+  function renderTrackLists(revealing) {
+    var html = TRACKS.map(function (t, i) { return trackRowHTML(t, i, revealing); }).join("");
+    $("tracklist").innerHTML = html;
+    $("sheet-list").innerHTML = html;
+  }
+  function bindTrackListClicks(container) {
+    container.addEventListener("click", function (e) {
+      var dl = e.target.closest("[data-dl]");
+      if (dl) { e.stopPropagation(); downloadTrack(parseInt(dl.getAttribute("data-dl"), 10)); return; }
+      var row = e.target.closest(".track-row");
+      if (row) playTrack(parseInt(row.getAttribute("data-i"), 10));
+    });
+  }
+  bindTrackListClicks($("tracklist"));
+  bindTrackListClicks($("sheet-list"));
+
+  /* 單曲下載：典藏版限定（Worker 端同樣會驗證，前端只是 UI 把關） */
+  function downloadTrack(i) {
+    var t = TRACKS[i];
+    if (isLocked(t)) { toast("需解鎖完整專輯才能下載"); go("purchase"); return; }
+    if (!t.free && purchasedProduct() !== "deluxe") { toast("下載為典藏版限定"); return; }
+    var url = srcFor(t) + (t.free ? "" : "&download=1");
+    try {
+      var a = document.createElement("a");
+      a.href = url; a.download = pad2(t.n) + " " + t.title + ".mp3"; a.rel = "noopener";
+      document.body.appendChild(a); a.click(); a.remove();
+    } catch (e) { window.open(url, "_blank"); }
+    hap(10); toast("開始下載 · " + t.title);
+  }
+
+  /* ---------- Bottom Sheet（含 iOS 風格拖曳關閉）---------- */
+  var sheet = $("sheet"), backdrop = $("sheet-backdrop");
+  function openSheet() { sheet.classList.remove("hidden"); backdrop.classList.remove("hidden"); sheet.style.transform = ""; }
+  function closeSheet() { sheet.classList.add("hidden"); backdrop.classList.add("hidden"); sheet.classList.remove("dragging", "snapping"); sheet.style.transform = ""; }
+  $("btn-open-sheet").addEventListener("click", openSheet);
+  $("btn-close-sheet").addEventListener("click", closeSheet);
+  backdrop.addEventListener("click", closeSheet);
+  /* 拖把手往下拉：跟手移動，放開超過 1/4 高度或速度夠快 → 關閉 */
+  (function () {
+    var startY = 0, curY = 0, startT = 0, active = false;
+    function onStart(e) {
+      active = true; startY = curY = (e.touches ? e.touches[0].clientY : e.clientY); startT = Date.now();
+      sheet.classList.add("dragging"); sheet.classList.remove("snapping");
+    }
+    function onMove(e) {
+      if (!active) return;
+      curY = (e.touches ? e.touches[0].clientY : e.clientY);
+      var dy = Math.max(0, curY - startY);
+      sheet.style.transform = "translateY(" + dy + "px)";
+      if (e.cancelable) e.preventDefault();
+    }
+    function onEnd() {
+      if (!active) return; active = false;
+      sheet.classList.remove("dragging");
+      var dy = Math.max(0, curY - startY);
+      var v = dy / Math.max(1, Date.now() - startT); // px/ms
+      if (dy > sheet.offsetHeight / 4 || v > 0.6) { closeSheet(); }
+      else { sheet.classList.add("snapping"); sheet.style.transform = "translateY(0)"; }
+    }
+    var g = $("sheet-grabber"), h = sheet.querySelector(".sheet-head");
+    [g, h].forEach(function (el) {
+      el.addEventListener("touchstart", onStart, { passive: true });
+      el.addEventListener("mousedown", onStart);
+    });
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("touchend", onEnd);
+    document.addEventListener("mouseup", onEnd);
+  })();
+
+  /* ---------- 歌詞 ---------- */
+  $("btn-lyrics").addEventListener("click", function () {
+    var t = TRACKS[state.cur];
+    $("lyrics-eyebrow").textContent = STR.lyricsLabel || "Lyrics";
+    $("lyrics-title").textContent = isLocked(t) ? "Secret Track" : t.title;
+    var body = $("lyrics-body");
+    $("lyrics-overlay").classList.remove("hidden");
+    if (!t.lyricsPath) { body.innerHTML = '<div class="lyrics-empty">' + esc(STR.noLyrics || "這首歌暫時沒有歌詞") + "</div>"; return; }
+    if (lyricsCache[t.n] != null) { body.textContent = lyricsCache[t.n]; return; }
+    body.innerHTML = '<div class="lyrics-empty">載入中…</div>';
+    fetch(t.lyricsPath).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.text();
+    }).then(function (txt) {
+      lyricsCache[t.n] = txt;
+      body.textContent = txt;
+      /* 之後要做同步歌詞（LRC）可在這裡解析時間標記 */
+    }).catch(function () {
+      body.innerHTML = '<div class="lyrics-empty">' + esc(STR.noLyrics || "這首歌暫時沒有歌詞") + "</div>";
+    });
+  });
+  $("btn-close-lyrics").addEventListener("click", function () { $("lyrics-overlay").classList.add("hidden"); });
+
+  /* ---------- 分頁切換 + Floating Island Nav ---------- */
+  var navBtns = Array.prototype.slice.call(document.querySelectorAll("#nav .navbtn"));
+  var ORDER = ["player", "purchase", "unlock", "mood", "gallery"];
+  function go(screen) {
+    state.screen = screen;
+    closeSheet();
+    ORDER.forEach(function (s) {
+      $("screen-" + s).classList.toggle("active", s === screen);
+    });
+    var i = ORDER.indexOf(screen);
+    $("nav-ind").style.transform = "translateX(" + (i * 64) + "px)";
+    navBtns.forEach(function (b, j) {
+      b.classList.toggle("active", j === i);
+      b.classList.remove("pop");
+    });
+    if (i >= 0) { void navBtns[i].offsetWidth; navBtns[i].classList.add("pop"); }
+    if (screen === "unlock") renderUnlockView();
+  }
+  navBtns.forEach(function (b) { b.addEventListener("click", function () { go(b.getAttribute("data-screen")); }); });
+
+  /* ---------- 付費解鎖頁 ---------- */
+  function renderPlans() {
+    var P = CFG.payment || {};
+    var plans = [
+      { key: "basic", name: P.basicName, price: P.basicPrice, features: P.basicFeatures || [], deluxe: false },
+      { key: "deluxe", name: P.deluxeName, price: P.deluxePrice, features: P.deluxeFeatures || [], deluxe: true },
+    ];
+    $("plans").innerHTML = plans.map(function (p) {
+      var check = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      return '<div class="plan' + (p.deluxe ? " deluxe" : "") + (state.selectedPlan === p.key ? " selected" : "") + '" data-plan="' + p.key + '">' +
+        (p.deluxe && P.deluxeBadge ? '<div class="plan-badge">' + esc(P.deluxeBadge) + "</div>" : "") +
+        '<div class="plan-name">' + esc(p.name) + "</div>" +
+        '<div class="plan-price">' + esc(P.currency || "NT$") + p.price + "</div>" +
+        '<div class="plan-features">' + p.features.map(function (f) {
+          return '<div class="plan-feature">' + check + esc(f) + "</div>";
+        }).join("") + "</div></div>";
+    }).join("");
+    var P2 = CFG.payment || {};
+    $("btn-checkout").textContent = "前往結帳 · " + (P2.currency || "NT$") +
+      (state.selectedPlan === "deluxe" ? P2.deluxePrice : P2.basicPrice);
+  }
+  $("plans").addEventListener("click", function (e) {
+    var card = e.target.closest("[data-plan]");
+    if (!card) return;
+    state.selectedPlan = card.getAttribute("data-plan");
+    renderPlans();
+  });
+  /* Stripe Payment Link 在 album-config.js → payment 換 */
+  $("btn-checkout").addEventListener("click", function () {
+    var P = CFG.payment || {};
+    var link = state.selectedPlan === "deluxe" ? P.stripeLinkDeluxe : P.stripeLinkBasic;
+    if (!link) { toast("尚未設定付款連結"); return; }
+    window.open(link, "_blank");
+  });
+  $("btn-goto-unlock").addEventListener("click", function () { go("unlock"); });
+  $("btn-goto-purchase").addEventListener("click", function () { go("purchase"); });
+  $("btn-goto-player").addEventListener("click", function () { go("player"); });
+
+  /* ---------- 兌換 / 解鎖 ---------- */
+  function renderUnlockView() {
+    $("unlock-form-view").classList.toggle("hidden", state.unlocked);
+    $("unlock-done-view").classList.toggle("hidden", !state.unlocked);
+    if (!state.unlocked) return;
+    var deluxe = purchasedProduct() === "deluxe";
+    var wav = $("btn-wav");
+    var hasWav = deluxe && CFG.api && CFG.api.wavDriveLink;
+    wav.classList.toggle("hidden", !hasWav);
+    if (hasWav) wav.href = CFG.api.wavDriveLink;
+    $("unlocked-plan-note").textContent = deluxe
+      ? "你的方案：典藏版 + WAV 無損 · 點上方按鈕前往雲端下載完整 WAV ♡"
+      : "你的方案：數位專輯 · 可線上聆聽完整 " + TOTAL + " 首（WAV 無損下載為典藏版限定）";
+  }
+
+  function unlockNow(data) {
+    lsSet(LS.unlock, Object.assign({ unlocked: true }, data));
+    state.unlocked = true;
+    go("player");
+    openSheet();
+    renderTrackLists(true);
+    renderNowPlaying();
+    unlockBurstFx();
+    hap([12, 30, 12, 30, 40]);
+    toast("解鎖成功 · " + TOTAL + " 首全部屬於你了 ♡");
+  }
+
+  $("btn-redeem").addEventListener("click", function () {
+    var email = ($("in-email").value || "").trim();
+    var code = ($("in-code").value || "").trim().toUpperCase();
+    if (!email || !code) { toast("請輸入 email 和兌換碼"); return; }
+
+    /* ⚠️ DEMO 模式：config 的 demoCodes 是「純前端」捷徑，方便展示。
+     *    每個 demo 碼都寫死對應方案（不會誤用畫面上選的方案 —— PITFALLS #2）。
+     *    正式版：demoCodes 設成 {}，所有兌換一律走下面的 Worker /verify
+     *    （server-side verification：碼綁購買 email、存在 KV）。 */
+    var demo = (CFG.unlock && CFG.unlock.demoCodes) || {};
+    if (demo[code]) {
+      unlockNow({ email: email, code: code, product: demo[code] });
+      return;
+    }
+
+    if (!CFG.api || !CFG.api.workerBaseUrl) { toast("後端尚未設定 · 可先用 demo 兌換碼體驗"); return; }
+    fetch(CFG.api.workerBaseUrl + "/verify", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=UTF-8" },  // 避免 CORS preflight
+      body: JSON.stringify({ email: email, code: code }),
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (data.ok) unlockNow({ email: email, code: code, product: data.product || "", unlockType: data.unlockType || "" });
+      else toast(data.message || "兌換碼或 email 不正確");
+    }).catch(function () { toast("連線失敗 · 後端未回應"); });
+  });
+
+  $("btn-reset-unlock").addEventListener("click", function () {
+    try { localStorage.removeItem(LS.unlock); } catch (e) {}
+    state.unlocked = false;
+    renderUnlockView(); renderTrackLists(); renderNowPlaying();
+    toast("已重設 · 回到未解鎖狀態");
+  });
+
+  /* ---------- 心情牆 ---------- */
+  var MW = CFG.moodWall || {};
+  var moods = lsGet(LS.mood, null);
+  if (!Array.isArray(moods) || !moods.length) {
+    moods = (MW.seedComments || []).map(function (c, i) { return Object.assign({ id: i + 1 }, c); });
+  }
+  var selectedMood = "", newMoodId = null;
+
+  function renderMoodWall() {
+    $("mood-count").textContent = moods.length;
+    $("mood-tags").innerHTML = (MW.tags || []).map(function (m) {
+      return '<button class="mood-tag' + (selectedMood === m ? " selected" : "") + '" data-mood="' + esc(m) + '">' + esc(m) + "</button>";
+    }).join("");
+    $("mood-notes").innerHTML = moods.map(function (c) {
+      return '<div class="mood-note' + (c.id === newMoodId ? " new" : "") + '">' +
+        '<div class="mood-note-head"><span class="mood-note-name">' + esc(c.name) + "</span>" +
+        '<span class="mood-note-tag">♡ ' + esc(c.mood) + "</span></div>" +
+        '<div class="mood-note-text">' + esc(c.text) + "</div>" +
+        '<div class="mood-note-time">' + esc(c.time) + "</div></div>";
+    }).join("");
+  }
+  $("mood-tags").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-mood]");
+    if (!b) return;
+    var m = b.getAttribute("data-mood");
+    selectedMood = selectedMood === m ? "" : m;
+    renderMoodWall();
+  });
+  $("mood-text").addEventListener("input", function () {
+    $("mood-chars").textContent = this.value.length;
+    $("mood-err").classList.add("hidden");
+  });
+  $("btn-mood-submit").addEventListener("click", function () {
+    var text = ($("mood-text").value || "").trim();
+    if (!text) { $("mood-err").classList.remove("hidden"); return; }
+    var name = ($("mood-name").value || "").trim() || "匿名聽眾";
+    var c = { id: Date.now(), name: name, mood: selectedMood || "聽歌中", text: text.slice(0, 80), time: "剛剛" };
+    moods.unshift(c);
+    lsSet(LS.mood, moods);           // localStorage key 依專輯 namespace，不會跟其他專輯混
+    newMoodId = c.id; selectedMood = "";
+    $("mood-name").value = ""; $("mood-text").value = ""; $("mood-chars").textContent = "0";
+    hap(15); renderMoodWall();
+    var btn = $("btn-mood-submit");
+    btn.textContent = "已收藏這個瞬間 ♡";
+    setTimeout(function () { btn.textContent = "留下心情"; }, 1100);
+  });
+
+  /* ---------- Toast ---------- */
+  var toastT = null;
+  function toast(msg, dur) {
+    var el = $("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { el.classList.remove("show"); }, dur || 2200);
+  }
+
+  /* ---------- 特效：心動收藏 / 解鎖慶祝 ---------- */
+  var HEART_PATH = "M12 21s-7.5-4.6-10-9.3C.3 8.3 1.9 4.8 5.2 4.8c2 0 3.3 1.2 3.9 2.2.6-1 1.9-2.2 3.9-2.2 3.3 0 4.9 3.5 3.2 6.9C19.5 16.4 12 21 12 21z";
+  function heartSVG(size, color, style) {
+    return '<svg class="fx-heart" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + color + '" style="' + style + '"><path d="' + HEART_PATH + '"/></svg>';
+  }
+  $("btn-heart").addEventListener("click", function (e) {
+    var t = TRACKS[state.cur];
+    if (isLocked(t)) { toast("解鎖後才能收藏這首的心動瞬間"); return; }
+    var stage = $("stage").getBoundingClientRect();
+    var b = e.currentTarget.getBoundingClientRect();
+    var ox = ((b.left + b.width / 2 - stage.left) / stage.width * 100).toFixed(1);
+    var oy = ((b.top + b.height / 2 - stage.top) / stage.height * 100).toFixed(1);
+    var fx = $("fx-layer");
+    var cols = [getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#f29bc2",
+                getComputedStyle(document.documentElement).getPropertyValue("--secondary").trim() || "#c9b0ec",
+                getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#afc7f6"];
+    var html = '<div class="fx-glow" style="left:' + ox + "%;top:" + oy + '%"></div>' +
+               '<div class="fx-ring" style="left:' + ox + "%;top:" + oy + '%"></div>' +
+               '<svg class="fx-bloom" width="60" height="60" viewBox="0 0 24 24" fill="' + cols[0] + '" style="left:' + ox + "%;top:" + oy + '%"><path d="' + HEART_PATH + '"/></svg>';
+    for (var k = 0; k < 16; k++) {
+      var dx = ((Math.random() * 2 - 1) * 72).toFixed(0);
+      var rise = (120 + Math.random() * 150).toFixed(0);
+      var sc = (0.65 + Math.random() * 0.85).toFixed(2);
+      var r2 = ((Math.random() * 2 - 1) * 45).toFixed(0);
+      var dur = (1.1 + Math.random() * 0.9).toFixed(2);
+      var delay = (Math.random() * 0.4).toFixed(2);
+      var size = (13 + Math.random() * 15).toFixed(0);
+      var col = cols[Math.floor(Math.random() * cols.length)];
+      html += heartSVG(size, col,
+        "left:" + ox + "%;top:" + oy + "%;transform:translate(-50%,-50%);--dx:" + dx + "px;--rise:" + rise + "px;--s:" + sc + ";--r2:" + r2 + "deg;" +
+        "animation:floatHeart " + dur + "s cubic-bezier(.4,.7,.5,1) " + delay + "s both");
+    }
+    fx.innerHTML = html;
+    var hearts = (lsGet(LS.hearts, 0) || 0) + 1;
+    lsSet(LS.hearts, hearts);
+    var btn = $("btn-heart");
+    btn.classList.add("liked");
+    setTimeout(function () { btn.classList.remove("liked"); }, 1200);
+    hap([8, 40, 12]); toast("已收藏這一刻", 1000);
+    setTimeout(function () { fx.innerHTML = ""; }, 2600);
+  });
+  function unlockBurstFx() {
+    var fx = $("fx-layer");
+    var html = '<div id="unlock-fx"><div class="fx-ring2"></div></div>';
+    for (var k = 0; k < 8; k++) {
+      var left = (10 + Math.random() * 78).toFixed(0);
+      var size = (13 + Math.random() * 13).toFixed(0);
+      var dur = (0.95 + Math.random() * 0.45).toFixed(2);
+      var delay = (Math.random() * 0.3).toFixed(2);
+      html += '<svg class="fx-float" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="var(--primary)" style="left:' + left + "%;animation-duration:" + dur + "s;animation-delay:" + delay + 's"><path d="' + HEART_PATH + '"/></svg>';
+    }
+    fx.innerHTML = html;
+    setTimeout(function () { fx.innerHTML = ""; }, 2200);
+  }
+
+  /* ---------- 控制鍵綁定 ---------- */
+  $("btn-play").addEventListener("click", togglePlay);
+  $("btn-prev").addEventListener("click", prev);
+  $("btn-next").addEventListener("click", next);
+
+  /* ---------- 開機 ---------- */
+  renderNowPlaying();
+  renderPlayState();
+  renderTrackLists();
+  renderPlans();
+  renderUnlockView();
+  renderMoodWall();
+  renderProgress(pos.time || 0);
+
+  window.__slSwitchView = function (view) {
+    var V = (window.__slViewData || {})[view];
+    if (!V) throw new Error("noview");
+    CFG.tracks = V.tracks; TRACKS = V.tracks; TOTAL = TRACKS.length;
+    CFG.albumEyebrow = V.albumEyebrow; CFG.albumTitleEn = V.albumTitleEn; CFG.albumTitle = V.albumTitle;
+    CFG.coverImage = V.coverImage; CFG.coverVideo = V.coverVideo || ""; CFG.viewCategory = view;
+    STR.nextScene = (view === "songs") ? "Next Track" : "Next Scene";
+    try { audio.pause(); } catch (e) {}
+    state.cur = 0; state.dur = 0; state.playing = false;
+    $("cover-img").src = CFG.coverImage || "";
+    $("cover-eyebrow").textContent = CFG.albumEyebrow || "";
+    $("cover-title-en").textContent = CFG.albumTitleEn || CFG.albumTitle || "";
+    document.title = CFG.albumTitle || document.title;
+    var nsl=$("next-scene-label"); if(nsl) nsl.textContent = (STR.nextScene || "Next Scene") + " · 共 " + TOTAL + " 首";
+    var stt=$("sheet-title"); if(stt) stt.textContent = "曲目列表 · " + TOTAL + " 首";
+    var tlc=$("tracklist-caption"); if(tlc) tlc.textContent = "Tracks · " + TOTAL + " 首";
+    renderNowPlaying(); renderPlayState(); renderTrackLists(); renderProgress(0);
+  };
+})();
+
+</script>
+<script>(function(){
+/* ===== 三商品購買頁(v4 手風琴)— 疊加接管,styles.css/app.js 不動 ===== */
+var W='https://secret-lover-ost-api.anthonywen0693.workers.dev';
+var PRODUCTS={
+  complete:{key:'complete',name:'完整原聲典藏版',price:499,badge:'最完整收藏',hot:true,
+    sub:'兩套分開購買原價 NT$598，典藏版現省 NT$99',
+    feats:['一次收藏完整 33 軌原聲','12 軌歌曲＋21 段劇情配樂','永久解鎖完整播放器'],
+    btn:'立即收藏完整原聲｜NT$499'},
+  songs:{key:'songs',name:'歌曲原聲帶',price:299,
+    feats:['收錄 12 軌歌曲與伴奏版本','不限次數永久收聽','可加入手機主畫面'],
+    btn:'立即解鎖歌曲原聲帶｜NT$299'},
+  score:{key:'score',name:'原創配樂集',price:299,
+    feats:['收錄 21 段劇情原創配樂','不限次數永久收聽','可加入手機主畫面'],
+    btn:'立即解鎖原創配樂集｜NT$299'},
+};
+var ORDER=['complete','songs','score'];
+var sel='complete';
+var CHK='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><polyline points="20 6 9 17 4 12"/></svg>';
+function getRef(){try{var o=JSON.parse(localStorage.getItem('slo-ref')||'null');if(o&&o.ref)return o.ref;}catch(e){}return '';}
+function $(id){return document.getElementById(id);}
+
+/* 卡片只建一次;之後選取只切換狀態 → 才有 0.25s 平滑動畫 */
+function renderOnce(plans){
+  plans.setAttribute('data-pv4','1');
+  plans.style.display='grid'; plans.style.gap='10px'; plans.style.marginBottom='12px';
+  plans.innerHTML=ORDER.map(function(k){
+    var p=PRODUCTS[k];
+    return '<div class="plan'+(p.hot?' deluxe':'')+'" data-pvcard="'+k+'" role="radio" tabindex="0" aria-checked="false" aria-expanded="false"'+
+      ' style="-webkit-tap-highlight-color:transparent;cursor:pointer;padding:12px 14px;transition:padding .25s ease">'+
+      '<div data-pvhead style="display:flex;align-items:center;gap:10px;min-height:26px">'+
+        '<div class="plan-name" style="margin:0;font-size:15px;flex:1;transition:font-size .25s ease">'+p.name+'</div>'+
+        '<div class="plan-price" style="margin:0;font-size:17px;transition:font-size .25s ease">NT$'+p.price+'</div>'+
+        '<span data-pvdot style="flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);transition:all .25s ease"></span>'+
+      '</div>'+
+      '<div data-pvbody aria-hidden="true" style="overflow:hidden;max-height:0;opacity:0;transition:max-height .25s ease,opacity .25s ease">'+
+        (p.badge?'<div style="display:inline-block;margin:9px 0 2px;padding:3px 9px;border-radius:99px;font-size:12px;letter-spacing:.08em;color:#1a1220;background:linear-gradient(135deg,#f29bc2,#c9b0ec)">'+p.badge+'</div>':'')+
+        '<div class="plan-features" style="margin-top:8px;display:grid;gap:8px">'+
+          p.feats.map(function(f){return '<div class="plan-feature" style="font-size:13.5px;line-height:1.55;display:flex;align-items:center;gap:7px">'+CHK+f+'</div>';}).join('')+
+        '</div>'+
+        (p.sub?'<div style="margin-top:8px;font-size:12px;line-height:1.5;color:rgba(247,184,210,.85)">'+p.sub+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function update(){
+  var plans=$('plans'); if(!plans)return;
+  ORDER.forEach(function(k){
+    var c=plans.querySelector('[data-pvcard="'+k+'"]'); if(!c)return;
+    var on=(sel===k);
+    c.classList.toggle('selected',on);
+    c.setAttribute('aria-checked',on?'true':'false');
+    c.setAttribute('aria-expanded',on?'true':'false');
+    c.style.padding=on?'13px 16px':'12px 14px';
+    var head=c.querySelector('[data-pvhead]');
+    if(head){
+      head.querySelector('.plan-name').style.fontSize=on?'16px':'15px';
+      head.querySelector('.plan-price').style.fontSize=on?'22px':'17px';
+      var dot=head.querySelector('[data-pvdot]');
+      if(dot){ dot.style.border=on?'0':'1.5px solid rgba(255,255,255,.35)';
+        dot.style.background=on?'linear-gradient(135deg,#f29bc2,#b59cf0)':'transparent';
+        dot.style.boxShadow=on?'0 0 8px rgba(242,155,194,.45)':'none'; }
+    }
+    var body=c.querySelector('[data-pvbody]');
+    if(body){ body.style.maxHeight=on?(body.scrollHeight+'px'):'0';
+      body.style.opacity=on?'1':'0';
+      body.setAttribute('aria-hidden',on?'false':'true'); }
+  });
+  var btn=$('btn-checkout'); if(btn) btn.textContent=PRODUCTS[sel].btn;
+}
+function select(k){ if(PRODUCTS[k]&&sel!==k){ sel=k; update(); } else if(PRODUCTS[k]){ update(); } }
+
+function ensureEmail(){
+  if($('pv-email'))return;
+  var cta=document.querySelector('#screen-purchase .cta-block');
+  if(!cta)return;
+  var box=document.createElement('div');
+  box.id='pv-emailbox';
+  box.style.cssText='padding:0 20px 2px';
+  box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px;font-size:13.5px">購買 Email・兌換碼將寄至信箱</label>'+
+    '<input class="form-input" id="pv-email" type="email" placeholder="your@email.com" autocomplete="email" style="font-size:16px">'+
+    '<div id="pv-emailerr" style="min-height:14px;font-size:12px;color:#f7a8c2;margin:4px 2px 0"></div>';
+  cta.parentNode.insertBefore(box,cta);
+  cta.style.paddingTop='4px';
+}
+
+function paint(){
+  var scr=$('screen-purchase'); if(!scr) return;
+  var en=$('purchase-title-en'), tc=$('purchase-title-tc'), note=$('purchase-note');
+  if(en){ en.textContent='Unlock the Soundtrack'; en.style.margin='0 0 2px'; }
+  if(tc){ tc.textContent='解鎖《秘密關係》完整原聲'; tc.style.margin='0 0 6px'; tc.style.fontSize='18px'; }
+  if(note){ note.textContent='先試聽，喜歡再收藏。購買後永久解鎖，隨時回到劇中的聲音。';
+    note.style.fontSize='13.5px'; note.style.lineHeight='1.6'; note.style.margin='0 0 14px'; }
+  var plans=$('plans');
+  if(plans && (plans.getAttribute('data-pv4')!=='1' || !plans.querySelector('[data-pvcard]'))){
+    renderOnce(plans); update();
+  }
+  /* 螢幕從隱藏變可見時 scrollHeight 才有值 → 補算展開高度 */
+  if(plans){ var sb=plans.querySelector('[data-pvcard="'+sel+'"] [data-pvbody]');
+    if(sb && sb.scrollHeight>0 && sb.style.maxHeight!==sb.scrollHeight+'px'){ update(); } }
+  ensureEmail();
+  var btn=$('btn-checkout'); if(btn && !btn.disabled) btn.textContent=PRODUCTS[sel].btn;
+  var wav=$('btn-wav'); if(wav){ wav.remove(); }
+  var pn=$('unlocked-plan-note'); if(pn && /WAV/.test(pn.textContent)){ pn.textContent='你的內容已永久解鎖，隨時回來聆聽 ♡'; }
+}
+
+/* 選卡:點整行任意處;鍵盤 Enter/空白 */
+document.addEventListener('click',function(e){
+  var c=e.target.closest?e.target.closest('[data-pvcard]'):null;
+  if(c){ select(c.getAttribute('data-pvcard')); }
+},true);
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  var c=e.target.closest?e.target.closest('[data-pvcard]'):null;
+  if(c){ e.preventDefault(); select(c.getAttribute('data-pvcard')); }
+},true);
+
+/* 接管結帳:clone 掉 app.js 的舊 listener,自己打 /ecpay/create */
+function bindCheckout(){
+  var old=$('btn-checkout'); if(!old || old.getAttribute('data-pv')==='1') return;
+  var b=old.cloneNode(true); b.setAttribute('data-pv','1'); old.parentNode.replaceChild(b,old);
+  b.addEventListener('click',function(){
+    var em=($('pv-email')&&$('pv-email').value||'').trim();
+    var err=$('pv-emailerr');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ if(err)err.textContent='請輸入正確的 Email'; if($('pv-email'))$('pv-email').focus(); return; }
+    if(err)err.textContent='';
+    b.disabled=true; var t=b.textContent; b.textContent='正在建立付款訂單…';
+    fetch(W+'/ecpay/create',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({productKey:sel,email:em,ref:getRef()})})
+      .then(function(r){return r.text();})
+      .then(function(html){
+        if(html.indexOf('<form')<0){ throw new Error('bad'); }
+        document.open(); document.write(html); document.close();   // 自動送出 → 轉綠界
+      })
+      .catch(function(){ b.disabled=false; b.textContent=t; if(err)err.textContent='建立訂單失敗，請稍後再試'; });
+  });
+}
+
+/* ===== 解鎖頁:選填藝人推廣碼 + 併入 /verify ===== */
+function ensureArtist(){
+  if($('pv-artist'))return;
+  var codeInput=$('in-code'); if(!codeInput)return;
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<label class="form-label" for="pv-artist" style="display:block;margin:14px 0 6px">藝人推廣碼（選填）</label>'+
+    '<input class="form-input" id="pv-artist" type="text" placeholder="JUNHAO / CHANCE" autocomplete="off" style="margin-bottom:22px">';
+  codeInput.parentNode.insertBefore(wrap, codeInput.nextSibling);
+}
+var _f=window.fetch;
+window.fetch=function(input,init){
+  try{
+    var u=(typeof input==='string')?input:(input&&input.url)||'';
+    if(u.indexOf('/verify')>-1 && init && typeof init.body==='string'){
+      var a=$('pv-artist'); var ac=(a&&a.value||'').trim().toUpperCase();
+      if(ac){ var b=JSON.parse(init.body); if(!b.artistCode){ b.artistCode=ac; init=Object.assign({},init,{body:JSON.stringify(b)}); } }
+    }
+  }catch(e){}
+  var p=_f.call(this,input,init);
+  try{
+    var u2=(typeof input==='string')?input:(input&&input.url)||'';
+    if(u2.indexOf('/verify')>-1){ p.then(function(r){ r.clone().json().then(function(j){
+      if(j&&j.artist&&j.artist.ok){ if(window.__pvToast)window.__pvToast('已為你記錄支持的藝人：'+j.artist.displayName+' ♡'); }
+    }).catch(function(){}); }); }
+  }catch(e){}
+  return p;
+};
+
+window.__slHeartStyle=function(v){var st=document.getElementById('pv-x-style');if(!st)return;var css=st.textContent.replace('#btn-heart{display:none!important}','');st.textContent=(v==='songs'?'#btn-heart{display:none!important}':'')+css;};
+function ensureStyle(){
+  if(document.getElementById('pv-x-style'))return;
+  var _v='songs'; try{_v=localStorage.getItem('slv-view')||'songs';}catch(e){}
+  var st=document.createElement('style'); st.id='pv-x-style';
+  st.textContent=(_v==='songs'?'#btn-heart{display:none!important}':'')+
+    '#lyrics-body,#lyrics-title,#lyrics-eyebrow{text-align:center!important}'+
+    '#lyrics-body{white-space:pre-line}'+
+    '.lyrics-head{position:relative!important}'+
+    '.lyrics-head>div:first-child{width:100%!important;text-align:center!important}'+
+    '.sheet-close{position:absolute!important;right:16px;top:16px}';
+  document.head.appendChild(st);
+}
+function labelLyrics(){
+  var lb=document.getElementById('btn-lyrics'); if(!lb) return;
+  if(lb.querySelector('[data-lyrlabel]')) return;   // 已標記就跳過(抗重繪)
+  lb.setAttribute('aria-label','Lyrics'); lb.setAttribute('title','歌詞');
+  lb.innerHTML='<span data-lyrlabel="1" style="font-size:9.5px;font-weight:600;letter-spacing:.02em;line-height:1">Lyrics</span>';
+}
+function tick(){ ensureStyle(); labelLyrics(); paint(); bindCheckout(); ensureArtist(); }
+tick();
+document.addEventListener('DOMContentLoaded',tick);
+window.addEventListener('load',tick);
+setInterval(tick,700);
+})();</script>
+<script>(function(){
+/* 藝人歸因(方法一):?ref=藝人碼 → 記 30 天 → 訂單自動帶上 → /hit 記點擊 */
+var W='https://secret-lover-ost-api.anthonywen0693.workers.dev';
+var KEY='slo-ref', DAYS=30;
+function san(x){x=String(x||'').trim().toUpperCase();return /^[A-Z0-9_-]{1,20}$/.test(x)?x:'';}
+function getStored(){try{var o=JSON.parse(localStorage.getItem(KEY)||'null');if(o&&o.ref&&(Date.now()-o.ts)<DAYS*864e5)return o.ref;}catch(e){}return '';}
+var urlRef=san(new URLSearchParams(location.search).get('ref'));
+if(urlRef){
+  try{localStorage.setItem(KEY,JSON.stringify({ref:urlRef,ts:Date.now()}));}catch(e){}
+  try{
+    if(sessionStorage.getItem('slo-ref-hit')!==urlRef){
+      sessionStorage.setItem('slo-ref-hit',urlRef);
+      fetch(W+'/hit?ref='+urlRef,{keepalive:true}).catch(function(){});
+    }
+  }catch(e){}
+}
+/* fetch wrapper:任何打 /ecpay/create 的請求自動補 ref(不動原本程式) */
+var _fetch=window.fetch;
+window.fetch=function(input,init){
+  try{
+    var u=(typeof input==='string')?input:(input&&input.url)||'';
+    if(u.indexOf('/ecpay/create')>-1){
+      var ref=getStored();
+      if(ref){
+        if(init&&typeof init.body==='string'){
+          try{var b=JSON.parse(init.body);if(!b.ref){b.ref=ref;init=Object.assign({},init,{body:JSON.stringify(b)});}}catch(e){}
+        }else if(u.indexOf('ref=')===-1){
+          u+=(u.indexOf('?')>-1?'&':'?')+'ref='+ref;
+          if(typeof input==='string')input=u;
+        }
+      }
+    }
+  }catch(e){}
+  return _fetch.call(this,input,init);
+};
+/* 若購買是用 window.open / location 導頁的 GET,也補一手 */
+var _open=window.open;
+window.open=function(u){try{var ref=getStored();if(ref&&typeof u==='string'&&u.indexOf('/ecpay/create')>-1&&u.indexOf('ref=')===-1){u+=(u.indexOf('?')>-1?'&':'?')+'ref='+ref;}}catch(e){}return _open.apply(this,arguments);};
+})();</script>
+<script>(function(){
+/* ===== 浮動 SONGS/SCORE segmented control：封面/卡片交界、水平置中、半浮 ===== */
+var VIEW='songs';
+try{VIEW=localStorage.getItem('slv-view')||'songs';}catch(e){}
+if(VIEW!=='songs'&&VIEW!=='score')VIEW='songs';
+
+function ensureCSS(){
+  if(document.getElementById('vsw-style'))return;
+  var st=document.createElement('style'); st.id='vsw-style';
+  st.textContent=[
+    /* np-card 補頂距，讓 NOW PLAYING 落在浮動切換器下方不重疊 */
+    '.np-card{padding-top:30px!important}',
+    /* 浮動切換器 */
+    '#__vsw{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);z-index:6;'+
+      'width:clamp(140px,44vw,162px);height:44px;display:flex;align-items:center;justify-content:center;'+
+      '-webkit-tap-highlight-color:transparent}',
+    '#__vsw .vsw-track{position:relative;width:100%;height:32px;display:flex;border-radius:16px;'+
+      'background:rgba(20,14,28,.55);border:1px solid rgba(242,155,194,.28);'+
+      'box-shadow:0 8px 24px rgba(0,0,0,.42);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}',
+    '#__vsw .vsw-thumb{position:absolute;top:2px;bottom:2px;left:2px;width:calc(50% - 3px);border-radius:14px;'+
+      'background:linear-gradient(135deg,#f7cbe0,#e6d4f5);box-shadow:0 2px 8px rgba(242,155,194,.28);'+
+      'transition:transform .2s cubic-bezier(.4,0,.2,1);will-change:transform}',
+    '#__vsw[data-view="score"] .vsw-thumb{transform:translateX(calc(100% + 2px))}',
+    '#__vsw button{position:relative;z-index:1;flex:1;height:44px;margin:-6px 0;padding:0;background:transparent;'+
+      'border:0;cursor:pointer;font-family:"Bodoni Moda",serif;font-size:10px;letter-spacing:.6px;line-height:1;'+
+      'display:flex;align-items:center;justify-content:center;color:rgba(199,186,214,.58);'+
+      'transition:color .2s ease;-webkit-tap-highlight-color:transparent}',
+    '#__vsw button[aria-pressed="true"]{color:#4a2d5c;font-weight:700}',
+    '#__vsw button:not([aria-pressed="true"]):hover{color:rgba(247,184,210,.9)}',
+    '#__vsw button:focus-visible{outline:2px solid rgba(242,155,194,.75);outline-offset:2px;border-radius:14px}'
+  ].join('');
+  document.head.appendChild(st);
+}
+
+function counts(){
+  var c=(window.__slCounts||{}); return {songs:c.songs||12, score:c.score||21};
+}
+function build(){
+  ensureCSS();
+  if(document.getElementById('__vsw'))return true;
+  var card=document.querySelector('.np-card');
+  if(!card)return false;
+  if(getComputedStyle(card).position==='static')card.style.position='relative';
+  var cc=counts();
+  var w=document.createElement('div');
+  w.id='__vsw'; w.setAttribute('role','group'); w.setAttribute('aria-label','原聲帶分類切換');
+  w.setAttribute('data-view',VIEW);
+  var track=document.createElement('div'); track.className='vsw-track';
+  var thumb=document.createElement('div'); thumb.className='vsw-thumb'; track.appendChild(thumb);
+  function seg(view,label,title){
+    var on=(VIEW===view);
+    var b=document.createElement('button');
+    b.type='button'; b.textContent=label; b.title=title;
+    b.setAttribute('aria-pressed',on?'true':'false');
+    b.setAttribute('aria-label',title+'（共 '+(view==='songs'?cc.songs:cc.score)+' 首）');
+    function go(){
+      if(VIEW===view)return;
+      w.setAttribute('data-view',view);      // 先滑動 highlight，再換頁
+      try{localStorage.setItem('slv-view',view);}catch(e){}
+      var fb=function(){try{sessionStorage.setItem('slv-switch','1');}catch(e){}var v2=document.getElementById('viewfade');if(v2){v2.style.transition='opacity .18s ease';v2.style.opacity='1';}setTimeout(function(){location.reload();},200);};
+      if(window.__slSwitchView&&window.__slViewData){
+        var vf=document.getElementById('viewfade');
+        if(vf){vf.style.transition='opacity .14s ease';vf.style.opacity='1';}
+        setTimeout(function(){
+          try{
+            window.__slSwitchView(view);
+            if(window.__slHeartStyle)window.__slHeartStyle(view);
+            VIEW=view; w.setAttribute('data-view',view);
+            var bs=w.querySelectorAll('button');
+            if(bs[0])bs[0].setAttribute('aria-pressed',view==='songs'?'true':'false');
+            if(bs[1])bs[1].setAttribute('aria-pressed',view==='score'?'true':'false');
+            if(vf){vf.style.transition='opacity .25s ease';vf.style.opacity='0';}
+          }catch(err){fb();}
+        },150);
+      } else { fb(); }
+    }
+    b.addEventListener('click',go);
+    b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+    return b;
+  }
+  track.appendChild(seg('songs','ALBUM','完整專輯'));
+  track.appendChild(seg('score','SCORE','配樂原聲帶'));
+  w.appendChild(track);
+  card.appendChild(w);
+  return true;
+}
+if(!build()){document.addEventListener('DOMContentLoaded',build);window.addEventListener('load',build);var n=0,t=setInterval(function(){if(build()||++n>20)clearInterval(t);},400);}
+})();</script>
+<script>(function(){
+/* ===== 即時歌詞條(LRC)— 只在歌曲檢視、有 .lrc 的曲目顯示 ===== */
+var VIEW='songs'; try{VIEW=localStorage.getItem('slv-view')||'songs';}catch(e){}
+               // 配樂檢視不顯示
+var LRC={6:'lyrics/06.lrc'};             // 目前只做第 6 首示範,之後逐首補
+// 攔截 play() 抓到 app.js 內部的 Audio 實例
+var _play=HTMLMediaElement.prototype.play;
+HTMLMediaElement.prototype.play=function(){window.__slAudio=this;return _play.apply(this,arguments);};
+var cache={}, curN=0, cues=null;
+function parseLRC(txt){
+  var out=[]; txt.split('\n').forEach(function(l){
+    var m=l.match(/^\[(\d{2}):(\d{2}(?:\.\d{1,2})?)\](.*)$/);
+    if(m){ out.push({t:parseInt(m[1])*60+parseFloat(m[2]), s:m[3].trim()}); }
+  });
+  out.sort(function(a,b){return a.t-b.t;}); return out;
+}
+function titleToN(){
+  var t=(document.getElementById('np-title')||{}).textContent||'';
+  var C=window.ALBUM_CONFIG; if(!C)return 0;
+  for(var i=0;i<C.tracks.length;i++){ if(C.tracks[i].title===t) return C.tracks[i].n; }
+  return 0;
+}
+function ensureBar(){
+  var bar=document.getElementById('lrc-ticker');
+  if(bar) return bar;
+  var npc=document.querySelector('.np-card'); if(!npc) return null;
+  var fold=npc.closest('.player-fold') || npc.parentNode;   // 放到 fold 之外,不佔封面(flex:1)空間
+  var mount=fold.parentNode||npc.parentNode, ref=fold.nextSibling;
+  bar=document.createElement('div'); bar.id='lrc-ticker';
+  bar.style.cssText='margin:0 20px;min-height:0;max-height:0;overflow:hidden;display:flex;flex-direction:column;'+
+    'align-items:center;justify-content:center;gap:4px;text-align:center;'+
+    'opacity:0;transition:opacity .4s ease,max-height .3s ease;pointer-events:none';
+  bar.innerHTML='<div id="lrc-now" style="font-size:15px;font-weight:600;color:#fff;line-height:1.35;'+
+      'transition:opacity .25s ease;text-shadow:0 1px 12px rgba(242,155,194,.35)"></div>'+
+    '<div id="lrc-next" style="font-size:12px;color:rgba(255,255,255,.4);line-height:1.3;transition:opacity .25s"></div>';
+  // 放在 player-fold 之後(不影響封面高度),落在中島與曲目列之間的空隙
+  if(mount) mount.insertBefore(bar, ref); else npc.parentNode.insertBefore(bar, npc.nextSibling);
+  return bar;
+}
+function load(n){
+  if(cache[n]!==undefined){ cues=cache[n]; return; }
+  cache[n]=null; cues=null;
+  if(!LRC[n]) return;
+  fetch(LRC[n]).then(function(r){return r.ok?r.text():'';}).then(function(t){
+    cache[n]=t?parseLRC(t):null; cues=cache[n];
+  }).catch(function(){});
+}
+function tick(){
+  var bar=ensureBar(); if(!bar) return;
+  var vv='songs';try{vv=localStorage.getItem('slv-view')||'songs';}catch(e){}
+  if(vv!=='songs'){bar.style.opacity='0';bar.style.maxHeight='0';return;}
+  var n=titleToN();
+  if(n!==curN){ curN=n; load(n); }
+  var au=window.__slAudio;
+  var now=document.getElementById('lrc-now'), nx=document.getElementById('lrc-next');
+  if(!cues || !au){ bar.style.opacity='0'; bar.style.maxHeight='0'; bar.style.margin='0 20px'; return; }
+  var ct=au.currentTime||0, i=-1;
+  for(var k=0;k<cues.length;k++){ if(cues[k].t<=ct+0.15) i=k; else break; }
+  bar.style.opacity='1'; bar.style.maxHeight='60px'; bar.style.margin='12px 20px 2px';
+  var cur=(i>=0)?cues[i].s:'';
+  var next=(i+1<cues.length)?cues[i+1].s:'';
+  if(now.textContent!==cur){ now.style.opacity='0'; setTimeout(function(){now.textContent=cur;now.style.opacity='1';},120); }
+  if(nx.textContent!==next){ nx.textContent=next; }
+}
+setInterval(tick,120);
+document.addEventListener('DOMContentLoaded',tick);
+})();</script>
+<script>(function(){
+/* ===== Liquid Glass 皮膚：SVG 位移折射 + 玻璃邊緣 inset（styles.css 不動，全注入） ===== */
+function ensureSVG(){
+  if(document.getElementById('lg-svg'))return;
+  var ns='http://www.w3.org/2000/svg';
+  var svg=document.createElementNS(ns,'svg');
+  svg.id='lg-svg'; svg.setAttribute('aria-hidden','true');
+  svg.setAttribute('style','position:absolute;width:0;height:0;overflow:hidden;pointer-events:none');
+  svg.innerHTML=
+    '<defs>'+
+      '<filter id="lg-card" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">'+
+        '<feTurbulence type="fractalNoise" baseFrequency="0.011 0.011" numOctaves="1" seed="4" result="n"/>'+
+        '<feGaussianBlur in="n" stdDeviation="2" result="nb"/>'+
+        '<feDisplacementMap in="SourceGraphic" in2="nb" scale="14" xChannelSelector="R" yChannelSelector="B"/>'+
+      '</filter>'+
+      '<filter id="lg-btn" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">'+
+        '<feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="1" seed="7" result="n2"/>'+
+        '<feGaussianBlur in="n2" stdDeviation="1.6" result="n2b"/>'+
+        '<feDisplacementMap in="SourceGraphic" in2="n2b" scale="26" xChannelSelector="R" yChannelSelector="B"/>'+
+      '</filter>'+
+    '</defs>';
+  document.body.appendChild(svg);
+}
+function ensureCSS(){
+  if(document.getElementById('lg-style'))return;
+  var EDGE='inset 3px 3px .5px -3.5px rgba(255,255,255,.6),'+
+           'inset -3px -3px .5px -3.5px rgba(255,255,255,.55),'+
+           'inset 1px 1px 1px -.5px rgba(255,255,255,.42),'+
+           'inset -1px -1px 1px -.5px rgba(255,255,255,.42),'+
+           'inset 0 0 6px 6px rgba(255,255,255,.07),'+
+           'inset 0 0 2px 2px rgba(255,255,255,.04)';
+  var st=document.createElement('style'); st.id='lg-style';
+  st.textContent=[
+    /* 主資訊卡：更透的玻璃 + 位移折射 + 玻璃邊緣光 */
+    '.np-card{background:rgba(20,14,26,.30)!important;'+
+      'backdrop-filter:blur(11px) saturate(1.6) url(#lg-card)!important;'+
+      '-webkit-backdrop-filter:blur(11px) saturate(1.6)!important;'+
+      'border:1px solid rgba(255,255,255,.16)!important;'+
+      'box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 12px rgba(255,255,255,.06),'+EDGE+'!important}',
+    /* 圓形按鈕（Lyrics / 愛心） */
+    '.icon-round{background:rgba(255,255,255,.06)!important;'+
+      'backdrop-filter:blur(6px) url(#lg-btn)!important;-webkit-backdrop-filter:blur(6px)!important;'+
+      'border:1px solid rgba(255,255,255,.22)!important;'+
+      'box-shadow:0 4px 14px rgba(0,0,0,.3),'+EDGE+'!important}',
+    /* 大播放鈕：保留亮底，疊玻璃邊緣 */
+    '.btn-play{box-shadow:0 10px 30px rgba(120,90,160,.45),0 0 10px rgba(255,255,255,.25),'+EDGE+'!important}',
+    /* SONGS/SCORE 切換器 track */
+    '#__vsw .vsw-track{backdrop-filter:blur(14px) saturate(1.4) url(#lg-btn)!important;'+
+      '-webkit-backdrop-filter:blur(14px) saturate(1.4)!important;'+
+      'box-shadow:0 8px 24px rgba(0,0,0,.42),'+EDGE+'!important}',
+    /* 底部分頁島：更透的霜面玻璃 + 加強邊緣反光（下方是深底，需靠亮邊撐出玻璃感） */
+    '#nav{background:rgba(255,255,255,.07)!important;'+
+      'backdrop-filter:blur(30px) saturate(1.7) url(#lg-card)!important;'+
+      '-webkit-backdrop-filter:blur(30px) saturate(1.7)!important;'+
+      'border:1px solid rgba(255,255,255,.24)!important;'+
+      'box-shadow:0 16px 42px rgba(0,0,0,.5),0 0 16px rgba(255,255,255,.12),'+EDGE+
+      ',inset 0 1px 0 rgba(255,255,255,.4)!important}',
+    /* 分頁島的光澤層調亮一點 */
+    '#nav::before{background:linear-gradient(135deg,rgba(255,255,255,.22),transparent 46%)!important}',
+    /* 選中指示塊 → 液態玻璃錠 */
+    '#nav-ind{backdrop-filter:blur(8px) url(#lg-btn)!important;-webkit-backdrop-filter:blur(8px)!important;'+
+      'background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(242,155,194,.14))!important;'+
+      'box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 12px rgba(242,155,194,.2),'+EDGE+
+      ',0 4px 12px rgba(0,0,0,.2)!important}'
+  ].join('');
+  document.head.appendChild(st);
+}
+function apply(){ ensureSVG(); ensureCSS(); }
+apply();
+document.addEventListener('DOMContentLoaded',apply);
+window.addEventListener('load',apply);
+})();</script>
+
+<style id="nav-tune">
+/* 收起主畫面 inline 曲目列 → 改由 NEXT SCENE 開 Bottom Sheet */
+.tracklist-block{display:none!important}
+/* __smooth_tabs v2:純 opacity 過場(iOS blur 友善,無 transform) */
+.screen{display:block!important;opacity:0;pointer-events:none;visibility:hidden;z-index:1;
+  transition:opacity var(--tabdur,.22s) ease,visibility 0s linear var(--tabdur,.22s)}
+.screen.active{opacity:1;pointer-events:auto;visibility:visible;z-index:2;
+  transition:opacity var(--tabdur,.22s) ease,visibility 0s;will-change:opacity}
+.screen.leaving{will-change:opacity}
+.screen:not(.active):not(.leaving){content-visibility:hidden}
+@media (prefers-reduced-motion:reduce){.screen,.screen.active{transition:none}}
+.cover-card img,.cover-card video{content-visibility:auto}
+.np-card{margin-bottom:calc(58px + env(safe-area-inset-bottom))!important}
+.sheet-list{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}
+.track-name{font-size:19px!important;font-weight:500!important;line-height:1.3!important}
+.track-num{font-size:14px!important}
+.cover-card{margin-top:calc(-1px + env(safe-area-inset-top))!important}
+/* 分頁島:下移貼底(保留 safe-area,不可回黑 bar) */
+#nav-wrap{bottom:calc(0px + env(safe-area-inset-bottom))!important;transform:translateY(10px)!important}
+/* 分頁島放大(維持 tab 寬 64px 以免選中指示塊跑位) */
+#nav{padding:9px 8px!important}
+#nav{transform:scale(.74)!important;transform-origin:center bottom!important;opacity:.87!important}
+.navbtn{padding:10px 0 9px!important;gap:4px!important}
+.navbtn .navico svg,.navbtn svg{width:23px!important;height:23px!important}
+.navbtn .navlbl{font-size:14px!important}
+#btn-checkout{font-size:16.5px!important}
+.cta-block button:not(#btn-checkout){font-size:14px!important}
+</style>
+<script>(function(){/* __smooth_helper */
+try{console.log('SL app-version: v2-smooth');}catch(e){}
+if(navigator.standalone){document.documentElement.style.setProperty('--tabdur','150ms');}
+var prev=null;
+var mo=new MutationObserver(function(ms){ms.forEach(function(m){var el=m.target;
+  if(el.classList&&el.classList.contains('active')){
+    if(prev&&prev!==el){prev.classList.add('leaving');(function(p){setTimeout(function(){p.classList.remove('leaving');},280);})(prev);}
+    prev=el;}});});
+function init(){var ss=document.querySelectorAll('.screen');if(!ss.length)return false;
+  ss.forEach(function(s){mo.observe(s,{attributes:true,attributeFilter:['class']});if(s.classList.contains('active'))prev=s;});return true;}
+if(!init()){document.addEventListener('DOMContentLoaded',init);}
+})();</script>
+<script>(function(){/* __viewfade_out */
+function out(){var f=document.getElementById('viewfade');if(!f)return;
+  f.style.transition='opacity .3s ease';f.style.opacity='0';
+  try{sessionStorage.removeItem('slv-switch');}catch(e){}}
+function ready(){
+  var p=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  p.then(function(){setTimeout(out,80);});}
+if(document.readyState==='complete')ready();else window.addEventListener('load',ready);
+/* 預載另一檢視封面,下次切換零載入 */
+try{var v=localStorage.getItem('slv-view')||'songs';
+  var other=(v==='songs')?'score-cover.jpg':'full-cover.jpg';
+  var im=new Image();im.src=other;}catch(e){}
+})();</script>
+</body>
+</html>
