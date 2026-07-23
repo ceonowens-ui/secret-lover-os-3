@@ -1627,7 +1627,7 @@ html, body {
     CFG.albumEyebrow = V.albumEyebrow; CFG.albumTitleEn = V.albumTitleEn; CFG.albumTitle = V.albumTitle;
     CFG.coverImage = V.coverImage; CFG.coverVideo = V.coverVideo || ""; CFG.viewCategory = view;
     STR.nextScene = (view === "songs") ? "Next Track" : "Next Scene";
-    try { audio.pause(); } catch (e) {}
+    try { audio.pause(); audio.removeAttribute("src"); audio.load(); } catch (e) {}
     state.cur = 0; state.dur = 0; state.playing = false;
     $("cover-img").src = CFG.coverImage || "";
     $("cover-eyebrow").textContent = CFG.albumEyebrow || "";
