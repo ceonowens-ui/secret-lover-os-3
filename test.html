@@ -1610,13 +1610,13 @@ var W='https://secret-lover-ost-api.anthonywen0693.workers.dev';
 var PRODUCTS={
   complete:{key:'complete',name:'完整原聲典藏版',price:499,badge:'最完整收藏',hot:true,
     sub:'兩套分開購買原價 NT$598，典藏版現省 NT$99',
-    feats:['一次收藏完整 33 軌原聲','12 軌歌曲＋21 段劇情配樂','完整 MP3 音檔收藏','永久解鎖完整播放器'],
+    feats:['一次收藏完整 33 軌原聲','12 軌歌曲＋21 段劇情配樂','永久解鎖完整播放器'],
     btn:'立即收藏完整原聲｜NT$499'},
   songs:{key:'songs',name:'歌曲原聲帶',price:299,
-    feats:['收錄 12 軌歌曲與伴奏版本','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
+    feats:['收錄 12 軌歌曲與伴奏版本','不限次數永久收聽','可加入手機主畫面'],
     btn:'立即解鎖歌曲原聲帶｜NT$299'},
   score:{key:'score',name:'原創配樂集',price:299,
-    feats:['收錄 21 段劇情原創配樂','完整 MP3 音檔收藏','不限次數永久收聽','可加入手機主畫面'],
+    feats:['收錄 21 段劇情原創配樂','不限次數永久收聽','可加入手機主畫面'],
     btn:'立即解鎖原創配樂集｜NT$299'},
 };
 var ORDER=['complete','songs','score'];
@@ -1634,16 +1634,16 @@ function renderOnce(plans){
     return '<div class="plan'+(p.hot?' deluxe':'')+'" data-pvcard="'+k+'" role="radio" tabindex="0" aria-checked="false" aria-expanded="false"'+
       ' style="-webkit-tap-highlight-color:transparent;cursor:pointer;padding:12px 14px;transition:padding .25s ease">'+
       '<div data-pvhead style="display:flex;align-items:center;gap:10px;min-height:26px">'+
-        '<div class="plan-name" style="margin:0;font-size:14px;flex:1;transition:font-size .25s ease">'+p.name+'</div>'+
-        '<div class="plan-price" style="margin:0;font-size:16px;transition:font-size .25s ease">NT$'+p.price+'</div>'+
+        '<div class="plan-name" style="margin:0;font-size:15px;flex:1;transition:font-size .25s ease">'+p.name+'</div>'+
+        '<div class="plan-price" style="margin:0;font-size:17px;transition:font-size .25s ease">NT$'+p.price+'</div>'+
         '<span data-pvdot style="flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);transition:all .25s ease"></span>'+
       '</div>'+
       '<div data-pvbody aria-hidden="true" style="overflow:hidden;max-height:0;opacity:0;transition:max-height .25s ease,opacity .25s ease">'+
-        (p.badge?'<div style="display:inline-block;margin:9px 0 2px;padding:3px 9px;border-radius:99px;font-size:10.5px;letter-spacing:.08em;color:#1a1220;background:linear-gradient(135deg,#f29bc2,#c9b0ec)">'+p.badge+'</div>':'')+
-        '<div class="plan-features" style="margin-top:8px;display:grid;gap:6px">'+
-          p.feats.map(function(f){return '<div class="plan-feature" style="font-size:12px;line-height:1.5;display:flex;align-items:center;gap:7px">'+CHK+f+'</div>';}).join('')+
+        (p.badge?'<div style="display:inline-block;margin:9px 0 2px;padding:3px 9px;border-radius:99px;font-size:12px;letter-spacing:.08em;color:#1a1220;background:linear-gradient(135deg,#f29bc2,#c9b0ec)">'+p.badge+'</div>':'')+
+        '<div class="plan-features" style="margin-top:8px;display:grid;gap:8px">'+
+          p.feats.map(function(f){return '<div class="plan-feature" style="font-size:13.5px;line-height:1.55;display:flex;align-items:center;gap:7px">'+CHK+f+'</div>';}).join('')+
         '</div>'+
-        (p.sub?'<div style="margin-top:8px;font-size:11px;line-height:1.5;color:rgba(247,184,210,.85)">'+p.sub+'</div>':'')+
+        (p.sub?'<div style="margin-top:8px;font-size:12px;line-height:1.5;color:rgba(247,184,210,.85)">'+p.sub+'</div>':'')+
       '</div>'+
     '</div>';
   }).join('');
@@ -1659,8 +1659,8 @@ function update(){
     c.style.padding=on?'13px 16px':'12px 14px';
     var head=c.querySelector('[data-pvhead]');
     if(head){
-      head.querySelector('.plan-name').style.fontSize=on?'15px':'14px';
-      head.querySelector('.plan-price').style.fontSize=on?'21px':'16px';
+      head.querySelector('.plan-name').style.fontSize=on?'16px':'15px';
+      head.querySelector('.plan-price').style.fontSize=on?'22px':'17px';
       var dot=head.querySelector('[data-pvdot]');
       if(dot){ dot.style.border=on?'0':'1.5px solid rgba(255,255,255,.35)';
         dot.style.background=on?'linear-gradient(135deg,#f29bc2,#b59cf0)':'transparent';
@@ -1682,8 +1682,8 @@ function ensureEmail(){
   var box=document.createElement('div');
   box.id='pv-emailbox';
   box.style.cssText='padding:0 20px 2px';
-  box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px">購買 Email・兌換碼將寄至信箱</label>'+
-    '<input class="form-input" id="pv-email" type="email" placeholder="your@email.com" autocomplete="email">'+
+  box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px;font-size:13.5px">購買 Email・兌換碼將寄至信箱</label>'+
+    '<input class="form-input" id="pv-email" type="email" placeholder="your@email.com" autocomplete="email" style="font-size:16px">'+
     '<div id="pv-emailerr" style="min-height:14px;font-size:12px;color:#f7a8c2;margin:4px 2px 0"></div>';
   cta.parentNode.insertBefore(box,cta);
   cta.style.paddingTop='4px';
@@ -1693,9 +1693,9 @@ function paint(){
   var scr=$('screen-purchase'); if(!scr) return;
   var en=$('purchase-title-en'), tc=$('purchase-title-tc'), note=$('purchase-note');
   if(en){ en.textContent='Unlock the Soundtrack'; en.style.margin='0 0 2px'; }
-  if(tc){ tc.textContent='解鎖《秘密關係》完整原聲'; tc.style.margin='0 0 6px'; }
+  if(tc){ tc.textContent='解鎖《秘密關係》完整原聲'; tc.style.margin='0 0 6px'; tc.style.fontSize='18px'; }
   if(note){ note.textContent='先試聽，喜歡再收藏。購買後永久解鎖，隨時回到劇中的聲音。';
-    note.style.fontSize='12.5px'; note.style.lineHeight='1.55'; note.style.margin='0 0 14px'; }
+    note.style.fontSize='13.5px'; note.style.lineHeight='1.6'; note.style.margin='0 0 14px'; }
   var plans=$('plans');
   if(plans && (plans.getAttribute('data-pv4')!=='1' || !plans.querySelector('[data-pvcard]'))){
     renderOnce(plans); update();
@@ -2068,6 +2068,8 @@ window.addEventListener('load',apply);
 .navbtn{padding:10px 0 9px!important;gap:4px!important}
 .navbtn .navico svg,.navbtn svg{width:23px!important;height:23px!important}
 .navbtn .navlbl{font-size:14px!important}
+#btn-checkout{font-size:16.5px!important}
+.cta-block button:not(#btn-checkout){font-size:14px!important}
 </style>
 <script>(function(){/* __smooth_helper */
 try{console.log('SL app-version: v2-smooth');}catch(e){}
