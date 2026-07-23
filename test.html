@@ -9,6 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <!-- theme-color 由 app.js 依 ALBUM_CONFIG.theme.themeColor 覆寫 -->
 <meta name="theme-color" content="#0d0a12">
+<meta name="app-version" content="v2-smooth">
 <link rel="manifest" href="test.webmanifest">
 <!-- 標題與 icon 由 app.js 從 config 填入 -->
 <title>秘密關係 Secret Lover · 原聲平台</title>
@@ -2043,14 +2044,14 @@ window.addEventListener('load',apply);
 <style id="nav-tune">
 /* 收起主畫面 inline 曲目列 → 改由 NEXT SCENE 開 Bottom Sheet */
 .tracklist-block{display:none!important}
-/* __smooth_tabs 分頁切換淡入淡出:不用 display 硬切(高度穩定/捲動保留/不 reflow) */
-.screen{display:block!important;opacity:0;pointer-events:none;visibility:hidden;
-  transform:translateY(8px);z-index:1;
-  transition:opacity .22s ease,transform .22s ease,visibility 0s linear .22s}
-.screen.active{opacity:1;pointer-events:auto;visibility:visible;transform:none;z-index:2;
-  transition:opacity .22s ease,transform .22s ease,visibility 0s}
-@media (prefers-reduced-motion:reduce){.screen,.screen.active{transition:none;transform:none}}
-/* 封面/資訊卡已固定框架,防載入抖動 */
+/* __smooth_tabs v2:純 opacity 過場(iOS blur 友善,無 transform) */
+.screen{display:block!important;opacity:0;pointer-events:none;visibility:hidden;z-index:1;
+  transition:opacity var(--tabdur,.22s) ease,visibility 0s linear var(--tabdur,.22s)}
+.screen.active{opacity:1;pointer-events:auto;visibility:visible;z-index:2;
+  transition:opacity var(--tabdur,.22s) ease,visibility 0s;will-change:opacity}
+.screen.leaving{will-change:opacity}
+.screen:not(.active):not(.leaving){content-visibility:hidden}
+@media (prefers-reduced-motion:reduce){.screen,.screen.active{transition:none}}
 .cover-card img,.cover-card video{content-visibility:auto}
 .np-card{margin-bottom:calc(58px + env(safe-area-inset-bottom))!important}
 .sheet-list{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}
@@ -2066,5 +2067,17 @@ window.addEventListener('load',apply);
 .navbtn .navico svg,.navbtn svg{width:23px!important;height:23px!important}
 .navbtn .navlbl{font-size:14px!important}
 </style>
+<script>(function(){/* __smooth_helper */
+try{console.log('SL app-version: v2-smooth');}catch(e){}
+if(navigator.standalone){document.documentElement.style.setProperty('--tabdur','150ms');}
+var prev=null;
+var mo=new MutationObserver(function(ms){ms.forEach(function(m){var el=m.target;
+  if(el.classList&&el.classList.contains('active')){
+    if(prev&&prev!==el){prev.classList.add('leaving');(function(p){setTimeout(function(){p.classList.remove('leaving');},280);})(prev);}
+    prev=el;}});});
+function init(){var ss=document.querySelectorAll('.screen');if(!ss.length)return false;
+  ss.forEach(function(s){mo.observe(s,{attributes:true,attributeFilter:['class']});if(s.classList.contains('active'))prev=s;});return true;}
+if(!init()){document.addEventListener('DOMContentLoaded',init);}
+})();</script>
 </body>
 </html>
