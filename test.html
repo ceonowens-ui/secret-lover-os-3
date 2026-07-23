@@ -2157,7 +2157,7 @@ function build(){
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
     document.querySelectorAll('.navbtn').forEach(function(n){n.classList.remove('active');});
     scr.classList.add('active'); b.classList.add('active');
-    var ind=document.getElementById('nav-ind'); if(ind)ind.style.transform='translateX('+(5*64)+'px)';
+    var ind=document.getElementById('nav-ind'); if(ind)ind.style.transform='translateX('+(4*64)+'px)';
   });
   nav.addEventListener('click',function(e){
     var nb=e.target.closest?e.target.closest('.navbtn'):null;
@@ -2166,6 +2166,26 @@ function build(){
   return true;
 }
 if(!build()){document.addEventListener('DOMContentLoaded',build);var n=0,tm=setInterval(function(){if(build()||++n>20)clearInterval(tm);},400);}
+})();</script>
+<style id="__uifix2css">
+.navbtn[data-screen="gallery"]{display:none!important}
+#screen-gallery{display:none!important}
+#btn-close-sheet{min-width:44px!important;min-height:44px!important}
+</style>
+<script>(function(){/* __uifix2 remove gallery tab + iOS sheet-close fix */
+function fix(){
+  var sheet=document.getElementById('sheet');
+  var x=document.getElementById('btn-close-sheet');
+  if(!sheet||!x)return false;
+  if(x.__uf2)return true; x.__uf2=1;
+  function close(e){ if(e){try{e.preventDefault();}catch(_){}} sheet.classList.add('hidden'); }
+  x.addEventListener('pointerup',close,true);
+  x.addEventListener('touchend',close,{passive:false,capture:true});
+  x.addEventListener('click',close,true);
+  sheet.addEventListener('pointerup',function(e){ if(e.target===sheet) sheet.classList.add('hidden'); },true);
+  return true;
+}
+if(!fix()){document.addEventListener('DOMContentLoaded',fix);var n=0,tm=setInterval(function(){if(fix()||++n>25)clearInterval(tm);},350);}
 })();</script>
 </body>
 </html>
