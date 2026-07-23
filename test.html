@@ -2134,5 +2134,38 @@ try{var v=localStorage.getItem('slv-view')||'songs';
   var other=(v==='songs')?'score-cover.jpg':'full-cover.jpg';
   var im=new Image();im.src=other;}catch(e){}
 })();</script>
+<script>(function(){/* __scratch_tab 集卡分頁(final 版佔位頁移植) */
+function build(){
+  if(document.getElementById('screen-scratch'))return true;
+  var stage=document.getElementById('stage'), nav=document.getElementById('nav');
+  if(!stage||!nav)return false;
+  var scr=document.createElement('div');
+  scr.className='screen'; scr.id='screen-scratch';
+  scr.innerHTML='<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px;background:radial-gradient(120% 60% at 50% 0%,#1c1426,#0d0a12 70%)">'+
+    '<div style="font-size:44px;margin-bottom:18px">\uD83D\uDD12</div>'+
+    '<div style="font-family:\'Playfair Display\',serif;font-style:italic;letter-spacing:3px;font-size:13px;color:#f29bc2;margin-bottom:14px">SECRET SCRATCH</div>'+
+    '<div style="font-family:\'Noto Serif TC\',serif;font-size:20px;font-weight:600;letter-spacing:2px;margin-bottom:10px;color:#fff">集卡刮刮樂</div>'+
+    '<div style="font-size:14.5px;color:rgba(255,255,255,.85);margin-bottom:12px">正在整理中，即將推出 ♡</div>'+
+    '<div style="font-size:12px;color:rgba(255,255,255,.45)">敬請期待，更多他們的秘密即將解鎖</div>'+
+    '<div style="margin-top:16px;display:flex;gap:6px;justify-content:center"><span style="width:4px;height:4px;border-radius:50%;background:rgba(242,155,194,.4)"></span><span style="width:4px;height:4px;border-radius:50%;background:rgba(242,155,194,.65)"></span><span style="width:4px;height:4px;border-radius:50%;background:#f29bc2"></span></div></div>';
+  stage.appendChild(scr);
+  var b=document.createElement('button');
+  b.className='navbtn'; b.id='navbtn-scratch'; b.type='button';
+  b.innerHTML='<span class="navico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg></span><span class="navlbl">集卡</span>';
+  nav.appendChild(b);
+  b.addEventListener('click',function(){
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('.navbtn').forEach(function(n){n.classList.remove('active');});
+    scr.classList.add('active'); b.classList.add('active');
+    var ind=document.getElementById('nav-ind'); if(ind)ind.style.transform='translateX('+(5*64)+'px)';
+  });
+  nav.addEventListener('click',function(e){
+    var nb=e.target.closest?e.target.closest('.navbtn'):null;
+    if(nb&&nb!==b){ b.classList.remove('active'); scr.classList.remove('active'); }
+  },true);
+  return true;
+}
+if(!build()){document.addEventListener('DOMContentLoaded',build);var n=0,tm=setInterval(function(){if(build()||++n>20)clearInterval(tm);},400);}
+})();</script>
 </body>
 </html>
