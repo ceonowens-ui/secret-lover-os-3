@@ -544,6 +544,8 @@ html, body {
 </style>
 </head>
 <body>
+<div id="viewfade" style="position:fixed;inset:0;background:#0d0a12;z-index:99999;opacity:0;pointer-events:none;transition:opacity .2s ease"></div>
+<script>(function(){try{if(sessionStorage.getItem('slv-switch')==='1'){var f=document.getElementById('viewfade');f.style.transition='none';f.style.opacity='1';}}catch(e){}})();</script>
 <div id="stage">
 
   <!-- ================= PLAYER（聽歌）================= -->
@@ -1889,7 +1891,7 @@ function build(){
       if(VIEW===view)return;
       w.setAttribute('data-view',view);      // 先滑動 highlight，再換頁
       try{localStorage.setItem('slv-view',view);}catch(e){}
-      setTimeout(function(){location.reload();},210);
+      try{sessionStorage.setItem('slv-switch','1');}catch(e){}var vf=document.getElementById('viewfade');if(vf){vf.style.transition='opacity .18s ease';vf.style.opacity='1';}setTimeout(function(){location.reload();},200);
     }
     b.addEventListener('click',go);
     b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
@@ -2078,6 +2080,19 @@ var mo=new MutationObserver(function(ms){ms.forEach(function(m){var el=m.target;
 function init(){var ss=document.querySelectorAll('.screen');if(!ss.length)return false;
   ss.forEach(function(s){mo.observe(s,{attributes:true,attributeFilter:['class']});if(s.classList.contains('active'))prev=s;});return true;}
 if(!init()){document.addEventListener('DOMContentLoaded',init);}
+})();</script>
+<script>(function(){/* __viewfade_out */
+function out(){var f=document.getElementById('viewfade');if(!f)return;
+  f.style.transition='opacity .3s ease';f.style.opacity='0';
+  try{sessionStorage.removeItem('slv-switch');}catch(e){}}
+function ready(){
+  var p=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  p.then(function(){setTimeout(out,80);});}
+if(document.readyState==='complete')ready();else window.addEventListener('load',ready);
+/* 預載另一檢視封面,下次切換零載入 */
+try{var v=localStorage.getItem('slv-view')||'songs';
+  var other=(v==='songs')?'score-cover.jpg':'full-cover.jpg';
+  var im=new Image();im.src=other;}catch(e){}
 })();</script>
 </body>
 </html>
