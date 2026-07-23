@@ -1071,17 +1071,21 @@ html, body {
     playing: false,
     dur: 0,
     selectedPlan: "basic",           // basic(299) / deluxe(599)
-    unlocked: !!(lsGet(LS.unlock, {}).unlocked),
+    unlocked: (function(){var u=lsGet(LS.unlock,{})||{};return !!(u.unlocked)||(Array.isArray(u.entries)&&u.entries.length>0);})(),
   };
   var seeking = false, saveT = 0, durFixing = false, resumeAt = 0;
   var lyricsCache = {};
 
   function unlockInfo() { return lsGet(LS.unlock, {}); }
+  function unlockList(){ var u=lsGet(LS.unlock,{})||{}; if(Array.isArray(u.entries))return u.entries; if(u.email&&u.code)return [{email:u.email,code:u.code,product:u.product||"",unlockType:u.unlockType||""}]; return []; }
+  function typeOfEntry(e){ var ut=e&&e.unlockType; if(!ut){var p=String((e&&e.product)||"");ut=(p==="199")?"songs":(p==="299"||p==="599")?"score":"complete";} return ut; }
+  function ownedTypes(){ var s={}; unlockList().forEach(function(e){var ut=typeOfEntry(e); if(ut==="complete"){s.songs=1;s.score=1;s.complete=1;} else s[ut]=1;}); return s; }
+  function hasCategory(cat){ var o=ownedTypes(); return !!(o.complete||o[cat]); }
+  function credFor(cat){ var l=unlockList(); for(var i=0;i<l.length;i++){var ut=typeOfEntry(l[i]); if(ut==="complete"||ut===cat)return l[i];} return l[0]||{}; }
   /* 分級正規化：只有真正的 599/deluxe 才算典藏版，其餘一律 basic。
    * （對後端回傳做防呆 —— 見 PITFALLS #2） */
   function purchasedProduct() {
-    var p = String(unlockInfo().product || "");
-    return (p === "599" || p === "deluxe" || p === String((CFG.payment || {}).deluxePrice)) ? "deluxe" : "basic";
+    return unlockList().some(function(e){ var p=String(e.product||""); return p==="599"||p==="deluxe"||p===String((CFG.payment||{}).deluxePrice); }) ? "deluxe" : "basic";
   }
   function unlockTypeNow() {
     var u = unlockInfo(); var ut = u.unlockType;
@@ -1090,11 +1094,8 @@ html, body {
   }
   function isLocked(t) {
     if (t.free) return false;
-    if (!state.unlocked) return true;
-    var ut = unlockTypeNow();
-    if (ut === "complete") return false;
     var cat = t.category || CFG.viewCategory || "songs";
-    return cat !== ut;   // songs 碼只開歌曲、score 碼只開配樂
+    return !hasCategory(cat);
   }
 
   /* ---------- 音源路徑 ----------
@@ -1105,7 +1106,7 @@ html, body {
    *    必須與 worker.js 的 PROTECTED_FILES、R2 object key 完全一致。 */
   function srcFor(t) {
     if (t.free) return t.audioPath;
-    var u = unlockInfo();
+    var u = credFor(t.category || CFG.viewCategory || "songs");
     return CFG.api.workerBaseUrl + "/track?file=" + encodeURIComponent(t.protectedPath || "") +
       "&email=" + encodeURIComponent(u.email || "") + "&code=" + encodeURIComponent(u.code || "");
   }
@@ -1419,29 +1420,45 @@ html, body {
 
   /* ---------- 兌換 / 解鎖 ---------- */
   function renderUnlockView() {
-    $("unlock-form-view").classList.toggle("hidden", state.unlocked);
-    $("unlock-done-view").classList.toggle("hidden", !state.unlocked);
-    if (!state.unlocked) return;
-    var deluxe = purchasedProduct() === "deluxe";
-    var wav = $("btn-wav");
-    var hasWav = deluxe && CFG.api && CFG.api.wavDriveLink;
-    wav.classList.toggle("hidden", !hasWav);
-    if (hasWav) wav.href = CFG.api.wavDriveLink;
-    $("unlocked-plan-note").textContent = deluxe
-      ? "你的方案：典藏版 + WAV 無損 · 點上方按鈕前往雲端下載完整 WAV ♡"
-      : "你的方案：數位專輯 · 可線上聆聽完整 " + TOTAL + " 首（WAV 無損下載為典藏版限定）";
+    var list = unlockList(); var any = list.length > 0; state.unlocked = any;
+    var form = $("unlock-form-view"), done = $("unlock-done-view");
+    done.classList.toggle("hidden", !any);
+    if (!any) { form.classList.remove("hidden"); return; }
+    if (!form.__keepOpen) form.classList.add("hidden");
+    var o = ownedTypes(); var both = !!(o.complete || (o.songs && o.score));
+    var titleEl = $("unlocked-title"), descEl = $("unlocked-desc");
+    if (both) { titleEl.textContent = "已解鎖 完整原聲典藏版"; descEl.textContent = "歌曲原聲帶 + 原創配樂集全部開放，可線上聽 + 下載收藏"; }
+    else if (o.songs) { titleEl.textContent = "已解鎖 歌曲原聲帶"; descEl.textContent = "13 軌歌曲與伴奏已開放"; }
+    else if (o.score) { titleEl.textContent = "已解鎖 原創配樂集"; descEl.textContent = "21 段劇情原創配樂已開放"; }
+    var owned = document.getElementById("__owned-list");
+    if (!owned) { owned = document.createElement("div"); owned.id = "__owned-list"; owned.style.cssText = "font-size:13px;line-height:1.9;margin:8px 0 2px;color:rgba(255,255,255,.78)"; descEl.parentNode.insertBefore(owned, descEl.nextSibling); }
+    owned.innerHTML = '<div>' + (o.songs ? '✓' : '·') + ' 歌曲原聲帶' + (o.songs ? '' : '（未解鎖）') + '</div><div>' + (o.score ? '✓' : '·') + ' 原創配樂集' + (o.score ? '' : '（未解鎖）') + '</div>';
+    var more = document.getElementById("__unlock-more");
+    if (!both) {
+      if (!more) { more = document.createElement("button"); more.id = "__unlock-more"; more.type = "button"; more.textContent = "解鎖另一張專輯 →"; more.style.cssText = "margin-top:12px;padding:10px 20px;border-radius:99px;background:rgba(247,184,210,.14);color:#f7b8d2;border:1px solid rgba(247,184,210,.42);font-size:14px;cursor:pointer"; more.addEventListener("click", function () { form.__keepOpen = 1; form.classList.remove("hidden"); try { $("in-email").value = ""; $("in-code").value = ""; $("in-code").focus(); } catch (e) {} }); owned.parentNode.insertBefore(more, owned.nextSibling); }
+      more.style.display = "";
+    } else if (more) { more.style.display = "none"; form.__keepOpen = 0; form.classList.add("hidden"); }
+    var deluxe = purchasedProduct() === "deluxe"; var wav = $("btn-wav"); var hasWav = deluxe && CFG.api && CFG.api.wavDriveLink;
+    wav.classList.toggle("hidden", !hasWav); if (hasWav) wav.href = CFG.api.wavDriveLink;
+    var note = $("unlocked-plan-note"); if (note) note.textContent = both ? "你的方案：完整原聲典藏版 ♡" : (o.songs ? "你的方案：歌曲原聲帶" : "你的方案：原創配樂集");
   }
 
   function unlockNow(data) {
-    lsSet(LS.unlock, Object.assign({ unlocked: true }, data));
+    var prev = lsGet(LS.unlock, {}) || {};
+    var list = Array.isArray(prev.entries) ? prev.entries.slice() : (prev.email && prev.code ? [{email:prev.email,code:prev.code,product:prev.product||"",unlockType:prev.unlockType||""}] : []);
+    var nt = typeOfEntry(data);
+    list = list.filter(function(e){ return typeOfEntry(e) !== nt; });
+    list.push({ email:data.email, code:data.code, product:data.product||"", unlockType:data.unlockType||"" });
+    lsSet(LS.unlock, { unlocked: true, entries: list });
     state.unlocked = true;
+    try{ var _f=$("unlock-form-view"); if(_f)_f.__keepOpen=0; }catch(e){}
     go("player");
     openSheet();
     renderTrackLists(true);
     renderNowPlaying();
     unlockBurstFx();
     hap([12, 30, 12, 30, 40]);
-    toast("解鎖成功 · " + TOTAL + " 首全部屬於你了 ♡");
+    toast("解鎖成功 ♡");
   }
 
   $("btn-redeem").addEventListener("click", function () {
