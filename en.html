@@ -1457,6 +1457,11 @@ html, body {
     renderTrackLists(true);
     renderNowPlaying();
     unlockBurstFx();
+    try{ var _own=ownedTypes(); var _cv="songs"; try{_cv=localStorage.getItem("slv-view")||"songs";}catch(e){}
+      var _cat=(_cv==="songs")?"songs":"score"; var _tgt=null;
+      if(!(_own.complete||_own[_cat])){ if(_own.songs)_tgt="songs"; else if(_own.score)_tgt="score"; }
+      if(_tgt&&_tgt!==_cv){ var _w=document.getElementById("__vsw"); if(_w){ var _bs=_w.querySelectorAll("button"); var _i=(_tgt==="songs")?0:1; if(_bs[_i]) setTimeout(function(){ _bs[_i].click(); },500); } }
+    }catch(e){}
     hap([12, 30, 12, 30, 40]);
     toast("Unlocked ♡");
   }
