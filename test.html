@@ -2216,5 +2216,25 @@ if(!fix()){document.addEventListener('DOMContentLoaded',fix);var n=0,tm=setInter
 .navbtn.active::before{ content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:50px; height:50px; border-radius:15px; background:rgba(247,184,210,.13); box-shadow:inset 0 0 0 1px rgba(247,184,210,.26); z-index:0; pointer-events:none; }
 .navbtn.active::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:7px; width:18px; height:3.5px; border-radius:99px; background:#f7b8d2; box-shadow:0 0 8px rgba(247,184,210,.5); pointer-events:none; z-index:3; }
 </style>
+<script>(function(){/* __policy_block 購買說明與退款政策 */
+function add(){
+  var scr=document.getElementById('screen-purchase');
+  if(!scr||document.getElementById('__policy'))return !!document.getElementById('__policy');
+  var host=scr.querySelector('.screen-sub')||scr;
+  var d=document.createElement('details');
+  d.id='__policy';
+  d.style.cssText='margin:18px 14px 8px;padding:12px 14px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.03);color:rgba(255,255,255,.55);font-size:12px;line-height:1.75';
+  d.innerHTML='<summary style="cursor:pointer;color:rgba(255,255,255,.72);font-size:12.5px;letter-spacing:1px">購買說明與退款政策</summary>'+
+   '<div style="margin-top:8px">'+
+   '・本商品為數位內容(線上聆聽/檔案下載),付款完成後,兌換碼將自動寄至您填寫的 Email。<br>'+
+   '・付款後若 24 小時內未收到兌換碼,請先檢查垃圾郵件;仍未收到請來信 <a href="mailto:anthonywen0693@gmail.com" style="color:#f7b8d2">anthonywen0693@gmail.com</a>,我們會協助補發。<br>'+
+   '・數位商品於兌換碼寄達時即完成交付;<b>兌換碼尚未使用</b>者,可於購買後 7 天內來信申請退款,已使用則恕不退款。<br>'+
+   '・付款由綠界科技(ECPay)安全處理,本站不會取得或儲存您的信用卡資訊。<br>'+
+   '・購買即表示同意上述說明。</div>';
+  host.appendChild(d);
+  return true;
+}
+if(!add()){var n=0,tm=setInterval(function(){if(add()||++n>25)clearInterval(tm);},400);}
+})();</script>
 </body>
 </html>
