@@ -12,7 +12,7 @@
 <meta name="app-version" content="v2-smooth">
 <link rel="manifest" href="test.webmanifest">
 <!-- 標題與 icon 由 app.js 從 config 填入 -->
-<title>Secret Lover · 原聲平台</title>
+<title>Secret Lover · OST Platform</title>
 <link id="apple-touch-icon" rel="apple-touch-icon" href="score-cover.jpg">
 
 <!-- 字體（想換字體就改這行 + styles.css 的 --font-* 變數） -->
@@ -630,7 +630,7 @@ html, body {
     <div class="plans" id="plans"></div>
     <div class="cta-block">
       <button class="btn-primary" id="btn-checkout"></button>
-      <button class="btn-outline" id="btn-goto-unlock">已經購買？輸入兌換碼</button>
+      <button class="btn-outline" id="btn-goto-unlock">Already purchased? Enter your code</button>
     </div>
   </section>
 
@@ -652,10 +652,10 @@ html, body {
       <div class="form-block">
         <label class="form-label" for="in-email">EMAIL</label>
         <input class="form-input" id="in-email" type="email" placeholder="you@example.com" autocomplete="email">
-        <label class="form-label" for="in-code">兌換碼 · CODE</label>
+        <label class="form-label" for="in-code">REDEEM CODE</label>
         <input class="form-input" id="in-code" type="text" placeholder="" autocomplete="off" style="margin-bottom:22px">
         <button class="btn-primary" id="btn-redeem">Unlock</button>
-        <div class="form-hint" id="btn-goto-purchase">還沒購買？<b>看方案 →</b></div>
+        <div class="form-hint" id="btn-goto-purchase">Not purchased yet? <b>See plans →</b></div>
       </div>
     </div>
 
@@ -669,14 +669,14 @@ html, body {
         <div class="unlocked-title" id="unlocked-title"></div>
         <div class="page-note" id="unlocked-desc" style="margin-top:8px"></div>
         <div class="unlocked-actions">
-          <button class="btn-chip" id="btn-goto-player">前往Listen →</button>
+          <button class="btn-chip" id="btn-goto-player">Go listen →</button>
           <a class="btn-chip grad hidden" id="btn-wav" target="_blank" rel="noopener">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            下載 WAV 無損 ↗
+            Download lossless WAV ↗
           </a>
         </div>
         <div class="unlocked-note" id="unlocked-plan-note"></div>
-        <div class="unlocked-reset" id="btn-reset-unlock">重設Unlock（測試用）</div>
+        <div class="unlocked-reset" id="btn-reset-unlock">Reset unlock (test only)</div>
       </div>
     </div>
   </section>
@@ -688,13 +688,13 @@ html, body {
       <div class="page-title-tc" id="mood-subheading" style="font-size:13px;color:rgba(255,255,255,.65);margin-top:12px;letter-spacing:1px;line-height:1.7"></div>
       <div style="font-family:var(--font-label);font-size:10px;letter-spacing:3px;color:var(--primary);margin-top:7px;text-transform:uppercase" id="mood-eyebrow"></div>
     </div>
-    <div class="mood-count">今晚有 <b id="mood-count">0</b> 個人，把Secret留在這裡。</div>
+    <div class="mood-count">Tonight <b id="mood-count">0</b> people left their secrets here.</div>
     <div class="mood-form">
       <input class="form-input" id="mood-name" type="text" placeholder="Your nickname" maxlength="16" autocomplete="off">
       <div class="mood-tags" id="mood-tags"></div>
       <textarea class="mood-textarea" id="mood-text" maxlength="80" placeholder="Listening to this song right now — what do you want to leave behind?"></textarea>
       <div class="mood-chars"><span id="mood-chars">0</span> / 80</div>
-      <div class="mood-err hidden" id="mood-err">先寫下一點心情吧。</div>
+      <div class="mood-err hidden" id="mood-err">Write a little something first.</div>
       <button class="btn-primary mood-submit" id="btn-mood-submit">Leave a mood</button>
     </div>
     <div class="mood-notes" id="mood-notes"></div>
@@ -1259,7 +1259,7 @@ html, body {
     if (locked) {
       right = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6f6680" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
     } else if (state.unlocked && purchasedProduct() === "deluxe" && !t.free) {
-      right = '<button class="track-dl" data-dl="' + i + '" title="下載這首"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>';
+      right = '<button class="track-dl" data-dl="' + i + '" title="Download this track"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>';
     } else {
       right = '<svg width="14" height="14" viewBox="0 0 24 24" fill="var(--primary)"><path d="M8 5v14l11-7z"/></svg>';
     }
@@ -1346,7 +1346,7 @@ html, body {
     $("lyrics-overlay").classList.remove("hidden");
     if (!t.lyricsPath) { body.innerHTML = '<div class="lyrics-empty">' + esc(STR.noLyrics || "No lyrics for this track yet") + "</div>"; return; }
     if (lyricsCache[t.n] != null) { body.textContent = lyricsCache[t.n]; return; }
-    body.innerHTML = '<div class="lyrics-empty">載入中…</div>';
+    body.innerHTML = '<div class="lyrics-empty">Loading…</div>';
     fetch(t.lyricsPath).then(function (r) {
       if (!r.ok) throw new Error(r.status);
       return r.text();
@@ -1719,7 +1719,7 @@ function ensureEmail(){
   var box=document.createElement('div');
   box.id='pv-emailbox';
   box.style.cssText='padding:0 20px 2px';
-  box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px;font-size:13.5px">購買 Email・兌換碼將寄至信箱</label>'+
+  box.innerHTML='<label class="form-label" for="pv-email" style="display:block;margin:0 0 6px;font-size:13.5px">Purchase email · your code will be sent here</label>'+
     '<input class="form-input" id="pv-email" type="email" placeholder="your@email.com" autocomplete="email" style="font-size:16px">'+
     '<div id="pv-emailerr" style="min-height:14px;font-size:12px;color:#f7a8c2;margin:4px 2px 0"></div>';
   cta.parentNode.insertBefore(box,cta);
@@ -2151,7 +2151,7 @@ try{var v=localStorage.getItem('slv-view')||'songs';
   var other=(v==='songs')?'score-cover.jpg':'full-cover.jpg';
   var im=new Image();im.src=other;}catch(e){}
 })();</script>
-<script>(function(){/* __scratch_tab 集卡分頁(final 版佔位頁移植) */
+<script>(function(){/* __scratch_tab Cards分頁(final 版佔位頁移植) */
 function build(){
   if(document.getElementById('screen-scratch'))return true;
   var stage=document.getElementById('stage'), nav=document.getElementById('nav');
@@ -2161,14 +2161,14 @@ function build(){
   scr.innerHTML='<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 40px;background:radial-gradient(120% 60% at 50% 0%,#1c1426,#0d0a12 70%)">'+
     '<div style="font-size:44px;margin-bottom:18px">\uD83D\uDD12</div>'+
     '<div style="font-family:\'Playfair Display\',serif;font-style:italic;letter-spacing:3px;font-size:13px;color:#f29bc2;margin-bottom:14px">SECRET SCRATCH</div>'+
-    '<div style="font-family:\'Noto Serif TC\',serif;font-size:20px;font-weight:600;letter-spacing:2px;margin-bottom:10px;color:#fff">集卡刮刮樂</div>'+
-    '<div style="font-size:14.5px;color:rgba(255,255,255,.85);margin-bottom:12px">正在整理中，即將推出 ♡</div>'+
+    '<div style="font-family:\'Noto Serif TC\',serif;font-size:20px;font-weight:600;letter-spacing:2px;margin-bottom:10px;color:#fff">Collect & Scratch</div>'+
+    '<div style="font-size:14.5px;color:rgba(255,255,255,.85);margin-bottom:12px">In the works — coming soon ♡</div>'+
     '<div style="font-size:12px;color:rgba(255,255,255,.45)">敬請期待，更多他們的Secret即將Unlock</div>'+
     '<div style="margin-top:16px;display:flex;gap:6px;justify-content:center"><span style="width:4px;height:4px;border-radius:50%;background:rgba(242,155,194,.4)"></span><span style="width:4px;height:4px;border-radius:50%;background:rgba(242,155,194,.65)"></span><span style="width:4px;height:4px;border-radius:50%;background:#f29bc2"></span></div></div>';
   stage.appendChild(scr);
   var b=document.createElement('button');
   b.className='navbtn'; b.id='navbtn-scratch'; b.type='button';
-  b.innerHTML='<span class="navico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg></span><span class="navlbl">集卡</span>';
+  b.innerHTML='<span class="navico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg></span><span class="navlbl">Cards</span>';
   nav.appendChild(b);
   b.addEventListener('click',function(){
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
@@ -2216,7 +2216,7 @@ if(!fix()){document.addEventListener('DOMContentLoaded',fix);var n=0,tm=setInter
 .navbtn.active::before{ content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:50px; height:50px; border-radius:15px; background:rgba(247,184,210,.13); box-shadow:inset 0 0 0 1px rgba(247,184,210,.26); z-index:0; pointer-events:none; }
 .navbtn.active::after{ content:""; position:absolute; left:50%; transform:translateX(-50%); bottom:7px; width:18px; height:3.5px; border-radius:99px; background:#f7b8d2; box-shadow:0 0 8px rgba(247,184,210,.5); pointer-events:none; z-index:3; }
 </style>
-<script>(function(){/* __policy_block 購買說明與退款政策 */
+<script>(function(){/* __policy_block Purchase info & refund policy */
 function add(){
   var scr=document.getElementById('screen-purchase');
   if(!scr||document.getElementById('__policy'))return !!document.getElementById('__policy');
@@ -2224,7 +2224,7 @@ function add(){
   var d=document.createElement('details');
   d.id='__policy';
   d.style.cssText='margin:18px 14px 8px;padding:12px 14px;border:1px solid rgba(255,255,255,.10);border-radius:14px;background:rgba(255,255,255,.03);color:rgba(255,255,255,.55);font-size:12px;line-height:1.75';
-  d.innerHTML='<summary style="cursor:pointer;color:rgba(255,255,255,.72);font-size:12.5px;letter-spacing:1px">購買說明與退款政策</summary>'+
+  d.innerHTML='<summary style="cursor:pointer;color:rgba(255,255,255,.72);font-size:12.5px;letter-spacing:1px">Purchase info & refund policy</summary>'+
    '<div style="margin-top:8px">'+
    '・This is digital content (online streaming / file download). After payment, your redeem code is sent automatically to the email you provide.<br>'+
    '・付款後若 24 小時內未收到兌換碼,請先檢查垃圾郵件;仍未收到請來信 <a href="mailto:anthonywen0693@gmail.com" style="color:#f7b8d2">anthonywen0693@gmail.com</a>,我們會協助補發。<br>'+
