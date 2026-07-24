@@ -2237,5 +2237,16 @@ function add(){
 if(!add()){var n=0,tm=setInterval(function(){if(add()||++n>25)clearInterval(tm);},400);}
 })();</script>
 <a id="__lang" href="test.html" style="position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:99998;font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.75);background:rgba(20,16,26,.55);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:5px 11px;text-decoration:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">中文</a>
+<style id="__en_lyrics_style">
+/* EN lyrics: big title, small left-aligned body */
+#lyrics-title{ font-size:24px!important; font-weight:700!important; letter-spacing:.5px; line-height:1.25; text-align:left; }
+.lyrics-head{ padding-bottom:14px!important; }
+.lyrics-body{ font-size:13px!important; line-height:1.85!important; text-align:left!important;
+  padding-left:28px!important; padding-right:28px!important; letter-spacing:.2px;
+  color:rgba(255,255,255,.82); }
+.lyrics-body>div:first-line{}
+/* 內文若含置中規則,覆蓋掉 */
+.lyrics-body *{ text-align:left!important; }
+</style>
 </body>
 </html>
