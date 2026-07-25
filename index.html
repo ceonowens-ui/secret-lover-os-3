@@ -2263,5 +2263,14 @@ setTimeout(beat,1500);setInterval(beat,25000);
 document.addEventListener("visibilitychange",function(){if(!document.hidden)beat();});
 })();</script>
 <style id="__lang_soft">#__lang{right:18px!important;top:calc(12px + env(safe-area-inset-top))!important;color:rgba(255,255,255,.5)!important;background:rgba(20,16,26,.32)!important;border-color:rgba(255,255,255,.12)!important;font-weight:400!important;min-width:54px!important;text-align:center!important;box-sizing:border-box!important;padding-left:0!important;padding-right:0!important}</style>
+<style id="__nozoom2">
+input,textarea,select,.form-input,.mood-form .form-input,#mood-text,#mood-name,#pv-email,#in-email,#in-code,#pv-artist{font-size:16px!important}
+.mood-form .form-input{padding:10px 14px!important;line-height:1.5!important}
+</style>
+<script>(function(){/* __blurfix 切分頁前收鍵盤 + 回正 */
+document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest(".navbtn");
+ if(b&&document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)){try{document.activeElement.blur();}catch(_){}}},true);
+document.addEventListener("blur",function(){setTimeout(function(){try{window.scrollTo(0,0);}catch(_){}},60);},true);
+})();</script>
 </body>
 </html>
