@@ -676,7 +676,6 @@ html, body {
           </a>
         </div>
         <div class="unlocked-note" id="unlocked-plan-note"></div>
-        <div class="unlocked-reset" id="btn-reset-unlock">重設解鎖（測試用）</div>
       </div>
     </div>
   </section>
@@ -1492,12 +1491,6 @@ html, body {
     }).catch(function () { toast("連線失敗 · 後端未回應"); });
   });
 
-  $("btn-reset-unlock").addEventListener("click", function () {
-    try { localStorage.removeItem(LS.unlock); } catch (e) {}
-    state.unlocked = false;
-    renderUnlockView(); renderTrackLists(); renderNowPlaying();
-    toast("已重設 · 回到未解鎖狀態");
-  });
 
   /* ---------- 心情牆 ---------- */
   var MW = CFG.moodWall || {};
