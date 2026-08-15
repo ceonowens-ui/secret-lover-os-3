@@ -2389,8 +2389,9 @@ if(e&&/(album|song)/i.test(e.textContent))return "songs";
 var n=document.getElementById("next-scene-label");
 if(n&&/scene/i.test(n.textContent))return "score";
 if(n&&/track/i.test(n.textContent))return "songs";
-var c=document.getElementById("tracklist-caption");
-if(c&&/21/.test(c.textContent))return "score";
+var v=document.getElementById("__vsw");
+if(v){var bs=v.querySelectorAll("button");for(var i=0;i<bs.length;i++)
+if(bs[i].getAttribute("aria-pressed")==="true")return /score/i.test(bs[i].textContent)?"score":"songs";}
 return "songs";}
 function rowNum(r){if(!r)return null;var m=(r.textContent||"").trim().match(/^(\d{1,2})/);return m?m[1]:null;}
 function curTrack(){var c=document.querySelector("#tracklist .track-row.current");var n=rowNum(c);if(n)return n;var s=document.getElementById("np-sub");if(s){var m=(s.textContent||"").match(/(\d{1,2})/);if(m)return m[1];}return "01";}
@@ -2405,9 +2406,10 @@ if(row.classList&&row.classList.contains("locked")){row.click();return;}
 window.__shSuppress=true;row.click();
 setTimeout(function(){window.__shSuppress=false;
 var bp=document.getElementById("btn-play");if(bp)bp.click();
-setTimeout(function(){try{if(window.__shMedia&&!window.__shMedia.paused)window.__shMedia.pause();}catch(e){}},300);
-var c2=document.querySelector("#tracklist .track-row.current");
-if(rowNum(c2)!==pad&&n<5)setTimeout(function(){cue(n+1);},480);},220);}
+try{window.__shMedia&&window.__shMedia.pause();}catch(e){}
+var c=document.querySelector("#tracklist .track-row.current");
+setTimeout(function(){try{if(window.__shMedia&&!window.__shMedia.paused)window.__shMedia.pause();}catch(e){}},320);
+if(rowNum(c)!==pad&&n<6)setTimeout(function(){cue(n+1);},450);},220);}
 if((v==="score"||v==="songs")&&v!==curView()&&typeof window.__slSwitchView==="function"){
 try{window.__slSwitchView(v);}catch(e){}setTimeout(function(){cue(0);},600);}
 else setTimeout(function(){cue(0);},150);}
